@@ -2,14 +2,29 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 25
+<<<<<<< HEAD
     buildToolsVersion "26.0.2"
     defaultConfig {
         applicationId "albocoder.github.com.facedetector"
         minSdkVersion 25
+=======
+    buildToolsVersion "25.0.3"
+    defaultConfig {
+        applicationId "albocoder.github.com.facedetector"
+        minSdkVersion 19
+>>>>>>> 2bdcb84510d217369405090c62d7012b44d54212
         targetSdkVersion 25
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+<<<<<<< HEAD
+=======
+        externalNativeBuild {
+            cmake {
+                cppFlags "-frtti -fexceptions"
+            }
+        }
+>>>>>>> 2bdcb84510d217369405090c62d7012b44d54212
     }
     buildTypes {
         release {
@@ -17,7 +32,17 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+<<<<<<< HEAD
     //sourceSets { main { jni.srcDirs = ['src/main/jni', 'src/main/jniLibs/'] } }
+=======
+    sourceSets { main { jni.srcDirs = ['src/main/jni', 'src/main/jniLibs/'] } }
+//    externalNativeBuild {
+//        cmake {
+//            path "CMakeLists.txt"
+//            version "3.8.1"
+//        }
+//    }
+>>>>>>> 2bdcb84510d217369405090c62d7012b44d54212
 }
 
 dependencies {
@@ -28,7 +53,12 @@ dependencies {
     compile 'com.android.support:appcompat-v7:25.3.1'
     compile 'com.android.support:design:25.3.1'
     testCompile 'junit:junit:4.12'
+<<<<<<< HEAD
     compile project(':openCVLibrary340')
     implementation files('src/main/libs/opencv-340.jar')
     implementation files('libs/opencv-340.jar')
+=======
+    compile files('libs/opencv-340.jar')
+    compile project(':openCVLibrary340')
+>>>>>>> 2bdcb84510d217369405090c62d7012b44d54212
 }
