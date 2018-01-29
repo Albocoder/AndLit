@@ -2,10 +2,10 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 25
-    buildToolsVersion "25.0.3"
+    buildToolsVersion "26.0.2"
     defaultConfig {
         applicationId "albocoder.github.com.facedetector"
-        minSdkVersion 19
+        minSdkVersion 25
         targetSdkVersion 25
         versionCode 1
         versionName "1.0"
@@ -17,7 +17,7 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
-    sourceSets { main { jni.srcDirs = ['src/main/jni', 'src/main/jniLibs/'] } }
+    //sourceSets { main { jni.srcDirs = ['src/main/jni', 'src/main/jniLibs/'] } }
 }
 
 dependencies {
@@ -29,4 +29,6 @@ dependencies {
     compile 'com.android.support:design:25.3.1'
     testCompile 'junit:junit:4.12'
     compile project(':openCVLibrary340')
+    implementation files('src/main/libs/opencv-340.jar')
+    implementation files('libs/opencv-340.jar')
 }
