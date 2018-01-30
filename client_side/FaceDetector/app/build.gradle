@@ -2,29 +2,17 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 25
-<<<<<<< HEAD
     buildToolsVersion "26.0.2"
     defaultConfig {
         applicationId "albocoder.github.com.facedetector"
         minSdkVersion 25
-=======
-    buildToolsVersion "25.0.3"
-    defaultConfig {
-        applicationId "albocoder.github.com.facedetector"
-        minSdkVersion 19
->>>>>>> 2bdcb84510d217369405090c62d7012b44d54212
         targetSdkVersion 25
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
-<<<<<<< HEAD
-=======
-        externalNativeBuild {
-            cmake {
-                cppFlags "-frtti -fexceptions"
-            }
+        ndk {
+            abiFilters "armeabi-v7a", "x86", "x86_64", "arm64-v8a"
         }
->>>>>>> 2bdcb84510d217369405090c62d7012b44d54212
     }
     buildTypes {
         release {
@@ -32,17 +20,15 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
-<<<<<<< HEAD
-    //sourceSets { main { jni.srcDirs = ['src/main/jni', 'src/main/jniLibs/'] } }
-=======
-    sourceSets { main { jni.srcDirs = ['src/main/jni', 'src/main/jniLibs/'] } }
-//    externalNativeBuild {
-//        cmake {
-//            path "CMakeLists.txt"
-//            version "3.8.1"
-//        }
-//    }
->>>>>>> 2bdcb84510d217369405090c62d7012b44d54212
+    sourceSets { main { jni.srcDirs = ['src/main/jniLibs/'] } }
+    externalNativeBuild {
+        ndkBuild {
+            path 'Android.mk'
+        }
+    }
+    defaultConfig {
+        multiDexEnabled true
+    }
 }
 
 dependencies {
@@ -50,15 +36,15 @@ dependencies {
     androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
+    //noinspection GradleCompatible
     compile 'com.android.support:appcompat-v7:25.3.1'
     compile 'com.android.support:design:25.3.1'
+    compile 'android.arch.lifecycle:extensions:1.0.0-rc1'
+    compile 'android.arch.persistence.room:runtime:1.0.0-rc1'
+    implementation "android.arch.persistence.room:runtime:1.0.0"
+    annotationProcessor 'android.arch.lifecycle:compiler:1.0.0-rc1'
+    annotationProcessor 'android.arch.persistence.room:compiler:1.0.0-rc1'
     testCompile 'junit:junit:4.12'
-<<<<<<< HEAD
     compile project(':openCVLibrary340')
-    implementation files('src/main/libs/opencv-340.jar')
     implementation files('libs/opencv-340.jar')
-=======
-    compile files('libs/opencv-340.jar')
-    compile project(':openCVLibrary340')
->>>>>>> 2bdcb84510d217369405090c62d7012b44d54212
 }

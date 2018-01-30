@@ -1,41 +1,31 @@
 package albocoder.github.com.facedetector;
 
+import android.content.Context;
+
 import org.opencv.core.Mat;
-<<<<<<< HEAD
-
-public class FaceRecognizerSingleton {
-    private static LBPHFaceRecognizer trainedModel;
-    public FaceRecognizerSingleton(){ trainModel(); }
-
-    private void trainModel() {
-
-    }
-    public long predict(Face face){
-
-    }
-}
-=======
-import org.opencv.face.FaceRecognizer;
 import org.opencv.face.LBPHFaceRecognizer;
 
 public class FaceRecognizerSingleton {
-    private static FaceRecognizer trainedModel;
+    // constants
+    public static final int SEARCH_RADIUS = 1;
+    public static final int NEIGHBORS = 5;
+    public static final int GRID_X = 8;
+    public static final int GRID_Y = 8;
+    public static final double THRESHOLD = 130.0;
 
-    public FaceRecognizerSingleton(){
-        if(trainedModel == null)
-            trainTheModel();
+    // statics
+    private static LBPHFaceRecognizer trainedModel;
+    // fields
+    private Context c;
+
+    public FaceRecognizerSingleton(Context c){ trainModel(); this.c = c;}
+
+    private void trainModel() {
+        trainedModel = LBPHFaceRecognizer.create(SEARCH_RADIUS,NEIGHBORS,GRID_X,GRID_Y,THRESHOLD);
+        // get mat and label from database
+        //trainedModel.train(mats,labels);
     }
-    public void trainTheModel(){
-        // read the trainedModel serialized from database
-        int RADIUS = 1, NEIGHBORS = 8, GRID_X = 8, GRID_Y = 8;
-        double THRESHOLD = 130d;
-        trainedModel = LBPHFaceRecognizer.create(RADIUS, NEIGHBORS, GRID_X, GRID_Y, THRESHOLD);
-        // get images and labels from the database
-        //trainedModel.train(Mat img,Mat labels_aka_IDs);
-    }
-    // // TODO: Implement this function
-    public long predict(Mat toPredict){
-        return -1;
-    }
+//    public long predict(Face face){
+//        trainedModel.predict(face.histEqualization(),labels,confidences);
+//    }
 }
->>>>>>> 2bdcb84510d217369405090c62d7012b44d54212

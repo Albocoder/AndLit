@@ -8,4 +8,11 @@
         android:layout_height="fill_parent"
         android:id="@+id/fd_activity_surface_view" />
 
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:text="TextView"
+        tools:text="This is just a test!" />
+
 </LinearLayout>
