@@ -30,15 +30,23 @@ import org.opencv.core.Mat;
 import org.opencv.android.CameraBridgeViewBase;
 import org.opencv.android.CameraBridgeViewBase.CvCameraViewListener2;
 import org.opencv.core.Scalar;
+import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.res.AssetManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.WindowManager;
 import android.widget.Toast;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 
 import albocoder.github.com.facedetector.database.AppDatabase;
@@ -57,8 +65,6 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
         public void onManagerConnected(int status) {
             mOpenCvCameraView.enableView();
             super.onManagerConnected(status);
-            FaceRecognizerSingleton fcs = new FaceRecognizerSingleton(this.mAppContext);
-            fcs.trainModel();
         }
     };
 
@@ -103,12 +109,10 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
             mLoaderCallback.onManagerConnected(LoaderCallbackInterface.SUCCESS);
         }
     }
-    public void onDestroy() {
-        super.onDestroy();
-        mOpenCvCameraView.disableView();
-    }
+    public void onDestroy() { super.onDestroy(); mOpenCvCameraView.disableView(); }
     public void onCameraViewStarted(int width, int height) { mRgba = new Mat(); }
     public void onCameraViewStopped() { mRgba.release(); }
+
     public Mat onCameraFrame(CvCameraViewFrame inputFrame) {
         mRgba = inputFrame.rgba();
 //        FaceRunner facernb = new FaceRunner(this,mRgba);
