@@ -10,9 +10,14 @@ public class UserLogin {
     public String username;
     public String access_token;
 
-    public UserLogin(long id,String un,String acc_tok) {
+    public UserLogin(long id,String username,String access_token) {
         this.id = id;
-        username = un;
-        access_token = acc_tok;
+        this.username = username;
+        this.access_token = access_token;
+    }
+
+    @Override
+    public String toString() {
+        return "UserTuple: < `"+id+"`, `"+username+"`, `"+access_token+"` >";
     }
 }

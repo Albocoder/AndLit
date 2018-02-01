@@ -55,13 +55,13 @@ public class FaceOperator {
         }
 
         MatOfRect facesFront = new MatOfRect();
-        MatOfRect facesProf = new MatOfRect();
+        //todo MatOfRect facesProf = new MatOfRect();
         if (frontDetector != null)
-            frontDetector.detectMultiScale(mGray, facesFront, 1.1, 5, 0|Objdetect.CASCADE_SCALE_IMAGE,
+            frontDetector.detectMultiScale(mGray, facesFront, 1.1, 5, 0| Objdetect.CASCADE_SCALE_IMAGE,
                     new Size(mAbsoluteFaceSize, mAbsoluteFaceSize), new Size());
-        if (profileDetector != null)
-            profileDetector.detectMultiScale(mGray, facesProf, 1.1, 5, 0|Objdetect.CASCADE_SCALE_IMAGE,
-                    new Size(mAbsoluteFaceSize, mAbsoluteFaceSize), new Size());
+//      todo  if (profileDetector != null)
+//            profileDetector.detectMultiScale(mGray, facesProf, 1.1, 5, 0|Objdetect.CASCADE_SCALE_IMAGE,
+//                    new Size(mAbsoluteFaceSize, mAbsoluteFaceSize), new Size());
         Rect[] facesRectArray = facesFront.toArray();//ToDo: Merge the two arrays(+facesProf.toArray())
         Face[] facesArray = new Face[facesRectArray.length];
 

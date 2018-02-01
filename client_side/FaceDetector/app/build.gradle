@@ -11,7 +11,7 @@ android {
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         ndk {
-            abiFilters "armeabi-v7a", "x86", "x86_64", "arm64-v8a"
+                abiFilters "armeabi-v7a", "x86" //, "x86_64", "arm64-v8a"
         }
     }
     buildTypes {
@@ -47,4 +47,6 @@ dependencies {
     testCompile 'junit:junit:4.12'
     compile project(':openCVLibrary340')
     implementation files('libs/opencv-340.jar')
+    compile group: 'org.bytedeco', name: 'javacv', version: '1.4'
 }
+

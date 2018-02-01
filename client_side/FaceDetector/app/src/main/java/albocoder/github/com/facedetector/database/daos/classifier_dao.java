@@ -4,6 +4,7 @@ import android.arch.persistence.room.Dao;
 import android.arch.persistence.room.Insert;
 import android.arch.persistence.room.OnConflictStrategy;
 import android.arch.persistence.room.Query;
+import android.arch.persistence.room.Update;
 
 import java.util.Date;
 
@@ -17,7 +18,6 @@ public interface classifier_dao {
     @Query("select * from classifier")
     Classifier getClassifier();
 
-    // TODO: implements more functions!
     @Query("select `hash` from classifier")
     String getHash();
 
@@ -25,8 +25,11 @@ public interface classifier_dao {
     String getPath();
 
     @Query("select `last_update` from classifier")
-    Date getLastModified();
+    long getLastModified();
 
     @Query("delete from classifier")
     void deleteClassifier();
+
+    @Update(onConflict = OnConflictStrategy.ROLLBACK)
+    void updateClassifier(Classifier toUpdate);
 }

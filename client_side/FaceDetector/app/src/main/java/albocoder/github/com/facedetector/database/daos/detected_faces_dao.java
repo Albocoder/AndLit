@@ -5,6 +5,7 @@ import android.arch.persistence.room.Delete;
 import android.arch.persistence.room.Insert;
 import android.arch.persistence.room.OnConflictStrategy;
 import android.arch.persistence.room.Query;
+import android.arch.persistence.room.Update;
 
 import java.util.List;
 
@@ -21,19 +22,28 @@ public interface detected_faces_dao {
     @Query("select * from detected_faces")
     List<detected_faces> getAllRecords();
 
-    // Todo: Continue from here
     @Query("select distinct `id` from detected_faces")
-    List<Integer> getKeyForWebsite();
+    List<Integer> getAllIDsDetectedSoFar();
 
-    @Query("select distinct website_name from api_keys where `key` = :k")
-    List<String> getWebsitesHavingKey(String k);
-
-    @Query("delete from api_keys")
+    @Query("delete from detected_faces")
     void purgeData();
 
-    @Delete
-    void deleteKey(detected_faces f);
+    @Query("delete from detected_faces where `id` = :i")
+    void deleteDetectionForID(int i);
 
     @Delete
-    void deleteKeys(detected_faces... f);
+    void deleteDetectionForFace(detected_faces f);
+
+    @Query("delete from detected_faces where `hash` = :h ")
+    void deleteDetectionForHash(String h);
+
+    @Query("delete from detected_faces where `date_taken` >= :s and `date_taken` <= :e")
+    void deleteDetectionForTime(long s,long e);
+
+    @Query("delete from detected_faces where `id` = :i and `date_taken` >= :s " +
+            "and `date_taken` <= :e")
+    void deleteDetectionForIDInTimeSpan(int i,long s,long e);
+
+    @Update(onConflict = OnConflictStrategy.ROLLBACK)
+    void updateRowData(detected_faces toChange);
 }

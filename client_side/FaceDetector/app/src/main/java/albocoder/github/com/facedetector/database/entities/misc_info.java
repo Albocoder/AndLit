@@ -7,7 +7,7 @@ import android.arch.persistence.room.PrimaryKey;
 
 @Entity(foreignKeys = {@ForeignKey(entity = KnownPPL.class,
         childColumns = "id",parentColumns = "id",onDelete = ForeignKey.CASCADE)},
-        indices = {@Index(value = {"id","key"})})
+        indices = {@Index(value = {"id","key"},unique = true)})
 public class misc_info {
     @PrimaryKey
     public int id;

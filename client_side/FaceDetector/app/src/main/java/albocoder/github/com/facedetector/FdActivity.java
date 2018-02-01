@@ -9,6 +9,18 @@ package albocoder.github.com.facedetector;
 // Warning: TESTiNG ONLY CLASS DON'T USE!!!!
 // Warning: TESTiNG ONLY CLASS DON'T USE!!!!
 // Warning: TESTiNG ONLY CLASS DON'T USE!!!!
+// Warning: TESTiNG ONLY CLASS DON'T USE!!!!
+// Warning: TESTiNG ONLY CLASS DON'T USE!!!!
+// Warning: TESTiNG ONLY CLASS DON'T USE!!!!
+// Warning: TESTiNG ONLY CLASS DON'T USE!!!!
+// Warning: TESTiNG ONLY CLASS DON'T USE!!!!
+// Warning: TESTiNG ONLY CLASS DON'T USE!!!!
+// Warning: TESTiNG ONLY CLASS DON'T USE!!!!
+// Warning: TESTiNG ONLY CLASS DON'T USE!!!!
+// Warning: TESTiNG ONLY CLASS DON'T USE!!!!
+// Warning: TESTiNG ONLY CLASS DON'T USE!!!!
+// Warning: TESTiNG ONLY CLASS DON'T USE!!!!
+// Warning: TESTiNG ONLY CLASS DON'T USE!!!!
 
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.CameraBridgeViewBase.CvCameraViewFrame;
@@ -17,24 +29,36 @@ import org.opencv.android.OpenCVLoader;
 import org.opencv.core.Mat;
 import org.opencv.android.CameraBridgeViewBase;
 import org.opencv.android.CameraBridgeViewBase.CvCameraViewListener2;
+import org.opencv.core.Scalar;
+import org.opencv.imgproc.Imgproc;
 
 import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.WindowManager;
+import android.widget.Toast;
 
+import java.util.List;
+
+import albocoder.github.com.facedetector.database.AppDatabase;
 import albocoder.github.com.facedetector.database.LocalDBInterface;
+import albocoder.github.com.facedetector.database.entities.UserLogin;
 
 public class FdActivity extends Activity implements CvCameraViewListener2 {
     private static final String    TAG                 = "OCVSample::MainActivity";
     private Mat                    mRgba;
+    private Scalar FACE_RECT_COLOR                     = new Scalar(255,0,255);
     private CameraBridgeViewBase   mOpenCvCameraView;
+    private AppDatabase db;
+
     private BaseLoaderCallback  mLoaderCallback = new BaseLoaderCallback(this) {
         @Override
         public void onManagerConnected(int status) {
             mOpenCvCameraView.enableView();
             super.onManagerConnected(status);
+            FaceRecognizerSingleton fcs = new FaceRecognizerSingleton(this.mAppContext);
+            fcs.trainModel();
         }
     };
 
@@ -45,8 +69,18 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
 
         setContentView(R.layout.face_detect_surface_view);
 
-        // Database initialization test
-        new LocalDBInterface(this);
+
+//        // Database initialization test
+//        db = AppDatabase.getDatabase(getApplicationContext());
+////        db.userDao().deleteEntries();
+//        List<UserLogin> users = db.userDao().getLoginEntry();
+//        if (users.size()==0) {
+//            db.userDao().insertEntry(new UserLogin(3242,"The Virtuoso", "death is an opera"));
+//            users.add(db.userDao().getLoginEntry().get(0));
+//            Log.d(TAG,users.get(0).toString());
+//        }
+//        else
+//            Log.d(TAG,"It existed before:"+users.get(0).toString());
 
         mOpenCvCameraView = (CameraBridgeViewBase) findViewById(R.id.fd_activity_surface_view);
         mOpenCvCameraView.setVisibility(CameraBridgeViewBase.VISIBLE);
@@ -80,7 +114,10 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
 //        FaceRunner facernb = new FaceRunner(this,mRgba);
 //        this.runOnUiThread(facernb);
 //        try { Thread.sleep(1000); } catch (InterruptedException e) {}
-//        for (Face aFacesArray : facernb.getFaces())
+//        Face [] faces = facernb.getFaces();
+//        if (faces == null)
+//            return mRgba;
+//        for (Face aFacesArray : faces)
 //            Imgproc.rectangle(mRgba, aFacesArray.getBoundingBox().tl(),
 //                    aFacesArray.getBoundingBox().br(), FACE_RECT_COLOR, 3);
         return mRgba;
@@ -103,3 +140,22 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
         public Face[] getFaces(){return facesArray;}
     }
 }
+// Warning: TESTiNG ONLY CLASS DON'T USE!!!!
+// Warning: TESTiNG ONLY CLASS DON'T USE!!!!
+// Warning: TESTiNG ONLY CLASS DON'T USE!!!!
+// Warning: TESTiNG ONLY CLASS DON'T USE!!!!
+// Warning: TESTiNG ONLY CLASS DON'T USE!!!!
+// Warning: TESTiNG ONLY CLASS DON'T USE!!!!
+// Warning: TESTiNG ONLY CLASS DON'T USE!!!!
+// Warning: TESTiNG ONLY CLASS DON'T USE!!!!
+// Warning: TESTiNG ONLY CLASS DON'T USE!!!!
+// Warning: TESTiNG ONLY CLASS DON'T USE!!!!
+// Warning: TESTiNG ONLY CLASS DON'T USE!!!!
+// Warning: TESTiNG ONLY CLASS DON'T USE!!!!
+// Warning: TESTiNG ONLY CLASS DON'T USE!!!!
+// Warning: TESTiNG ONLY CLASS DON'T USE!!!!
+// Warning: TESTiNG ONLY CLASS DON'T USE!!!!
+// Warning: TESTiNG ONLY CLASS DON'T USE!!!!
+// Warning: TESTiNG ONLY CLASS DON'T USE!!!!
+// Warning: TESTiNG ONLY CLASS DON'T USE!!!!
+// Warning: TESTiNG ONLY CLASS DON'T USE!!!!
