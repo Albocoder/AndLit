@@ -59,26 +59,20 @@ public class FaceOperator {
                 mAbsoluteFaceSize = Math.round(height * mRelativeFaceSize);
         }
 
-        RectVector facesFront = new RectVector();
-        //todo MatOfRect facesProf = new MatOfRect();
+        RectVector facesVector = new RectVector();
         if (frontDetector != null)
-            frontDetector.detectMultiScale(mGray, facesFront, 1.1, 5, 0| CASCADE_SCALE_IMAGE,
+            frontDetector.detectMultiScale(mGray, facesVector, 1.1, 5, 0| CASCADE_SCALE_IMAGE,
                     new Size(mAbsoluteFaceSize, mAbsoluteFaceSize), new Size());
-//      todo  if (profileDetector != null)
-//            profileDetector.detectMultiScale(mGray, facesProf, 1.1, 5, 0|Objdetect.CASCADE_SCALE_IMAGE,
-//                    new Size(mAbsoluteFaceSize, mAbsoluteFaceSize), new Size());
-        RectVector facesRectArray = facesFront; //ToDo: Merge the two arrays(+facesProf.toArray())
-        Face[] facesArray = new Face[(int) facesRectArray.size()];
-
-        int index = 0;
-        for (int i = 0; i < facesRectArray.size();i++) {
-            Rect faceRect = facesRectArray.get(i);
+        Face[] facesArray = new Face[(int) facesVector.size()];
+        for (int i = 0; i < facesVector.size();i++) {
+            Rect faceRect = facesVector.get(i);
             Mat content = mRgba.apply(faceRect);
-            facesArray[index] = new Face(faceRect,content);
-            index++;
+            facesArray[i] = new Face(faceRect,content);
         }
-        Log.i(TAG,"Found "+facesRectArray.size()+"!");
+//        Log.i(TAG,"Found "+facesRectArray.size()+"!");
         foundFaces = facesArray;
+        mRgba.release();
+        mGray.release();
         return facesArray;
     }
     private void initializeDetector() {

@@ -22,36 +22,45 @@ package albocoder.github.com.facedetector;
 // Warning: TESTiNG ONLY CLASS DON'T USE!!!!
 // Warning: TESTiNG ONLY CLASS DON'T USE!!!!
 
-import org.bytedeco.javacpp.opencv_core;
-import org.bytedeco.javacpp.opencv_core.*;
-import org.bytedeco.javacpp.opencv_imgproc;
-
 import android.app.Activity;
-import android.content.Context;
+import android.os.AsyncTask;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.WindowManager;
 
-import java.io.*;
-import albocoder.github.com.facedetector.database.*;
-import albocoder.github.com.facedetector.database.entities.*;
+import org.bytedeco.javacpp.opencv_core;
+import org.bytedeco.javacpp.opencv_core.Mat;
+import org.bytedeco.javacpp.opencv_core.Point;
+import org.bytedeco.javacpp.opencv_objdetect;
+
+import albocoder.github.com.facedetector.database.AppDatabase;
+import albocoder.github.com.facedetector.utils.StorageHelper;
 
 import static org.bytedeco.javacpp.opencv_core.LINE_8;
+import static org.bytedeco.javacpp.opencv_imgproc.rectangle;
 
 public class FdActivity extends Activity implements CvCameraPreview.CvCameraViewListener {
-    private static final String    TAG                 = "OCVSample::albocoder.github.com.facedetector.MainActivity";
-    private opencv_core.Scalar     FACE_RECT_COLOR     = new opencv_core.Scalar(255,0.0,0.0,1);
+    private static final String    TAG                 = "OCVSample::MainActivity";
     private AppDatabase db;
+    private FaceOperator fop;
     private CvCameraPreview cameraView;
+    private opencv_objdetect.CascadeClassifier faceDetector;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.face_detect_surface_view);
+        setContentView(R.layout.activity_opencv);
 
         cameraView = (CvCameraPreview) findViewById(R.id.camera_view);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         cameraView.setCvCameraViewListener(this);
+
+        new AsyncTask<Void, Void, Void>() {
+            @Override
+            protected Void doInBackground(Void... voids) {
+                faceDetector = StorageHelper.loadClassifierCascade(FdActivity.this, R.raw.lbpcascade_frontalface_improved);
+                return null;
+            }
+        }.execute();
 
 //        // Database initialization test
 //        db = AppDatabase.getDatabase(getApplicationContext());
@@ -66,16 +75,15 @@ public class FdActivity extends Activity implements CvCameraPreview.CvCameraView
 //            Log.d(TAG,"It existed before:"+users.get(0).toString());
 
     }
-    public void onCameraViewStarted(int width, int height) {}
-    public void onCameraViewStopped() {}
-
     @Override
+    public void onCameraViewStarted(int width, int height) { }
+    @Override
+    public void onCameraViewStopped() { if (fop != null) fop.destroy(); fop = null; }
+
+//    @Override
     public Mat onCameraFrame(Mat mat) {
-//        FaceRunner facernb = new FaceRunner(this,mat);
-//        this.runOnUiThread(facernb);
         FaceOperator fop = new FaceOperator(this,mat);
         Face [] faces = fop.getFaces();
-//        Face [] faces = facernb.getFaces();
         if (faces == null)
             return mat;
         for (Face aFacesArray : faces) {
@@ -83,8 +91,8 @@ public class FdActivity extends Activity implements CvCameraPreview.CvCameraView
             int y = aFacesArray.getBoundingBox().y();
             int w = aFacesArray.getBoundingBox().width();
             int h = aFacesArray.getBoundingBox().height();
-            opencv_imgproc.rectangle(mat,new Point(x, y), new Point(x + w, y + h)
-                    , Scalar.GREEN,2, LINE_8,0);
+            rectangle(mat,new Point(x, y), new Point(x + w, y + h)
+                    , opencv_core.Scalar.GREEN,2, LINE_8,0);
         }
         fop.destroy();
         fop = null;

@@ -1,33 +1,23 @@
 package albocoder.github.com.facedetector;
 
 import android.content.Context;
-import android.support.annotation.NonNull;
-import android.support.annotation.VisibleForTesting;
 import android.util.Log;
 
 import org.bytedeco.javacpp.opencv_core;
-import org.bytedeco.javacpp.opencv_core.MatVector;
 import org.bytedeco.javacpp.opencv_core.Mat;
-import org.bytedeco.javacpp.opencv_face;
+import org.bytedeco.javacpp.opencv_core.MatVector;
 import org.bytedeco.javacpp.opencv_face.LBPHFaceRecognizer;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.FilenameFilter;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.ObjectInputStream;
-import java.nio.IntBuffer;
 
 import albocoder.github.com.facedetector.database.AppDatabase;
 import albocoder.github.com.facedetector.database.entities.Classifier;
+import albocoder.github.com.facedetector.utils.StorageHelper;
 
-import static org.bytedeco.javacpp.opencv_core.CV_32SC1;
-import static org.bytedeco.javacpp.opencv_imgcodecs.CV_LOAD_IMAGE_GRAYSCALE;
+import static org.bytedeco.javacpp.opencv_face.createLBPHFaceRecognizer;
 import static org.bytedeco.javacpp.opencv_imgcodecs.imread;
-import static org.bytedeco.javacpp.opencv_imgproc.resize;
 
 public class FaceRecognizerSingleton {
     // constants
@@ -36,7 +26,7 @@ public class FaceRecognizerSingleton {
     public static final int GRID_X = 8;
     public static final int GRID_Y = 8;
     public static final double THRESHOLD = 130.0;
-    private static final String TAG = "Controller::FaceRecognizerSingleton";
+    private static final String TAG = "FaceRecognizerSingleton";
     private static final String CLASSIFIER_PATH = "lbphClassifier.yml"; // Default path for the classifier if it doesn't exist
 
     // statics
@@ -53,21 +43,19 @@ public class FaceRecognizerSingleton {
         trainModel();
     }
 
-    private void trainModel() {
+    private synchronized void trainModel() {
         loadTrainedModel();
         if (trainedModel != null)
             return;
-
         int numClasses = 1; // todo make this training dynamic
-        trainedModel = LBPHFaceRecognizer.create(SEARCH_RADIUS,NEIGHBORS,GRID_X,GRID_Y,THRESHOLD);
-        MatVector imgs = new MatVector();
-
+        trainedModel = createLBPHFaceRecognizer(SEARCH_RADIUS,NEIGHBORS,GRID_X,GRID_Y,THRESHOLD);
+        MatVector imgs = new MatVector(8);
         for (int i = 1; i < 9; i++) {
             try {
-                String fileLocation = getFilePathFromAssets(c, "trainingdata/features/face"+i+".png", "face.png");
+                String fileLocation = StorageHelper.getFilePathFromAssets(c, "trainingdata/features/face"+i+".png", "face.png");
                 Mat totest = new Face(imread(fileLocation)).performHistEqualization();  // Must be taken from Face class
                 new File(fileLocation).delete();   // delete the file
-                imgs.push_back(totest);
+                imgs.put(i,totest);
             } catch (IOException e) {}
         }
         Mat labels = Mat.ones(1,((int)imgs.size()),0).asMat();
@@ -81,7 +69,7 @@ public class FaceRecognizerSingleton {
         try {
             int[] l = new int[1];
             double[] conf = new double[1];
-            String fileLocation = getFilePathFromAssets(c, "erinface/face9.png", "face.png");
+            String fileLocation = StorageHelper.getFilePathFromAssets(c, "erinface/face9.png", "face.png");
             toPredict = new Face(imread(fileLocation));
             new File(fileLocation).delete();
         }catch (IOException e){}
@@ -93,7 +81,8 @@ public class FaceRecognizerSingleton {
             return null;
         int [] foundLabels = new int[5];        // top 5 predictions
         double [] confidence = new double[5];   // top 5 prediction confidences
-        trainedModel.predict(face.performHistEqualization(),foundLabels,confidence);
+        opencv_core.UMat faceUmat = new opencv_core.UMat(face.performHistEqualization());
+        trainedModel.predict(faceUmat,foundLabels,confidence);
         Log.i(TAG,"Predicted: \nLabels:"+foundLabels.toString()
                 +"\nConfidences:"+confidence.toString());
         return null;
@@ -106,14 +95,15 @@ public class FaceRecognizerSingleton {
             path = classifierMetadata.path;
         File classifierFile = new File(c.getFilesDir(),path);
         if (classifierFile.exists())
-            trainedModel.read(classifierFile.getAbsolutePath());
+            trainedModel.load(classifierFile.getAbsolutePath());
     }
     private synchronized void saveTrainedModel(int numberOfDetections){
         String path = CLASSIFIER_PATH;
         if (classifierMetadata != null)
             path = classifierMetadata.path;
+        classifierMetadata = new Classifier(classifierMetadata);
         File classifierFile = new File(c.getFilesDir(),path);
-        trainedModel.write(classifierFile.getAbsolutePath());
+        trainedModel.save(classifierFile.getAbsolutePath());
         try {
             FileInputStream fis = new FileInputStream(classifierFile);
             String md5 = org.apache.commons.codec.digest.DigestUtils.md5Hex(fis);
@@ -123,20 +113,7 @@ public class FaceRecognizerSingleton {
             classifierMetadata.last_update = tsLong;
             classifierMetadata.num_recogn = numberOfDetections;
             classifierMetadata.path = path;
+            AppDatabase.getDatabase(c).classifierDao().updateClassifier(classifierMetadata);
         } catch (IOException e) {}
-    }
-    @NonNull
-    public static String getFilePathFromAssets(Context c, String path, String newFileName) throws IOException {
-        InputStream is = c.getAssets().open(path);
-        File cascadeDir = c.getDir("cascade", Context.MODE_PRIVATE);
-        File mCascadeFile = new File(cascadeDir, newFileName);
-        FileOutputStream os = new FileOutputStream(mCascadeFile);
-        byte[] buffer = new byte[1024];
-        int bytesRead;
-        while ((bytesRead = is.read(buffer)) != -1)
-            os.write(buffer, 0, bytesRead);
-        is.close();
-        os.close();
-        return  mCascadeFile.getAbsolutePath();
     }
 }

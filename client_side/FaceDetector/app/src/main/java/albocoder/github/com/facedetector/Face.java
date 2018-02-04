@@ -10,7 +10,7 @@ public class Face {
 
     // class fields
     private Rect boundingBox;
-    private Mat faceContent;        // must always be 60x60
+    private Mat faceContent;        // must always be 80x80
 
     // calculated-later fields
     private int local_id;
@@ -22,7 +22,7 @@ public class Face {
         boundingBox = new Rect(bb);
         faceContent = new Mat();
         resize(content,faceContent,new Size(WIDTH,HEIGHT));
-        cvtColor(faceContent, faceContent, CV_RGBA2RGB);
+        cvtColor(faceContent, faceContent, CV_BGRA2RGB);
         local_id = -1;
 
         histEqualizedFace = null;

@@ -1,5 +1,3 @@
-package albocoder.github.com.facedetector;
-
 /*
 * Copyright 2007-2011 the original author or authors
 *
@@ -15,6 +13,7 @@ package albocoder.github.com.facedetector;
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
+package albocoder.github.com.facedetector;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -182,10 +181,6 @@ public class CvCameraPreview extends SurfaceView implements SurfaceHolder.Callba
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
         /* Do nothing. Wait until surfaceChanged delivered */
-        try {
-            cameraDevice.setPreviewDisplay(surfaceHolder);
-            cameraDevice.startPreview();
-        } catch (IOException|NullPointerException e) {}
     }
 
     /**
@@ -604,10 +599,10 @@ public class CvCameraPreview extends SurfaceView implements SurfaceHolder.Callba
      */
     private synchronized void startCameraPreview(SurfaceHolder holder) {
         try {
-//            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-//                surfaceTexture = new SurfaceTexture(MAGIC_TEXTURE_ID);
-//                cameraDevice.setPreviewTexture(surfaceTexture);
-//            } else
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+                surfaceTexture = new SurfaceTexture(MAGIC_TEXTURE_ID);
+                cameraDevice.setPreviewTexture(surfaceTexture);
+            } else
                 cameraDevice.setPreviewDisplay(holder);
             cameraDevice.startPreview();
 //            filter.start();
