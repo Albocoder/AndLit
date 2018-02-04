@@ -56,5 +56,10 @@ dependencies {
     compile project(':openCVLibrary340')
     implementation files('libs/opencv-340.jar')
     compile 'org.bytedeco:javacv:1.4'
+    compile 'org.bytedeco.javacpp-presets:ffmpeg-platform:3.4.1-1.4'
+    compile 'org.bytedeco.javacpp-presets:opencv:3.4.0-1.4'
+    compile 'org.bytedeco.javacpp-presets:opencv:3.4.0-1.4:android-arm'
+    compile 'commons-codec:commons-codec:1.5'
+    testCompile 'org.bytedeco.javacpp-presets:opencv:3.4.0-1.4:linux-x86_64' // for the machine testing
 }
 

@@ -1,4 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Face Detector</string>
+    <string name="permission_warning">To continue, please enable Camera and Read Write External Storage permission for this application.</string>
+    <string name="dismiss">Dismiss</string>
+    <string name="unknown">Unknown</string>
 </resources>

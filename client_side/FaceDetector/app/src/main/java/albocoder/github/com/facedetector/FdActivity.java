@@ -22,126 +22,73 @@ package albocoder.github.com.facedetector;
 // Warning: TESTiNG ONLY CLASS DON'T USE!!!!
 // Warning: TESTiNG ONLY CLASS DON'T USE!!!!
 
-import org.opencv.android.BaseLoaderCallback;
-import org.opencv.android.CameraBridgeViewBase.CvCameraViewFrame;
-import org.opencv.android.LoaderCallbackInterface;
-import org.opencv.android.OpenCVLoader;
-import org.opencv.core.Mat;
-import org.opencv.android.CameraBridgeViewBase;
-import org.opencv.android.CameraBridgeViewBase.CvCameraViewListener2;
-import org.opencv.core.Scalar;
-import org.opencv.imgcodecs.Imgcodecs;
-import org.opencv.imgproc.Imgproc;
+import org.bytedeco.javacpp.opencv_core;
+import org.bytedeco.javacpp.opencv_core.*;
+import org.bytedeco.javacpp.opencv_imgproc;
 
 import android.app.Activity;
 import android.content.Context;
-import android.content.res.AssetManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.WindowManager;
-import android.widget.Toast;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.List;
+import java.io.*;
+import albocoder.github.com.facedetector.database.*;
+import albocoder.github.com.facedetector.database.entities.*;
 
-import albocoder.github.com.facedetector.database.AppDatabase;
-import albocoder.github.com.facedetector.database.LocalDBInterface;
-import albocoder.github.com.facedetector.database.entities.UserLogin;
+import static org.bytedeco.javacpp.opencv_core.LINE_8;
 
-public class FdActivity extends Activity implements CvCameraViewListener2 {
-    private static final String    TAG                 = "OCVSample::MainActivity";
-    private Mat                    mRgba;
-    private Scalar FACE_RECT_COLOR                     = new Scalar(255,0,255);
-    private CameraBridgeViewBase   mOpenCvCameraView;
+public class FdActivity extends Activity implements CvCameraPreview.CvCameraViewListener {
+    private static final String    TAG                 = "OCVSample::albocoder.github.com.facedetector.MainActivity";
+    private opencv_core.Scalar     FACE_RECT_COLOR     = new opencv_core.Scalar(255,0.0,0.0,1);
     private AppDatabase db;
-
-    private BaseLoaderCallback  mLoaderCallback = new BaseLoaderCallback(this) {
-        @Override
-        public void onManagerConnected(int status) {
-            mOpenCvCameraView.enableView();
-            super.onManagerConnected(status);
-        }
-    };
+    private CvCameraPreview cameraView;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-
         setContentView(R.layout.face_detect_surface_view);
 
+        cameraView = (CvCameraPreview) findViewById(R.id.camera_view);
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        cameraView.setCvCameraViewListener(this);
 
 //        // Database initialization test
 //        db = AppDatabase.getDatabase(getApplicationContext());
 ////        db.userDao().deleteEntries();
 //        List<UserLogin> users = db.userDao().getLoginEntry();
 //        if (users.size()==0) {
-//            db.userDao().insertEntry(new UserLogin(3242,"The Virtuoso", "death is an opera"));
+//            db.userDao().insertEntry(new UserLogin(3242,"The aspect of", "twilight... ZOE!"));
 //            users.add(db.userDao().getLoginEntry().get(0));
 //            Log.d(TAG,users.get(0).toString());
 //        }
 //        else
 //            Log.d(TAG,"It existed before:"+users.get(0).toString());
 
-        mOpenCvCameraView = (CameraBridgeViewBase) findViewById(R.id.fd_activity_surface_view);
-        mOpenCvCameraView.setVisibility(CameraBridgeViewBase.VISIBLE);
-        mOpenCvCameraView.setCvCameraViewListener(this);
     }
-    @Override
-    public void onPause() {
-        super.onPause();
-        if (mOpenCvCameraView != null)
-            mOpenCvCameraView.disableView();
-    }
-    @Override
-    public void onResume() {
-        super.onResume();
-        if (!OpenCVLoader.initDebug()) {
-            Log.d(TAG, "Internal OpenCV library not found. Using OpenCV Manager for initialization");
-            OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION_3_4_0, this, mLoaderCallback);
-        } else {
-            Log.d(TAG, "OpenCV library found inside package. Using it!");
-            mLoaderCallback.onManagerConnected(LoaderCallbackInterface.SUCCESS);
-        }
-    }
-    public void onDestroy() { super.onDestroy(); mOpenCvCameraView.disableView(); }
-    public void onCameraViewStarted(int width, int height) { mRgba = new Mat(); }
-    public void onCameraViewStopped() { mRgba.release(); }
+    public void onCameraViewStarted(int width, int height) {}
+    public void onCameraViewStopped() {}
 
-    public Mat onCameraFrame(CvCameraViewFrame inputFrame) {
-        mRgba = inputFrame.rgba();
-//        FaceRunner facernb = new FaceRunner(this,mRgba);
+    @Override
+    public Mat onCameraFrame(Mat mat) {
+//        FaceRunner facernb = new FaceRunner(this,mat);
 //        this.runOnUiThread(facernb);
-//        try { Thread.sleep(1000); } catch (InterruptedException e) {}
+        FaceOperator fop = new FaceOperator(this,mat);
+        Face [] faces = fop.getFaces();
 //        Face [] faces = facernb.getFaces();
-//        if (faces == null)
-//            return mRgba;
-//        for (Face aFacesArray : faces)
-//            Imgproc.rectangle(mRgba, aFacesArray.getBoundingBox().tl(),
-//                    aFacesArray.getBoundingBox().br(), FACE_RECT_COLOR, 3);
-        return mRgba;
-    }
-    class FaceRunner implements Runnable{
-        Mat m;
-        Face[] facesArray;
-        Context c;
-        public FaceRunner(Context c,Mat s){
-            m = new Mat();
-            this.c = c;
-            s.copyTo(m);
-            facesArray = null;
+        if (faces == null)
+            return mat;
+        for (Face aFacesArray : faces) {
+            int x = aFacesArray.getBoundingBox().x();
+            int y = aFacesArray.getBoundingBox().y();
+            int w = aFacesArray.getBoundingBox().width();
+            int h = aFacesArray.getBoundingBox().height();
+            opencv_imgproc.rectangle(mat,new Point(x, y), new Point(x + w, y + h)
+                    , Scalar.GREEN,2, LINE_8,0);
         }
-        @Override
-        public void run() {
-            FaceOperator fop = new FaceOperator(c,m);
-            facesArray = fop.getFaces();
-        }
-        public Face[] getFaces(){return facesArray;}
+        fop.destroy();
+        fop = null;
+        return mat;
     }
 }
 // Warning: TESTiNG ONLY CLASS DON'T USE!!!!

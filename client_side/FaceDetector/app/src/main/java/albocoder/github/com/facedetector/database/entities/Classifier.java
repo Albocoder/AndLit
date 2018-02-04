@@ -20,9 +20,6 @@ public class Classifier {
     public long last_update;
     public int num_recogn;
 
-    @Ignore
-    private LBPHFaceRecognizer recognizerModel;
-
     // constructor
     public Classifier(String path,String hash,Date last_update,int num_recogn){
         this(path,hash,DateConverter.toTimestamp(last_update),num_recogn);
@@ -35,6 +32,8 @@ public class Classifier {
         this.num_recogn = num_recogn;
         // createModel() -> recognizerModel = load the recognizer model from file system
     }
-
-    public LBPHFaceRecognizer getRecognizerModel(){ return recognizerModel; }
+    @Override
+    public String toString(){
+        return "Classifier Entry: <`"+path+"`, `"+hash+"`, `"+last_update+"`, `"+num_recogn+"`>";
+    }
 }
