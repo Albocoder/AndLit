@@ -113,7 +113,8 @@ public class FaceRecognizerSingleton {
             classifierMetadata.last_update = tsLong;
             classifierMetadata.num_recogn = numberOfDetections;
             classifierMetadata.path = path;
-            AppDatabase.getDatabase(c).classifierDao().updateClassifier(classifierMetadata);
+            AppDatabase.getDatabase(c).classifierDao().deleteClassifier();
+            AppDatabase.getDatabase(c).classifierDao().insertClassifier(classifierMetadata);
         } catch (IOException e) {}
     }
 }

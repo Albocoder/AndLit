@@ -3,6 +3,7 @@ package albocoder.github.com.facedetector.database.entities;
 import android.arch.persistence.room.Entity;
 import android.arch.persistence.room.ForeignKey;
 import android.arch.persistence.room.PrimaryKey;
+import android.support.annotation.NonNull;
 
 import java.util.Date;
 
@@ -11,8 +12,8 @@ import albocoder.github.com.facedetector.database.converters.DateConverter;
 @Entity(foreignKeys = {@ForeignKey(entity = KnownPPL.class,
         childColumns = "id",parentColumns = "id",onDelete = ForeignKey.CASCADE)})
 public class detected_faces {
-    @PrimaryKey
     public int id;
+    @PrimaryKey @NonNull
     public String path;
     public String hash;
     public long date_taken;

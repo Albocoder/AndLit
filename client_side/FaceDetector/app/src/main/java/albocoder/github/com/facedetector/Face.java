@@ -1,7 +1,14 @@
 package albocoder.github.com.facedetector;
 
-import org.bytedeco.javacpp.opencv_core.*;
-import static org.bytedeco.javacpp.opencv_imgproc.*;
+import org.bytedeco.javacpp.opencv_core.Mat;
+import org.bytedeco.javacpp.opencv_core.Rect;
+import org.bytedeco.javacpp.opencv_core.Size;
+
+import static org.bytedeco.javacpp.opencv_imgproc.CV_BGRA2RGB;
+import static org.bytedeco.javacpp.opencv_imgproc.CV_RGB2GRAY;
+import static org.bytedeco.javacpp.opencv_imgproc.cvtColor;
+import static org.bytedeco.javacpp.opencv_imgproc.equalizeHist;
+import static org.bytedeco.javacpp.opencv_imgproc.resize;
 
 public class Face {
     // class constants
@@ -19,8 +26,8 @@ public class Face {
 
     // constructors
     public Face(Rect bb,Mat content){
-        boundingBox = new Rect(bb);
-        faceContent = new Mat();
+        boundingBox = bb;
+        faceContent = content;
         resize(content,faceContent,new Size(WIDTH,HEIGHT));
         cvtColor(faceContent, faceContent, CV_BGRA2RGB);
         local_id = -1;
@@ -34,14 +41,14 @@ public class Face {
     public Rect getBoundingBox(){return boundingBox;}
     public Mat getRGBContent(){return faceContent;}
     public Mat getgscaleContent(){
-        Mat dst = new Mat();
+        Mat dst = faceContent.clone();
         cvtColor(faceContent,dst,CV_RGB2GRAY);
         return dst;
     }
     public Mat performHistEqualization() {
         if(histEqualizedFace != null)
             return histEqualizedFace;
-        Mat histEqualizedFace = new Mat();
+        Mat histEqualizedFace = faceContent.clone();
         equalizeHist(faceContent,histEqualizedFace);
         return histEqualizedFace;
     }
@@ -57,18 +64,4 @@ public class Face {
     }
     public int getID(){ return local_id; }
     public void destroy() {faceContent.release();}
-    public void saveToDatabase(){
-//        File path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
-//        String filename = "barry.png";
-//        File file = new File(path, filename);
-//
-//        Boolean bool = null;
-//        filename = file.toString();
-//        bool = Highgui.imwrite(filename, mIntermediateMat);
-//
-//        if (bool == true)
-//            Log.d(TAG, "SUCCESS writing image to external storage");
-//        else
-//            Log.d(TAG, "Fail writing image to external storage");
-    }
 }

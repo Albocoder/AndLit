@@ -1,15 +1,29 @@
 package albocoder.github.com.facedetector;
 
 import android.content.Context;
+import android.os.Environment;
 import android.util.Log;
 
-import org.bytedeco.javacpp.opencv_core.*;
-import org.bytedeco.javacpp.opencv_objdetect.*;
+import org.bytedeco.javacpp.opencv_core.Mat;
+import org.bytedeco.javacpp.opencv_core.Rect;
+import org.bytedeco.javacpp.opencv_core.RectVector;
+import org.bytedeco.javacpp.opencv_core.Size;
+import org.bytedeco.javacpp.opencv_objdetect.CascadeClassifier;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Random;
 
-import static org.bytedeco.javacpp.opencv_imgproc.*;
-import static org.bytedeco.javacpp.opencv_objdetect.*;
+import albocoder.github.com.facedetector.database.AppDatabase;
+import albocoder.github.com.facedetector.database.entities.detected_faces;
+
+import static org.bytedeco.javacpp.opencv_imgcodecs.imwrite;
+import static org.bytedeco.javacpp.opencv_imgproc.CV_RGB2GRAY;
+import static org.bytedeco.javacpp.opencv_imgproc.cvtColor;
+import static org.bytedeco.javacpp.opencv_objdetect.CASCADE_SCALE_IMAGE;
 
 public class FaceOperator {
     // class constants
@@ -20,6 +34,7 @@ public class FaceOperator {
     private static CascadeClassifier frontDetector;
     private static CascadeClassifier profileDetector;
     private static final String TAG = "Controller:FaceOperator";
+    private static final String DETECTIONS_PATH = "detections/";
 
     // unique fields
     private float mRelativeFaceSize;
@@ -34,8 +49,7 @@ public class FaceOperator {
     FaceOperator(Context c, Mat f, int abs, float rel){
         super();
         context = c;
-        scene = new Mat();
-        f.copyTo(scene);
+        scene = f.clone();
         mAbsoluteFaceSize = abs;
         mRelativeFaceSize = rel;
         foundFaces = null;
@@ -48,9 +62,8 @@ public class FaceOperator {
         if (foundFaces != null)
             return foundFaces;
         initializeDetector();
-        Mat mRgba = new Mat(), mGray = new Mat();
+        Mat mGray = scene.clone();
 
-        scene.copyTo(mRgba);
         cvtColor(scene,mGray, CV_RGB2GRAY);
 
         if (mAbsoluteFaceSize == 0) {
@@ -66,16 +79,17 @@ public class FaceOperator {
         Face[] facesArray = new Face[(int) facesVector.size()];
         for (int i = 0; i < facesVector.size();i++) {
             Rect faceRect = facesVector.get(i);
-            Mat content = mRgba.apply(faceRect);
+            Mat content = scene.apply(faceRect);
             facesArray[i] = new Face(faceRect,content);
         }
 //        Log.i(TAG,"Found "+facesRectArray.size()+"!");
         foundFaces = facesArray;
-        mRgba.release();
         mGray.release();
+        System.gc();
+        Runtime.getRuntime().gc(); // if you delete this you are fucked! DON'T DO IT FFS!!!
         return facesArray;
     }
-    private void initializeDetector() {
+    private synchronized void initializeDetector() {
         if (frontDetector == null) {
             try {
                 // load cascade file from application resources
@@ -141,5 +155,75 @@ public class FaceOperator {
             frs.predict(f); // Todo: develop this to get the id;
         return facesToRecognize;
     }
-    public void destroy(){ for(Face f:foundFaces) f.destroy(); scene.release();}
+
+    // Utility functions
+    public void destroy(){
+        for(Face f:foundFaces)
+            f.destroy();
+        scene.release();
+        foundFaces = null;
+        System.gc();
+    }
+    public static boolean saveFaceToDatabase(Context c, Face f) throws IOException {
+        // todo: TEST
+        long timeInMillis = System.currentTimeMillis();
+        Random r = new Random();
+        if(Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)){
+            // write to here
+            String root = Environment.getExternalStorageDirectory().toString();
+            File myDir = new File(root+DETECTIONS_PATH);
+            if(!myDir.exists())
+                myDir.mkdir();
+            String filename = "face_"+timeInMillis+"_"+r.nextInt()+".png";
+            File toSave = new File (myDir, filename);
+            if (toSave.exists())
+                toSave.delete();
+            Mat m = f.getRGBContent().clone();
+//            cvtColor(m,m,CV_RGB2BGR);
+            boolean saved = imwrite(toSave.getAbsolutePath(),m);
+            if(!saved)
+                return false;
+            FileInputStream fis = new FileInputStream(toSave.getAbsolutePath());
+            String md5 = org.apache.commons.codec.digest.DigestUtils.md5Hex(fis);
+            fis.close();
+            detected_faces detection = new detected_faces(f.getID(),toSave.getAbsolutePath()
+                    ,md5,timeInMillis);
+            AppDatabase db = AppDatabase.getDatabase(c);
+            db.facesDao().insertFace(detection);
+        }
+        else{
+            // write to here
+            File detectionsDir = new File(c.getFilesDir(),DETECTIONS_PATH);
+            if(!detectionsDir.exists())
+                detectionsDir.mkdir();
+            String filename = "face_"+timeInMillis+"_"+r.nextInt()+".png";
+            File toSave = new File (detectionsDir, filename);
+            if (toSave.exists())
+                toSave.delete();
+            Mat m = f.getRGBContent().clone();
+//            cvtColor(m,m,CV_RGB2BGR);
+            boolean saved = imwrite(toSave.getAbsolutePath(),m);
+            if(!saved)
+                return false;
+            FileInputStream fis = new FileInputStream(toSave.getAbsolutePath());
+            String md5 = org.apache.commons.codec.digest.DigestUtils.md5Hex(fis);
+            fis.close();
+            detected_faces detection = new detected_faces(f.getID(),toSave.getAbsolutePath()
+                    ,md5,timeInMillis);
+            AppDatabase db = AppDatabase.getDatabase(c);
+            db.facesDao().insertFace(detection);
+            return true;
+        }
+        return true;
+    }
+
+    public void storeFaces(){
+        for(Face f: foundFaces)
+            try {
+                saveFaceToDatabase(context,f);
+            } catch (IOException e) {
+                Log.e(TAG,"Couldn't save a face! Error encountered: "+e.getMessage());
+            }
+    }
+    public void storeFacesThenDestroy(){ storeFaces(); destroy(); }
 }
