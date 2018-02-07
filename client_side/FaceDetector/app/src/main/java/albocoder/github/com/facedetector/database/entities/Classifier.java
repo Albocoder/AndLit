@@ -14,19 +14,21 @@ public class Classifier {
     @PrimaryKey @NonNull
     public String path;
     public String hash;
-    public long last_update;
-    public int num_recogn;
+    public Long last_update;
+    public Integer num_recogn;
+    public Integer num_inst_trained;
 
     // constructor
-    public Classifier(String path,String hash,Date last_update,int num_recogn){
-        this(path,hash,DateConverter.toTimestamp(last_update),num_recogn);
+    public Classifier(String path,String hash,Date last_update,int num_recogn,int num_inst_trained){
+        this(path,hash,DateConverter.toTimestamp(last_update),num_recogn,num_inst_trained);
     }
 
-    public Classifier(String path,String hash,long last_update,int num_recogn){
+    public Classifier(String path,String hash,long last_update,int num_recogn, int num_inst_trained){
         this.path = path;
         this.hash = hash;
         this.last_update = last_update;
         this.num_recogn = num_recogn;
+        this.num_inst_trained = num_inst_trained;
     }
 
     public Classifier(Classifier c2) {

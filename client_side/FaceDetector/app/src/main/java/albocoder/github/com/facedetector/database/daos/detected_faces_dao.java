@@ -9,18 +9,15 @@ import android.arch.persistence.room.Update;
 
 import java.util.List;
 
-import albocoder.github.com.facedetector.database.entities.detected_faces;
+import albocoder.github.com.facedetector.database.entities.detected_face;
 
 @Dao
 public interface detected_faces_dao {
-    @Insert(onConflict = OnConflictStrategy.ROLLBACK)
-    void insertFaces(detected_faces... f);
-
-    @Insert(onConflict = OnConflictStrategy.ROLLBACK)
-    void insertFace(detected_faces key);
+    @Insert
+    void insertFace(detected_face key);
 
     @Query("select * from detected_faces")
-    List<detected_faces> getAllRecords();
+    List<detected_face> getAllRecords();
 
     @Query("select distinct `id` from detected_faces")
     List<Integer> getAllIDsDetectedSoFar();
@@ -32,7 +29,7 @@ public interface detected_faces_dao {
     void deleteDetectionForID(int i);
 
     @Delete
-    void deleteDetectionForFace(detected_faces f);
+    void deleteDetectionForFace(detected_face f);
 
     @Query("delete from detected_faces where `hash` = :h ")
     void deleteDetectionForHash(String h);
@@ -45,5 +42,5 @@ public interface detected_faces_dao {
     void deleteDetectionForIDInTimeSpan(int i,long s,long e);
 
     @Update(onConflict = OnConflictStrategy.ROLLBACK)
-    void updateRowData(detected_faces toChange);
+    void updateRowData(detected_face toChange);
 }

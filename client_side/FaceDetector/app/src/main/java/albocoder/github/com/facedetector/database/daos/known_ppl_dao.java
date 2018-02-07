@@ -2,16 +2,20 @@ package albocoder.github.com.facedetector.database.daos;
 
 import android.arch.persistence.room.Dao;
 import android.arch.persistence.room.Delete;
+import android.arch.persistence.room.Insert;
 import android.arch.persistence.room.Query;
 import android.arch.persistence.room.Update;
 
-import java.util.Date;
 import java.util.List;
 
 import albocoder.github.com.facedetector.database.entities.KnownPPL;
 
 @Dao
 public interface known_ppl_dao {
+    // INSERTION
+    @Insert
+    void insertEntry(KnownPPL person);
+
     // SELECTION
     @Query("select `id` from known_ppl")
     List<Integer> getAllIDs();
@@ -41,10 +45,13 @@ public interface known_ppl_dao {
     KnownPPL getPersonWithID(int i);
 
     @Query("select global_id from known_ppl where id = :i")
-    int getGlobalIDForID(int i);
+    Integer getGlobalIDForID(int i);
 
     @Query("select address from known_ppl where id = :i")
     String getAddressForID(int i);
+
+    @Query("select id from known_ppl where id= :i")
+    List<Integer> getEntryWithID(int i);
 
     @Query("select * from known_ppl where name = :n and sname = :s")
     KnownPPL getPeopleWithNameAndSName(String n,String s);

@@ -1,26 +1,38 @@
 package albocoder.github.com.facedetector.database;
 
-import android.arch.lifecycle.MutableLiveData;
 import android.arch.persistence.room.Database;
 import android.arch.persistence.room.Room;
 import android.arch.persistence.room.RoomDatabase;
 import android.content.Context;
 import android.support.annotation.VisibleForTesting;
 
-import albocoder.github.com.facedetector.database.daos.*;
-import albocoder.github.com.facedetector.database.entities.*;
+import albocoder.github.com.facedetector.database.daos.api_keys_dao;
+import albocoder.github.com.facedetector.database.daos.classifier_dao;
+import albocoder.github.com.facedetector.database.daos.detected_faces_dao;
+import albocoder.github.com.facedetector.database.daos.known_ppl_dao;
+import albocoder.github.com.facedetector.database.daos.misc_info_dao;
+import albocoder.github.com.facedetector.database.daos.training_face_dao;
+import albocoder.github.com.facedetector.database.daos.user_login_dao;
+import albocoder.github.com.facedetector.database.entities.API_key;
+import albocoder.github.com.facedetector.database.entities.Classifier;
+import albocoder.github.com.facedetector.database.entities.KnownPPL;
+import albocoder.github.com.facedetector.database.entities.UserLogin;
+import albocoder.github.com.facedetector.database.entities.detected_face;
+import albocoder.github.com.facedetector.database.entities.misc_info;
+import albocoder.github.com.facedetector.database.entities.training_face;
 
-@Database(entities = {API_key.class, Classifier.class, detected_faces.class, KnownPPL.class,
-        misc_info.class, UserLogin.class}, version = 1, exportSchema = false)
+@Database(entities = {API_key.class, Classifier.class, detected_face.class, KnownPPL.class,
+        misc_info.class, UserLogin.class, training_face.class}, version = 1, exportSchema = false)
 public abstract class AppDatabase extends RoomDatabase {
     private static AppDatabase INSTANCE;
 
-    public abstract api_keys_dao apiDao();
+    public abstract api_keys_dao apiKeysDao();
     public abstract classifier_dao classifierDao();
-    public abstract detected_faces_dao facesDao();
-    public abstract known_ppl_dao knownDao();
-    public abstract misc_info_dao miscDao();
-    public abstract user_login_dao userDao();
+    public abstract detected_faces_dao detectedFacesDao();
+    public abstract known_ppl_dao knownPplDao();
+    public abstract misc_info_dao miscInfoDao();
+    public abstract user_login_dao userLoginDao();
+    public abstract training_face_dao trainingFaceDao();
 
     @VisibleForTesting
     public static final String DATABASE_NAME = "local-andlit-database";

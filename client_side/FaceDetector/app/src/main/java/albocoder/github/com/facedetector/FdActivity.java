@@ -37,8 +37,10 @@ import org.bytedeco.javacpp.opencv_objdetect;
 
 import java.io.File;
 import java.io.IOException;
+import java.security.NoSuchAlgorithmException;
 
 import albocoder.github.com.facedetector.database.AppDatabase;
+import albocoder.github.com.facedetector.database.entities.detected_face;
 import albocoder.github.com.facedetector.utils.StorageHelper;
 
 import static org.bytedeco.javacpp.opencv_core.LINE_8;
@@ -64,31 +66,28 @@ public class FdActivity extends Activity implements CvCameraPreview.CvCameraView
                             Manifest.permission.WRITE_EXTERNAL_STORAGE}
                             ,2);
         }
-
         cameraView = (CvCameraPreview) findViewById(R.id.camera_view);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         cameraView.setCvCameraViewListener(this);
 
-
-
-
-        // todo: remove this cuz its only for testing the save image functionality
         Face toPredict = null;
         try {
             int[] l = new int[1];
             double[] conf = new double[1];
-            String fileLocation = StorageHelper.getFilePathFromAssets(this, "trainingdata/features/face9.png", "face.png");
+            String fileLocation = StorageHelper.getFilePathFromAssets(getApplicationContext()
+                    , "trainingdata/features/face9.png", "face.png");
             toPredict = new Face(imread(fileLocation));
             new File(fileLocation).delete();
-        }catch (IOException e){Log.d(TAG,"Error encountered while saving:" +e.getMessage());}
-        boolean saved = false;
+        }catch (IOException e){}
+        toPredict.setID(1);
+
         try {
-            saved = FaceOperator.saveFaceToDatabase(this,toPredict);
-        } catch (IOException e) {
+            detected_face f = FaceOperator.saveDetectedFaceToDatabase(this,toPredict);
+            if(f != null)
+                Log.d(TAG,f.toString());// if one works the other will too
+        } catch (IOException |NoSuchAlgorithmException e) {
             Log.d(TAG,"Error encountered while saving:" +e.getMessage());
         }
-        Log.d(TAG,"Saved: "+saved);
-
 //        // Database initialization test
 //        db = AppDatabase.getDatabase(getApplicationContext());
 ////        db.userDao().deleteEntries();

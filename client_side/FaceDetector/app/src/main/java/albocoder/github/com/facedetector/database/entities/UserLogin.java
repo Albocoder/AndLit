@@ -6,7 +6,7 @@ import android.arch.persistence.room.PrimaryKey;
 @Entity(tableName = "user_login")
 public class UserLogin {
     @PrimaryKey
-    public final long id;
+    public final Long id;
     public String username;
     public String access_token;
 

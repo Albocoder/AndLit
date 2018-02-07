@@ -10,7 +10,7 @@ import android.arch.persistence.room.PrimaryKey;
         indices = {@Index(value = {"id","key"},unique = true)})
 public class misc_info {
     @PrimaryKey
-    public int id;
+    public Integer id;
     public String key;
     public String desc;
 

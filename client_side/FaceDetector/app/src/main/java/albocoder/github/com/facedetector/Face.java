@@ -4,10 +4,10 @@ import org.bytedeco.javacpp.opencv_core.Mat;
 import org.bytedeco.javacpp.opencv_core.Rect;
 import org.bytedeco.javacpp.opencv_core.Size;
 
-import static org.bytedeco.javacpp.opencv_imgproc.CV_BGRA2RGB;
+import static org.bytedeco.javacpp.opencv_imgproc.CV_BGR2RGB;
+import static org.bytedeco.javacpp.opencv_imgproc.CV_BGRA2BGR;
 import static org.bytedeco.javacpp.opencv_imgproc.CV_RGB2GRAY;
 import static org.bytedeco.javacpp.opencv_imgproc.cvtColor;
-import static org.bytedeco.javacpp.opencv_imgproc.equalizeHist;
 import static org.bytedeco.javacpp.opencv_imgproc.resize;
 
 public class Face {
@@ -29,7 +29,7 @@ public class Face {
         boundingBox = bb;
         faceContent = content;
         resize(content,faceContent,new Size(WIDTH,HEIGHT));
-        cvtColor(faceContent, faceContent, CV_BGRA2RGB);
+        cvtColor(faceContent, faceContent, CV_BGRA2BGR);
         local_id = -1;
 
         histEqualizedFace = null;
@@ -39,18 +39,16 @@ public class Face {
 
     // useful functions
     public Rect getBoundingBox(){return boundingBox;}
-    public Mat getRGBContent(){return faceContent;}
+    public Mat getBGRContent(){return faceContent;}
+    public Mat getRGBContent(){
+        Mat toReturn = faceContent.clone();
+        cvtColor(toReturn, toReturn, CV_BGR2RGB);
+        return toReturn;
+    }
     public Mat getgscaleContent(){
         Mat dst = faceContent.clone();
         cvtColor(faceContent,dst,CV_RGB2GRAY);
         return dst;
-    }
-    public Mat performHistEqualization() {
-        if(histEqualizedFace != null)
-            return histEqualizedFace;
-        Mat histEqualizedFace = faceContent.clone();
-        equalizeHist(faceContent,histEqualizedFace);
-        return histEqualizedFace;
     }
     public boolean setID(int id){
         if(local_id == -1){

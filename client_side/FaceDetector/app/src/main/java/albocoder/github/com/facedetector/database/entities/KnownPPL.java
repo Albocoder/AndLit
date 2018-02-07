@@ -8,16 +8,15 @@ import java.util.Date;
 
 import albocoder.github.com.facedetector.database.converters.DateConverter;
 
-@Entity(tableName = "known_ppl",indices = {@Index(value = "global_id",
-        unique = true)})
+@Entity(tableName = "known_ppl",indices = {@Index(value = "global_id")})
 public class KnownPPL {
     @PrimaryKey(autoGenerate=true)
-    public int id;
-    public long global_id;
+    public Integer id;
+    public Long global_id;
     public String name;
     public String sname;
-    public long dob;
-    public int age;
+    public Long dob;
+    public Integer age;
     public String address;
 
     public KnownPPL(long global_id,String name,String sname,long dob, int age, String address){

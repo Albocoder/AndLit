@@ -6,8 +6,6 @@ import android.arch.persistence.room.OnConflictStrategy;
 import android.arch.persistence.room.Query;
 import android.arch.persistence.room.Update;
 
-import java.util.Date;
-
 import albocoder.github.com.facedetector.database.entities.Classifier;
 
 @Dao
@@ -17,15 +15,6 @@ public interface classifier_dao {
 
     @Query("select * from classifier")
     Classifier getClassifier();
-
-    @Query("select `hash` from classifier")
-    String getHash();
-
-    @Query("select `path` from classifier")
-    String getPath();
-
-    @Query("select `last_update` from classifier")
-    long getLastModified();
 
     @Query("delete from classifier")
     void deleteClassifier();

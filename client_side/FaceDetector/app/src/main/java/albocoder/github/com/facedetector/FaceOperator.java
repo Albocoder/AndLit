@@ -1,7 +1,11 @@
 package albocoder.github.com.facedetector;
 
+import android.Manifest;
 import android.content.Context;
+import android.content.pm.PackageManager;
+import android.database.sqlite.SQLiteConstraintException;
 import android.os.Environment;
+import android.support.v4.content.ContextCompat;
 import android.util.Log;
 
 import org.bytedeco.javacpp.opencv_core.Mat;
@@ -15,12 +19,18 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.security.DigestInputStream;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Random;
 
 import albocoder.github.com.facedetector.database.AppDatabase;
-import albocoder.github.com.facedetector.database.entities.detected_faces;
+import albocoder.github.com.facedetector.database.entities.detected_face;
+import albocoder.github.com.facedetector.database.entities.training_face;
 
+import static org.bytedeco.javacpp.opencv_imgcodecs.imread;
 import static org.bytedeco.javacpp.opencv_imgcodecs.imwrite;
+import static org.bytedeco.javacpp.opencv_imgproc.CV_BGR2BGRA;
 import static org.bytedeco.javacpp.opencv_imgproc.CV_RGB2GRAY;
 import static org.bytedeco.javacpp.opencv_imgproc.cvtColor;
 import static org.bytedeco.javacpp.opencv_objdetect.CASCADE_SCALE_IMAGE;
@@ -34,7 +44,8 @@ public class FaceOperator {
     private static CascadeClassifier frontDetector;
     private static CascadeClassifier profileDetector;
     private static final String TAG = "Controller:FaceOperator";
-    private static final String DETECTIONS_PATH = "detections/";
+    private static final String DETECTIONS_PATH = "detections";
+    private static final String TRAINING_PATH = "training";
 
     // unique fields
     private float mRelativeFaceSize;
@@ -157,73 +168,293 @@ public class FaceOperator {
     }
 
     // Utility functions
-    public void destroy(){
+    public void destroy() {
         for(Face f:foundFaces)
             f.destroy();
         scene.release();
         foundFaces = null;
         System.gc();
     }
-    public static boolean saveFaceToDatabase(Context c, Face f) throws IOException {
-        // todo: TEST
-        long timeInMillis = System.currentTimeMillis();
-        Random r = new Random();
-        if(Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)){
-            // write to here
-            String root = Environment.getExternalStorageDirectory().toString();
-            File myDir = new File(root+DETECTIONS_PATH);
-            if(!myDir.exists())
-                myDir.mkdir();
-            String filename = "face_"+timeInMillis+"_"+r.nextInt()+".png";
-            File toSave = new File (myDir, filename);
-            if (toSave.exists())
-                toSave.delete();
-            Mat m = f.getRGBContent().clone();
-//            cvtColor(m,m,CV_RGB2BGR);
-            boolean saved = imwrite(toSave.getAbsolutePath(),m);
-            if(!saved)
-                return false;
-            FileInputStream fis = new FileInputStream(toSave.getAbsolutePath());
-            String md5 = org.apache.commons.codec.digest.DigestUtils.md5Hex(fis);
-            fis.close();
-            detected_faces detection = new detected_faces(f.getID(),toSave.getAbsolutePath()
-                    ,md5,timeInMillis);
-            AppDatabase db = AppDatabase.getDatabase(c);
-            db.facesDao().insertFace(detection);
-        }
-        else{
-            // write to here
-            File detectionsDir = new File(c.getFilesDir(),DETECTIONS_PATH);
-            if(!detectionsDir.exists())
-                detectionsDir.mkdir();
-            String filename = "face_"+timeInMillis+"_"+r.nextInt()+".png";
-            File toSave = new File (detectionsDir, filename);
-            if (toSave.exists())
-                toSave.delete();
-            Mat m = f.getRGBContent().clone();
-//            cvtColor(m,m,CV_RGB2BGR);
-            boolean saved = imwrite(toSave.getAbsolutePath(),m);
-            if(!saved)
-                return false;
-            FileInputStream fis = new FileInputStream(toSave.getAbsolutePath());
-            String md5 = org.apache.commons.codec.digest.DigestUtils.md5Hex(fis);
-            fis.close();
-            detected_faces detection = new detected_faces(f.getID(),toSave.getAbsolutePath()
-                    ,md5,timeInMillis);
-            AppDatabase db = AppDatabase.getDatabase(c);
-            db.facesDao().insertFace(detection);
-            return true;
-        }
-        return true;
-    }
-
-    public void storeFaces(){
+    public void storeDetectedFaces(){
         for(Face f: foundFaces)
             try {
-                saveFaceToDatabase(context,f);
-            } catch (IOException e) {
+                saveDetectedFaceToDatabase(context,f);
+            } catch (IOException|NoSuchAlgorithmException e) {
                 Log.e(TAG,"Couldn't save a face! Error encountered: "+e.getMessage());
             }
     }
-    public void storeFacesThenDestroy(){ storeFaces(); destroy(); }
+    public void storeDetectedFacesThenDestroy(){ storeDetectedFaces(); destroy(); }
+
+    // static utility functions
+    // referring: https://stackoverflow.com/questions/35469726/creating-directory-in-internal-storage
+    public static detected_face saveDetectedFaceToDatabase(Context c, Face f) throws IOException, NoSuchAlgorithmException {
+        return saveDetectedFaceToDatabase(c,f,true);
+    }
+    public static training_face saveTrainingFaceToDatabase(Context c, Face f) throws IOException, NoSuchAlgorithmException {
+        return saveTrainingFaceToDatabase(c, f, true);
+    }
+    public static detected_face saveDetectedFaceToDatabase(Context c, Face f, boolean privateData) throws IOException, NoSuchAlgorithmException {
+        long timeInMillis = System.currentTimeMillis();
+        Random r = new Random();
+        detected_face detection;
+        // if we can write to external storage we do
+        if (ContextCompat.checkSelfPermission(c, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                ==PackageManager.PERMISSION_GRANTED && !privateData) {
+            String filename = "face_" + timeInMillis + "_" + r.nextInt() + ".png";
+            File savingDir = new File(Environment.getExternalStorageDirectory(), DETECTIONS_PATH);
+
+            // check if directory exists
+            if (!savingDir.exists())
+                savingDir.mkdirs();
+            File imageFile = new File(Environment.getExternalStorageDirectory(),
+                    DETECTIONS_PATH + "/" + filename);
+            if (imageFile.exists())
+                imageFile.delete();
+
+            // check if written
+            boolean saved = imwrite(imageFile.getAbsolutePath(), f.getBGRContent());
+            if (!saved)
+                return null;
+
+            FileInputStream fis = new FileInputStream(imageFile.getAbsolutePath());
+
+            // get MD5 of the file we just wrote
+            MessageDigest md = MessageDigest.getInstance("MD5");
+            DigestInputStream dis = new DigestInputStream(fis, md);
+            byte[] digest = md.digest();
+            String md5 = MD5toHexString(digest);
+            dis.close();
+
+            detection = new detected_face(f.getID(), imageFile.getAbsolutePath()
+                    , md5, timeInMillis);
+            // insert and return new entry
+            AppDatabase db = AppDatabase.getDatabase(c);
+            try {
+                db.detectedFacesDao().insertFace(detection);
+            } catch (RuntimeException e) {
+                try{
+                    db.detectedFacesDao().updateRowData(detection);
+                    Log.e(TAG, "First Try failed: "+e.getStackTrace().toString());
+                }catch (RuntimeException e2) {
+                    Log.e(TAG, "Second Try failed: "+e2.getStackTrace().toString());
+                    imageFile.delete();
+                    return null;
+                }
+            }
+        } else {
+            // write to internal storage
+            String filename = "face_" + timeInMillis + "_" + r.nextInt() + ".png";
+            File mFileTemp = new File(c.getFilesDir() + File.separator + DETECTIONS_PATH, filename);
+            mFileTemp.getParentFile().mkdirs();
+
+            // check if written
+            boolean written = imwrite(mFileTemp.getAbsolutePath(), f.getBGRContent());
+            if (!written)
+                return null;
+
+            // get MD5
+            FileInputStream fis = new FileInputStream(mFileTemp.getAbsolutePath());
+            MessageDigest md = MessageDigest.getInstance("MD5");
+            DigestInputStream dis = new DigestInputStream(fis, md);
+            byte[] digest = md.digest();
+            String md5 = MD5toHexString(digest);
+            dis.close();
+
+            // create new entry
+            detection = new detected_face(f.getID(), mFileTemp.getAbsolutePath()
+                    , md5, timeInMillis);
+
+            // insert and return new entry
+            AppDatabase db = AppDatabase.getDatabase(c);
+            try {
+                db.detectedFacesDao().insertFace(detection);
+            } catch (SQLiteConstraintException e) {
+                try{
+                    db.detectedFacesDao().updateRowData(detection);
+                    Log.e(TAG, "First Try failed: "+e.getStackTrace().toString());
+                }catch (RuntimeException e2) {
+                    Log.e(TAG, "Second Try failed: "+e2.getStackTrace().toString());
+                    mFileTemp.delete();
+                    return null;
+                }
+            }
+        }
+        return detection;
+    }
+    public static training_face saveTrainingFaceToDatabase(Context c, Face f, boolean privateData) throws IOException, NoSuchAlgorithmException {
+        if(f.getID() == -1)
+            return null;
+        long timeInMillis = System.currentTimeMillis();
+        Random r = new Random();
+        training_face trainingInstance;
+        // if we can write to external storage we do
+        if (ContextCompat.checkSelfPermission(c, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                ==PackageManager.PERMISSION_GRANTED && !privateData) {
+            String filename = "face_" + timeInMillis + "_" + r.nextInt() + ".png";
+            File savingDir = new File(Environment.getExternalStorageDirectory(), TRAINING_PATH);
+
+            // check if directory exists
+            if (!savingDir.exists())
+                savingDir.mkdirs();
+            File imageFile = new File(Environment.getExternalStorageDirectory(),
+                    TRAINING_PATH + "/" + filename);
+            if (imageFile.exists())
+                imageFile.delete();
+
+            // check if written
+            boolean saved = imwrite(imageFile.getAbsolutePath(), f.getBGRContent());
+            if (!saved)
+                return null;
+
+            FileInputStream fis = new FileInputStream(imageFile.getAbsolutePath());
+
+            // get MD5 of the file we just wrote
+            MessageDigest md = MessageDigest.getInstance("MD5");
+            DigestInputStream dis = new DigestInputStream(fis, md);
+            byte[] digest = md.digest();
+            String md5 = MD5toHexString(digest);
+            dis.close();
+
+            trainingInstance = new training_face(f.getID(), imageFile.getAbsolutePath(), md5);
+
+            // insert and return new entry
+            AppDatabase db = AppDatabase.getDatabase(c);
+            try {
+                db.trainingFaceDao().insertTrainingFace(trainingInstance);
+            } catch (RuntimeException e) {
+                try{
+                    db.trainingFaceDao().insertTrainingFace(trainingInstance);
+                    Log.e(TAG, "First Try failed: "+e.getStackTrace().toString());
+                }catch (RuntimeException e2) {
+                    Log.e(TAG, "Second Try failed: "+e2.getStackTrace().toString());
+                    imageFile.delete();
+                    return null;
+                }
+            }
+        } else {
+            // write to internal storage
+            String filename = "face_" + timeInMillis + "_" + r.nextInt() + ".png";
+            File mFileTemp = new File(c.getFilesDir() + File.separator + DETECTIONS_PATH, filename);
+            mFileTemp.getParentFile().mkdirs();
+
+            // check if written
+            boolean written = imwrite(mFileTemp.getAbsolutePath(), f.getBGRContent());
+            if (!written)
+                return null;
+
+            // get MD5
+            FileInputStream fis = new FileInputStream(mFileTemp.getAbsolutePath());
+            MessageDigest md = MessageDigest.getInstance("MD5");
+            DigestInputStream dis = new DigestInputStream(fis, md);
+            byte[] digest = md.digest();
+            String md5 = MD5toHexString(digest);
+            dis.close();
+
+            // create new entry
+            trainingInstance = new training_face(f.getID(), mFileTemp.getAbsolutePath(), md5);
+
+            // insert and return new entry
+            AppDatabase db = AppDatabase.getDatabase(c);
+            try {
+                db.trainingFaceDao().insertTrainingFace(trainingInstance);
+            } catch (SQLiteConstraintException e) {
+                try{
+                    db.trainingFaceDao().insertTrainingFace(trainingInstance);
+                    Log.e(TAG, "First Try failed: "+e.getStackTrace().toString());
+                }catch (RuntimeException e2) {
+                    Log.e(TAG, "Second Try failed: "+e2.getStackTrace().toString());
+                    mFileTemp.delete();
+                    return null;
+                }
+            }
+        }
+        return trainingInstance;
+    }
+    public static boolean deleteDetectionInstance(Context c, detected_face d){
+        File toDelete = new File(d.path);
+        AppDatabase db = AppDatabase.getDatabase(c);
+        try{
+            db.detectedFacesDao().deleteDetectionForFace(d);
+        }catch (RuntimeException e){
+            return false;
+        }
+        if (toDelete.exists())
+            toDelete.delete();
+        return true;
+    }
+    public static boolean deleteTrainingInstance(Context c, training_face t){
+        File toDelete = new File(t.path);
+        AppDatabase db = AppDatabase.getDatabase(c);
+        try{
+            db.trainingFaceDao().deleteEntry(t);
+        }catch (RuntimeException e){ return false; }
+        if (toDelete.exists())
+            toDelete.delete();
+        return true;
+    }
+    public static training_face moveDetectionToTraining(Context c, detected_face d) {
+        // checks for sanity
+        if (d == null)
+            return null;
+        // if id != -1 (just to make less accesses to database)
+        if (d.id == -1)
+            return null;
+        File faceImg = new File(d.path);
+        // if face exists
+        if(!faceImg.exists())
+            return null;
+
+        // read matrix from image
+        Face tmp = loadFaceFromDatabase(d);
+        if (tmp == null)
+            return null;
+        tmp.setID(d.id);
+
+        try {
+            training_face tf = saveTrainingFaceToDatabase(c,tmp);
+            if (tf == null) // person is not known in the database
+                return null;
+            if(deleteDetectionInstance(c,d))
+                return tf;
+            else{
+                // sanitizing database to use least possible space
+                deleteTrainingInstance(c,tf);
+                return null;
+            }
+        } catch (IOException|NoSuchAlgorithmException e) {
+            Log.e(TAG,"Error trying to move face to training: "+e.getStackTrace().toString());
+            return null;
+        }
+    }
+    public static Face loadFaceFromDatabase(detected_face f) {
+        if( f == null)
+            return null;
+        Mat image = imread(f.path);
+        if(image == null)
+            return null;
+        cvtColor(image,image,CV_BGR2BGRA);
+        return new Face(image);
+    }
+    public static Face loadFaceFromDatabase(training_face f) {
+        if( f == null)
+            return null;
+        Mat image = imread(f.path);
+        if(image == null)
+            return null;
+        cvtColor(image,image,CV_BGR2BGRA);
+        return new Face(image);
+    }
+    public static String MD5toHexString(byte[] bytes) {
+        StringBuilder hexString = new StringBuilder();
+
+        for (int i = 0; i < bytes.length; i++) {
+            String hex = Integer.toHexString(0xFF & bytes[i]);
+            if (hex.length() == 1) {
+                hexString.append('0');
+            }
+            hexString.append(hex);
+        }
+
+        return hexString.toString().toUpperCase();
+    }
 }
