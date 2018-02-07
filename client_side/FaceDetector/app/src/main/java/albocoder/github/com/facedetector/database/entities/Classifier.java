@@ -17,18 +17,20 @@ public class Classifier {
     public Long last_update;
     public Integer num_recogn;
     public Integer num_inst_trained;
+    public Double avgCorrectThresh;
 
     // constructor
-    public Classifier(String path,String hash,Date last_update,int num_recogn,int num_inst_trained){
-        this(path,hash,DateConverter.toTimestamp(last_update),num_recogn,num_inst_trained);
+    public Classifier(String path,String hash,Date last_update,int num_recogn,int num_inst_trained,double avgCorrectThresh){
+        this(path,hash,DateConverter.toTimestamp(last_update),num_recogn,num_inst_trained,avgCorrectThresh);
     }
 
-    public Classifier(String path,String hash,long last_update,int num_recogn, int num_inst_trained){
+    public Classifier(String path,String hash,long last_update,int num_recogn, int num_inst_trained,double avgCorrectThresh){
         this.path = path;
         this.hash = hash;
         this.last_update = last_update;
         this.num_recogn = num_recogn;
         this.num_inst_trained = num_inst_trained;
+        this.avgCorrectThresh = avgCorrectThresh;
     }
 
     public Classifier(Classifier c2) {

@@ -29,6 +29,9 @@ public class FaceRecognizerSingleton {
     public static final int GRID_X = 8;
     public static final int GRID_Y = 8;
     public static final double THRESHOLD = 130.0;
+    public static final int TOP_PREDICTIONS = 5;
+    public static final double INSTANCES_DETECTION_RATIO = 3.0;
+    public static final double RELATIVE_RATIO = 0.25;
     private static final String TAG = "FaceRecognizerSingleton";
     private static final String CLASSIFIER_NAME = "lbphClassifier.yml"; // Default path for the classifier if it doesn't exist
 
@@ -41,7 +44,7 @@ public class FaceRecognizerSingleton {
     public FaceRecognizerSingleton(Context c){
         this.c = c;
         // Get metadata from the database
-        if (classifierMetadata == null)     // If no entry we get null
+        if (classifierMetadata == null)
             classifierMetadata = AppDatabase.getDatabase(c).classifierDao().getClassifier();
 
         if (trainedModel != null)
@@ -52,57 +55,70 @@ public class FaceRecognizerSingleton {
             loadTrainedModel();
     }
 
-    public synchronized void trainModel() {
-        // get the training data labels and paths
-        // load the data in list and train from that
-        // then save
+    public synchronized void trainModel() { // todo test this with data and stuff
         AppDatabase db = AppDatabase.getDatabase(c);
         int trainingInstances = db.trainingFaceDao().getNumberOfTrainingInstances();
-        List<Integer> numClasses = db.trainingFaceDao().getAllPossibleRecognitions();
+        List<Integer> allLabels = db.trainingFaceDao().getAllPossibleRecognitions();
 
         trainedModel = createLBPHFaceRecognizer(SEARCH_RADIUS,NEIGHBORS,GRID_X,GRID_Y,THRESHOLD);
 
         Mat labels = new Mat(trainingInstances, 1);
-        IntBuffer rotulosBuffer = labels.createBuffer();
+        IntBuffer labelsBuffer = labels.createBuffer();
         opencv_core.MatVector facePhotos = new opencv_core.MatVector(trainingInstances);
         int index = 0;
-        for (int i: numClasses) {
+        for (int i: allLabels) {
             List<training_face> facesOfLabel = db.trainingFaceDao().getInstancesOfLabel(i);
             for(training_face tf: facesOfLabel) {
                 Face tmp = FaceOperator.loadFaceFromDatabase(tf);
-                Mat totest = tmp.getBGRContent();  // Must be taken from Face class
-                rotulosBuffer.put(index);
-                index ++;//todo
+                facePhotos.put(index,tmp.getBGRContent());
+                labelsBuffer.put(index,i);
+                index++;
             }
         }
-//        Mat labels = Mat.ones(1,((int)imgs.size()),0).asMat();
-//        Log.i(TAG,"Number of images loaded is: "+imgs.size());
-//        trainedModel.train(imgs,labels);
-//        Log.i(TAG,"Model is trained");
-//        saveTrainedModel(numClasses,);
+        trainedModel.train(facePhotos,labels);
+        Log.d(TAG,"Model is trained");
+        saveTrainedModel(allLabels.size(),trainingInstances);
     }
 
-    private boolean mustTrainConditions() {
-        AppDatabase db = AppDatabase.getDatabase(c);
-        int numberOfPossibleDetections = db.trainingFaceDao().getNumberOfPossibleRecognitions();
-        int numberOfCurrentDetections = 0;
-        if(classifierMetadata != null)
-            numberOfCurrentDetections = classifierMetadata.num_recogn;
-        else
-            return true;
-        return true;//todo
-    }
-
-    public Object predict(Face face) { // todo decide return type
+    public RecognizedFace recognize(Face face) {
         if (face == null)
             return null;
-        int [] foundLabels = new int[5];        // top 5 predictions
-        double [] confidence = new double[5];   // top 5 prediction confidences
+        int [] foundLabels = new int[TOP_PREDICTIONS];        // top 5 predictions
+        double [] confidence = new double[TOP_PREDICTIONS];   // top 5 prediction confidences
         opencv_core.UMat faceUmat = new opencv_core.UMat(face.getBGRContent());
         trainedModel.predict(faceUmat,foundLabels,confidence);
-        Log.i(TAG,"Predicted: \nLabels:"+foundLabels.toString()
-                +"\nConfidences:"+confidence.toString());
-        return null;
+        return new RecognizedFace(face,foundLabels,confidence);
+    }
+
+    // private inner functions for modularity and nice stuff
+    private boolean mustTrainConditions() {
+        if(classifierMetadata == null)
+            return true;
+        AppDatabase db = AppDatabase.getDatabase(c);
+        int numberOfPossibleDetections = db.trainingFaceDao().getNumberOfPossibleRecognitions();
+        int numberOfInstancesPossible = db.trainingFaceDao().getNumberOfTrainingInstances();
+        int numberOfCurrentDetections = classifierMetadata.num_recogn;
+        int numberOfInstancesUsed = classifierMetadata.num_inst_trained;
+
+        int newDetections = numberOfPossibleDetections-numberOfCurrentDetections;
+        int newInstances = numberOfInstancesPossible-numberOfInstancesUsed;
+        if (newDetections < 0)
+            return false;
+
+        if (newDetections == 0){
+            // if same number of detections but new average instances haven't increased enough
+            if (((double)numberOfInstancesPossible/(double)numberOfPossibleDetections) <
+                    ((double)numberOfInstancesUsed/(double)numberOfCurrentDetections + RELATIVE_RATIO))
+                return false;
+        }
+        else {
+            // if in average there is less than 3 photos per detection don't train
+            if ( ((double)newInstances/(double)newDetections) < INSTANCES_DETECTION_RATIO )
+                return false;
+        }
+
+        // else train
+        return true;
     }
     private synchronized void loadTrainedModel() {
         String path = CLASSIFIER_NAME;
@@ -111,6 +127,8 @@ public class FaceRecognizerSingleton {
         File classifierFile = new File(c.getFilesDir(),path);
         if (classifierFile.exists())
             trainedModel.load(classifierFile.getAbsolutePath());
+        else
+            trainModel(); // todo get it from the cloud. The damn user has deleted the shit
     }
     private synchronized void saveTrainedModel(int numberOfDetections, int numInstTrained){
         File classifierFile;
@@ -125,12 +143,12 @@ public class FaceRecognizerSingleton {
             MessageDigest md = MessageDigest.getInstance("MD5");
             DigestInputStream dis = new DigestInputStream(fis,md);
             byte[] digest = md.digest();
-            String md5 = new String(digest);
+            String md5 = FaceOperator.MD5toHexString(digest);
             dis.close();
 
             Long tsLong = System.currentTimeMillis()/1000;
             classifierMetadata = new Classifier(classifierFile.getAbsolutePath(),md5,
-                tsLong,numberOfDetections,numInstTrained);
+                tsLong,numberOfDetections,numInstTrained,THRESHOLD);
             AppDatabase.getDatabase(c).classifierDao().deleteClassifier();
             AppDatabase.getDatabase(c).classifierDao().insertClassifier(classifierMetadata);
         } catch (IOException|NoSuchAlgorithmException e) {}

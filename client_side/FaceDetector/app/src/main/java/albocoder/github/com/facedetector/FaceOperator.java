@@ -55,6 +55,7 @@ public class FaceOperator {
 
     // calculated fields
     private Face[] foundFaces;
+    private RecognizedFace[] recognizedFaces;
 
     // constructors
     FaceOperator(Context c, Mat f, int abs, float rel){
@@ -64,6 +65,7 @@ public class FaceOperator {
         mAbsoluteFaceSize = abs;
         mRelativeFaceSize = rel;
         foundFaces = null;
+        recognizedFaces = null;
     }
     FaceOperator(Context c, Mat f){this (c,f,FACE_MIN_SQUARE_EDGE,FACE_MIN_SQUARE_RELATIVE_EDGE);}
     FaceOperator(Context c, Mat f,float rel){this (c,f,0,rel);}
@@ -158,13 +160,14 @@ public class FaceOperator {
             }
         }
     }
-    public Face[] recognizeFaces() {
+    public RecognizedFace[] recognizeFaces() {
+        if(recognizedFaces != null)
+            return recognizedFaces;
         FaceRecognizerSingleton frs = new FaceRecognizerSingleton(context);
-        Face[] facesToRecognize = getFaces();
-
-        for(Face f: facesToRecognize)
-            frs.predict(f); // Todo: develop this to get the id;
-        return facesToRecognize;
+        recognizedFaces = new RecognizedFace[foundFaces.length];
+        for(int i = 0; i < recognizedFaces.length; i++)
+            recognizedFaces[i] = frs.recognize(foundFaces[i]);
+        return recognizedFaces;
     }
 
     // Utility functions

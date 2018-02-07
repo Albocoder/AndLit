@@ -32,7 +32,7 @@ public interface training_face_dao {
     List<Integer> getAllPossibleRecognitions();
 
     @Query("select count(distinct `label`) from training_faces")
-    int getNumberOfPossibleRecognitions();
+    Integer getNumberOfPossibleRecognitions();
 
     @Query("select count(*) from training_faces where label= :l")
     List<String> getNumberOfTrainingInstancesForLabel(int l);
