@@ -36,7 +36,6 @@ public class Face {
         gScaledFace = null;
     }
     public Face(Mat content) { this (null,content); }
-
     // useful functions
     public Rect getBoundingBox(){return boundingBox;}
     public Mat getBGRContent(){return faceContent;}

@@ -8,18 +8,17 @@ import org.bytedeco.javacpp.opencv_core.Mat;
 import org.bytedeco.javacpp.opencv_face.LBPHFaceRecognizer;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.IntBuffer;
-import java.security.DigestInputStream;
-import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
 
 import albocoder.github.com.facedetector.database.AppDatabase;
 import albocoder.github.com.facedetector.database.entities.Classifier;
 import albocoder.github.com.facedetector.database.entities.training_face;
+import albocoder.github.com.facedetector.utils.StorageHelper;
 
+import static org.bytedeco.javacpp.opencv_core.CV_32SC1;
 import static org.bytedeco.javacpp.opencv_face.createLBPHFaceRecognizer;
 
 public class FaceRecognizerSingleton {
@@ -62,7 +61,7 @@ public class FaceRecognizerSingleton {
 
         trainedModel = createLBPHFaceRecognizer(SEARCH_RADIUS,NEIGHBORS,GRID_X,GRID_Y,THRESHOLD);
 
-        Mat labels = new Mat(trainingInstances, 1);
+        Mat labels = new Mat( trainingInstances,1,CV_32SC1 );
         IntBuffer labelsBuffer = labels.createBuffer();
         opencv_core.MatVector facePhotos = new opencv_core.MatVector(trainingInstances);
         int index = 0;
@@ -70,7 +69,7 @@ public class FaceRecognizerSingleton {
             List<training_face> facesOfLabel = db.trainingFaceDao().getInstancesOfLabel(i);
             for(training_face tf: facesOfLabel) {
                 Face tmp = FaceOperator.loadFaceFromDatabase(tf);
-                facePhotos.put(index,tmp.getBGRContent());
+                facePhotos.put(index,tmp.getgscaleContent());
                 labelsBuffer.put(index,i);
                 index++;
             }
@@ -138,14 +137,7 @@ public class FaceRecognizerSingleton {
             classifierFile = new File(c.getFilesDir(),CLASSIFIER_NAME);
         trainedModel.save(classifierFile.getAbsolutePath());
         try {
-            FileInputStream fis = new FileInputStream(classifierFile);
-
-            MessageDigest md = MessageDigest.getInstance("MD5");
-            DigestInputStream dis = new DigestInputStream(fis,md);
-            byte[] digest = md.digest();
-            String md5 = FaceOperator.MD5toHexString(digest);
-            dis.close();
-
+            String md5 = StorageHelper.MD5toHexString(StorageHelper.getMD5OfFile(classifierFile.getAbsolutePath()));
             Long tsLong = System.currentTimeMillis()/1000;
             classifierMetadata = new Classifier(classifierFile.getAbsolutePath(),md5,
                 tsLong,numberOfDetections,numInstTrained,THRESHOLD);

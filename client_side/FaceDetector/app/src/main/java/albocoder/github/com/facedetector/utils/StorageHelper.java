@@ -8,9 +8,13 @@ import org.bytedeco.javacpp.opencv_core.Mat;
 import org.bytedeco.javacpp.opencv_objdetect.CascadeClassifier;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.security.DigestInputStream;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 
 import static org.bytedeco.javacpp.opencv_imgcodecs.imwrite;
 import static org.bytedeco.javacpp.opencv_imgproc.COLOR_RGB2BGR;
@@ -106,9 +110,9 @@ public class StorageHelper {
         return trainFile;
     }
     @NonNull
-    public static String getFilePathFromAssets(Context c, String path, String newFileName) throws IOException {
+    public static String getFilePathFromAssets(Context c, String path,String newFilePath, String newFileName) throws IOException {
         InputStream is = c.getAssets().open(path);
-        File cascadeDir = c.getDir("cascade", Context.MODE_PRIVATE);
+        File cascadeDir = c.getDir(newFilePath, Context.MODE_PRIVATE);
         File mCascadeFile = new File(cascadeDir, newFileName);
         FileOutputStream os = new FileOutputStream(mCascadeFile);
         byte[] buffer = new byte[1024];
@@ -133,5 +137,29 @@ public class StorageHelper {
             return file;
         else
             return null;
+    }
+    public static String MD5toHexString(byte[] bytes) {
+        StringBuilder hexString = new StringBuilder();
+
+        for (int i = 0; i < bytes.length; i++) {
+            String hex = Integer.toHexString(0xFF & bytes[i]);
+            if (hex.length() == 1) {
+                hexString.append('0');
+            }
+            hexString.append(hex);
+        }
+
+        return hexString.toString().toUpperCase();
+    }
+    public static byte[] getMD5OfFile(String filepath) throws IOException, NoSuchAlgorithmException {
+        FileInputStream fis = new FileInputStream(filepath);
+        return getMD5OfFile(fis);
+    }
+    public static byte[] getMD5OfFile(InputStream is) throws NoSuchAlgorithmException, IOException {
+        MessageDigest md = MessageDigest.getInstance("MD5");
+        DigestInputStream dis = new DigestInputStream(is,md);
+        byte[] digest = md.digest();
+        dis.close();
+        return digest;
     }
 }

@@ -33,14 +33,17 @@ import android.view.WindowManager;
 
 import org.bytedeco.javacpp.opencv_core;
 import org.bytedeco.javacpp.opencv_core.Mat;
-import org.bytedeco.javacpp.opencv_objdetect;
 
 import java.io.File;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
+import java.util.Date;
+import java.util.List;
+import java.util.Random;
 
 import albocoder.github.com.facedetector.database.AppDatabase;
-import albocoder.github.com.facedetector.database.entities.detected_face;
+import albocoder.github.com.facedetector.database.entities.KnownPPL;
+import albocoder.github.com.facedetector.database.entities.training_face;
 import albocoder.github.com.facedetector.utils.StorageHelper;
 
 import static org.bytedeco.javacpp.opencv_core.LINE_8;
@@ -52,7 +55,6 @@ public class FdActivity extends Activity implements CvCameraPreview.CvCameraView
     private AppDatabase db;
     private FaceOperator fop;
     private CvCameraPreview cameraView;
-    private opencv_objdetect.CascadeClassifier faceDetector;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -70,24 +72,74 @@ public class FdActivity extends Activity implements CvCameraPreview.CvCameraView
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         cameraView.setCvCameraViewListener(this);
 
-        Face toPredict = null;
-        try {
-            int[] l = new int[1];
-            double[] conf = new double[1];
-            String fileLocation = StorageHelper.getFilePathFromAssets(getApplicationContext()
-                    , "trainingdata/features/face9.png", "face.png");
-            toPredict = new Face(imread(fileLocation));
-            new File(fileLocation).delete();
-        }catch (IOException e){}
-        toPredict.setID(1);
 
-        try {
-            detected_face f = FaceOperator.saveDetectedFaceToDatabase(this,toPredict);
-            if(f != null)
-                Log.d(TAG,f.toString());// if one works the other will too
-        } catch (IOException |NoSuchAlgorithmException e) {
-            Log.d(TAG,"Error encountered while saving:" +e.getMessage());
+        // testing classifier
+        db = AppDatabase.getDatabase(getApplicationContext());
+        db.knownPplDao().insertEntry(
+                new KnownPPL(1,"Erin","Avllazagaj",new Date(1996,3,13), 21,"Dorm #76 Bilkent") );
+        db.knownPplDao().insertEntry(
+                new KnownPPL(2,"Barack","Obama",new Date(1961,8,4), 56,"USA") );
+
+        // random generator for md5 (NEVER DO THIS IRL)
+        Random r = new Random();
+
+        // delete all instances
+        List<training_face> recs =  db.trainingFaceDao().getAllRecords();
+        for (training_face tf : recs)
+            FaceOperator.deleteTrainingInstance(this,tf);
+
+        for(int i = 1; i < 17; i++) {
+            String filepath;
+            try {
+                filepath = StorageHelper.getFilePathFromAssets(this,"training/face"+i+".png","training","face"+i+".png");
+            } catch (IOException e) { continue; }
+            String md5 = ""+r.nextLong()+r.nextInt();
+            try {
+                md5 = StorageHelper.MD5toHexString(StorageHelper.getMD5OfFile(filepath));
+            } catch (IOException|NoSuchAlgorithmException e) {}
+
+            Mat m = imread(filepath);
+            if (m==null)
+                continue;
+            Face detected = new Face(m);
+            if (i == 15 || i == 16) {
+                FaceRecognizerSingleton frs = new FaceRecognizerSingleton(this);
+                RecognizedFace rf = frs.recognize(detected);
+                Log.d(TAG,rf.toString());
+                continue;
+            }
+            if(i < 9)
+                try {
+                    detected.setID(1);
+                    FaceOperator.moveDetectionToTraining(this,FaceOperator.saveDetectedFaceToDatabase(this,detected));
+                } catch (IOException|NoSuchAlgorithmException e) {}
+            else
+                try {
+                    detected.setID(2);
+                    FaceOperator.moveDetectionToTraining(this,FaceOperator.saveDetectedFaceToDatabase(this,detected));
+                } catch (IOException|NoSuchAlgorithmException e) {}
+
+            new File(filepath).delete();
         }
+
+//        Face toPredict = null;
+//        try {
+//            int[] l = new int[1];
+//            double[] conf = new double[1];
+//            String fileLocation = StorageHelper.getFilePathFromAssets(getApplicationContext()
+//                    , "trainingdata/features/face9.png", "face.png");
+//            toPredict = new Face(imread(fileLocation));
+//            new File(fileLocation).delete();
+//        }catch (IOException e){}
+//        toPredict.setID(1);
+//
+//        try {
+//            detected_face f = FaceOperator.saveDetectedFaceToDatabase(this,toPredict);
+//            if(f != null)
+//                Log.d(TAG,f.toString());// if one works the other will too
+//        } catch (IOException |NoSuchAlgorithmException e) {
+//            Log.d(TAG,"Error encountered while saving:" +e.getMessage());
+//        }
 //        // Database initialization test
 //        db = AppDatabase.getDatabase(getApplicationContext());
 ////        db.userDao().deleteEntries();
@@ -99,7 +151,6 @@ public class FdActivity extends Activity implements CvCameraPreview.CvCameraView
 //        }
 //        else
 //            Log.d(TAG,"It existed before:"+users.get(0).toString());
-
     }
     @Override
     public void onCameraViewStarted(int width, int height) { }

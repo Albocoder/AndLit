@@ -15,22 +15,19 @@ import org.bytedeco.javacpp.opencv_core.Size;
 import org.bytedeco.javacpp.opencv_objdetect.CascadeClassifier;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.security.DigestInputStream;
-import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Random;
 
 import albocoder.github.com.facedetector.database.AppDatabase;
 import albocoder.github.com.facedetector.database.entities.detected_face;
 import albocoder.github.com.facedetector.database.entities.training_face;
+import albocoder.github.com.facedetector.utils.StorageHelper;
 
 import static org.bytedeco.javacpp.opencv_imgcodecs.imread;
 import static org.bytedeco.javacpp.opencv_imgcodecs.imwrite;
-import static org.bytedeco.javacpp.opencv_imgproc.CV_BGR2BGRA;
 import static org.bytedeco.javacpp.opencv_imgproc.CV_RGB2GRAY;
 import static org.bytedeco.javacpp.opencv_imgproc.cvtColor;
 import static org.bytedeco.javacpp.opencv_objdetect.CASCADE_SCALE_IMAGE;
@@ -219,14 +216,8 @@ public class FaceOperator {
             if (!saved)
                 return null;
 
-            FileInputStream fis = new FileInputStream(imageFile.getAbsolutePath());
-
             // get MD5 of the file we just wrote
-            MessageDigest md = MessageDigest.getInstance("MD5");
-            DigestInputStream dis = new DigestInputStream(fis, md);
-            byte[] digest = md.digest();
-            String md5 = MD5toHexString(digest);
-            dis.close();
+            String md5 = StorageHelper.MD5toHexString(StorageHelper.getMD5OfFile(imageFile.getAbsolutePath()));
 
             detection = new detected_face(f.getID(), imageFile.getAbsolutePath()
                     , md5, timeInMillis);
@@ -256,12 +247,7 @@ public class FaceOperator {
                 return null;
 
             // get MD5
-            FileInputStream fis = new FileInputStream(mFileTemp.getAbsolutePath());
-            MessageDigest md = MessageDigest.getInstance("MD5");
-            DigestInputStream dis = new DigestInputStream(fis, md);
-            byte[] digest = md.digest();
-            String md5 = MD5toHexString(digest);
-            dis.close();
+            String md5 = StorageHelper.MD5toHexString(StorageHelper.getMD5OfFile(mFileTemp.getAbsolutePath()));
 
             // create new entry
             detection = new detected_face(f.getID(), mFileTemp.getAbsolutePath()
@@ -309,14 +295,8 @@ public class FaceOperator {
             if (!saved)
                 return null;
 
-            FileInputStream fis = new FileInputStream(imageFile.getAbsolutePath());
-
             // get MD5 of the file we just wrote
-            MessageDigest md = MessageDigest.getInstance("MD5");
-            DigestInputStream dis = new DigestInputStream(fis, md);
-            byte[] digest = md.digest();
-            String md5 = MD5toHexString(digest);
-            dis.close();
+            String md5 = StorageHelper.MD5toHexString(StorageHelper.getMD5OfFile(imageFile.getAbsolutePath()));
 
             trainingInstance = new training_face(f.getID(), imageFile.getAbsolutePath(), md5);
 
@@ -346,12 +326,7 @@ public class FaceOperator {
                 return null;
 
             // get MD5
-            FileInputStream fis = new FileInputStream(mFileTemp.getAbsolutePath());
-            MessageDigest md = MessageDigest.getInstance("MD5");
-            DigestInputStream dis = new DigestInputStream(fis, md);
-            byte[] digest = md.digest();
-            String md5 = MD5toHexString(digest);
-            dis.close();
+            String md5 = StorageHelper.MD5toHexString(StorageHelper.getMD5OfFile(mFileTemp.getAbsolutePath()));
 
             // create new entry
             trainingInstance = new training_face(f.getID(), mFileTemp.getAbsolutePath(), md5);
@@ -435,7 +410,6 @@ public class FaceOperator {
         Mat image = imread(f.path);
         if(image == null)
             return null;
-        cvtColor(image,image,CV_BGR2BGRA);
         return new Face(image);
     }
     public static Face loadFaceFromDatabase(training_face f) {
@@ -444,20 +418,6 @@ public class FaceOperator {
         Mat image = imread(f.path);
         if(image == null)
             return null;
-        cvtColor(image,image,CV_BGR2BGRA);
         return new Face(image);
-    }
-    public static String MD5toHexString(byte[] bytes) {
-        StringBuilder hexString = new StringBuilder();
-
-        for (int i = 0; i < bytes.length; i++) {
-            String hex = Integer.toHexString(0xFF & bytes[i]);
-            if (hex.length() == 1) {
-                hexString.append('0');
-            }
-            hexString.append(hex);
-        }
-
-        return hexString.toString().toUpperCase();
     }
 }
