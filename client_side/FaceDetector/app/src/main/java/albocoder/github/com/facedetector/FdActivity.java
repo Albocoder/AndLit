@@ -44,16 +44,23 @@ import java.util.Random;
 import albocoder.github.com.facedetector.database.AppDatabase;
 import albocoder.github.com.facedetector.database.entities.KnownPPL;
 import albocoder.github.com.facedetector.database.entities.training_face;
+import albocoder.github.com.facedetector.face.Face;
+import albocoder.github.com.facedetector.face.FaceOperator;
+import albocoder.github.com.facedetector.face.FaceRecognizerSingleton;
+import albocoder.github.com.facedetector.face.RecognizedFace;
 import albocoder.github.com.facedetector.utils.StorageHelper;
 
 import static org.bytedeco.javacpp.opencv_core.LINE_8;
 import static org.bytedeco.javacpp.opencv_imgcodecs.imread;
+import static org.bytedeco.javacpp.opencv_imgproc.CV_FONT_HERSHEY_PLAIN;
+import static org.bytedeco.javacpp.opencv_imgproc.putText;
 import static org.bytedeco.javacpp.opencv_imgproc.rectangle;
 
 public class FdActivity extends Activity implements CvCameraPreview.CvCameraViewListener {
     private static final String    TAG                 = "OCVSample::MainActivity";
     private AppDatabase db;
     private FaceOperator fop;
+    private FaceRecognizerSingleton frs;
     private CvCameraPreview cameraView;
 
     @Override
@@ -67,6 +74,7 @@ public class FdActivity extends Activity implements CvCameraPreview.CvCameraView
                             Manifest.permission.CAMERA,
                             Manifest.permission.WRITE_EXTERNAL_STORAGE}
                             ,2);
+            return;
         }
         cameraView = (CvCameraPreview) findViewById(R.id.camera_view);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
@@ -103,7 +111,7 @@ public class FdActivity extends Activity implements CvCameraPreview.CvCameraView
                 continue;
             Face detected = new Face(m);
             if (i == 15 || i == 16) {
-                FaceRecognizerSingleton frs = new FaceRecognizerSingleton(this);
+                frs = new FaceRecognizerSingleton(this);
                 RecognizedFace rf = frs.recognize(detected);
                 Log.d(TAG,rf.toString());
                 continue;
@@ -168,6 +176,20 @@ public class FdActivity extends Activity implements CvCameraPreview.CvCameraView
             int y = aFacesArray.getBoundingBox().y();
             int w = aFacesArray.getBoundingBox().width();
             int h = aFacesArray.getBoundingBox().height();
+
+            RecognizedFace rf = frs.recognize(aFacesArray);
+            int [] labels = rf.getLabels();
+            double [] conf = rf.getConfidences();
+
+            Log.d(TAG,"[");
+            for(int i = 0; i < labels.length;i++){
+                Log.d(TAG," ("+labels[i]+", "+conf[i]+")");
+            }
+            Log.d(TAG," ]");
+
+            KnownPPL p = db.knownPplDao().getEntryWithID(labels[0]);
+            if (p!= null)
+                putText(mat,p.name+" "+p.sname,new opencv_core.Point(x, y),CV_FONT_HERSHEY_PLAIN,1, opencv_core.Scalar.MAGENTA);
             rectangle(mat,new opencv_core.Point(x, y), new opencv_core.Point(x + w, y + h)
                     , opencv_core.Scalar.GREEN,2, LINE_8,0);
         }

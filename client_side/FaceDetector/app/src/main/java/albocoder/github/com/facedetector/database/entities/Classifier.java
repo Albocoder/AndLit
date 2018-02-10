@@ -38,6 +38,8 @@ public class Classifier {
         this.hash = c2.hash;
         this.num_recogn = c2.num_recogn;
         this.last_update = c2.last_update;
+        this.num_inst_trained = c2.num_inst_trained;
+        this.avgCorrectThresh = c2.avgCorrectThresh;
     }
 
     @Override

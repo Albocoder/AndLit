@@ -50,8 +50,8 @@ public interface known_ppl_dao {
     @Query("select address from known_ppl where id = :i")
     String getAddressForID(int i);
 
-    @Query("select id from known_ppl where id= :i")
-    List<Integer> getEntryWithID(int i);
+    @Query("select * from known_ppl where id= :i")
+    KnownPPL getEntryWithID(int i);
 
     @Query("select * from known_ppl where name = :n and sname = :s")
     KnownPPL getPeopleWithNameAndSName(String n,String s);
