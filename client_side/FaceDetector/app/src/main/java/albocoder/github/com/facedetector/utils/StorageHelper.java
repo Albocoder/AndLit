@@ -15,7 +15,9 @@ import java.io.InputStream;
 import java.security.DigestInputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Random;
 
+import static org.bytedeco.javacpp.opencv_imgcodecs.imread;
 import static org.bytedeco.javacpp.opencv_imgcodecs.imwrite;
 import static org.bytedeco.javacpp.opencv_imgproc.COLOR_RGB2BGR;
 import static org.bytedeco.javacpp.opencv_imgproc.cvtColor;
@@ -158,8 +160,31 @@ public class StorageHelper {
     public static byte[] getMD5OfFile(InputStream is) throws NoSuchAlgorithmException, IOException {
         MessageDigest md = MessageDigest.getInstance("MD5");
         DigestInputStream dis = new DigestInputStream(is,md);
+        byte[] buffer = new byte[4096];
+        try {
+            while (dis.read(buffer) != -1);
+        } finally { dis.close(); }
         byte[] digest = md.digest();
-        dis.close();
         return digest;
+    }
+    public static String writeMat(Context c,Mat m,String path) throws IOException {
+        File f = new File(path);
+        if(!f.exists())
+            f.createNewFile();
+        if(imwrite(f.getAbsolutePath(),m))
+            return f.getAbsolutePath();
+        else
+            return null;
+    }
+    public static String writeMat(Context c,Mat m) throws IOException {
+        long l = System.currentTimeMillis();
+        int random = new Random().nextInt();
+        File defaultPlace = new File(c.getFilesDir() + File.separator+l+".png");
+        if(defaultPlace.exists())
+            defaultPlace.delete();
+        return writeMat(c,m,defaultPlace.getAbsolutePath());
+    }
+    public static Mat readMat(String path){
+        return imread(path);
     }
 }

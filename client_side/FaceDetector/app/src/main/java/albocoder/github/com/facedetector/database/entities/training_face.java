@@ -11,9 +11,9 @@ import android.support.annotation.NonNull;
                 childColumns = "label", parentColumns = "id", onDelete = ForeignKey.CASCADE)})
 public class training_face {
     public Integer label;
-    @PrimaryKey
     @NonNull
     public String path;
+    @PrimaryKey @NonNull
     public String hash;
 
     public training_face(int label, String path, String hash) {

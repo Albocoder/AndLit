@@ -53,14 +53,17 @@ public class FaceRecognizerSingleton {
         else if(mustTrainConditions())
             trainModel();
         else
-            loadTrainedModel();
+            trainModel();//loadTrainedModel(); todo CHANGE THIS in production code!!!!!!!!
     }
 
     public synchronized void trainModel() {
         AppDatabase db = AppDatabase.getDatabase(c);
         int trainingInstances = db.trainingFaceDao().getNumberOfTrainingInstances();
-        List<Integer> allLabels = db.trainingFaceDao().getAllPossibleRecognitions();
+        if(trainingInstances == 0)
+            throw new RuntimeException("No training instances found in database!");
 
+        List<Integer> allLabels = db.trainingFaceDao().getAllPossibleRecognitions();
+        // todo: check if this is better than putting the values hardcoded
         trainedModel = createLBPHFaceRecognizer(SEARCH_RADIUS,NEIGHBORS,GRID_X,GRID_Y,THRESHOLD);
 
         Mat labels = new Mat( trainingInstances,1,CV_32SC1 );
@@ -69,7 +72,7 @@ public class FaceRecognizerSingleton {
         int index = 0;
         for (int i: allLabels) {
             List<training_face> facesOfLabel = db.trainingFaceDao().getInstancesOfLabel(i);
-            for(training_face tf: facesOfLabel) {
+            for (training_face tf: facesOfLabel) {
                 Face tmp = FaceOperator.loadFaceFromDatabase(tf);
                 facePhotos.put(index,tmp.getgscaleContent());
                 labelsBuffer.put(index,i);
@@ -133,14 +136,17 @@ public class FaceRecognizerSingleton {
         return true;
     }
     private synchronized void loadTrainedModel() {
-        String path = CLASSIFIER_NAME;
+        File classifierFile = null;
         if (classifierMetadata != null)
-            path = classifierMetadata.path;
-        File classifierFile = new File(c.getFilesDir(),path);
-        if (classifierFile.exists())
+            classifierFile = new File(classifierMetadata.path);
+        if(classifierFile==null)
+            classifierFile = new File(c.getFilesDir(),CLASSIFIER_NAME);
+        if (classifierFile.exists()) {
+            trainedModel  = createLBPHFaceRecognizer();
             trainedModel.load(classifierFile.getAbsolutePath());
+        }
         else
-            trainModel(); // todo get it from the cloud. The damn user has deleted the shit
+            trainModel(); // todo get data from the cloud. The damn user has deleted the shit
     }
     private synchronized void saveTrainedModel(int numberOfDetections, int numInstTrained){
         File classifierFile;

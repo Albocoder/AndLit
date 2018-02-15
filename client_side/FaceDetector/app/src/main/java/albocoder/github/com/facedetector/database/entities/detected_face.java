@@ -11,8 +11,9 @@ import albocoder.github.com.facedetector.database.converters.DateConverter;
 @Entity(tableName = "detected_faces")
 public class detected_face {
     public Integer id;      // this is the manually given label
-    @PrimaryKey @NonNull
+    @NonNull
     public String path;
+    @PrimaryKey @NonNull
     public String hash;
     public Long date_taken;
     public Integer predictedlabel;

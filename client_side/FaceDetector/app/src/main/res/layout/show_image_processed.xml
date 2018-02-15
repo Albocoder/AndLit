@@ -1,20 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <AbsoluteLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@android:color/black">
+    android:gravity="top|center"
+    android:orientation="vertical"
+    tools:context=".ImgAnalysisBundle" >
 
-    <albocoder.github.com.facedetector.CvCameraPreview
-        android:id="@+id/camera_view"
+    <ImageView
+        android:id="@+id/AnalyzedImg"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_gravity="top"
-        app:camera_type="front"
-        app:scale_type="full" />
+        android:adjustViewBounds="false"
+        android:scaleType="fitXY" />
 
     <Button
-        android:id="@+id/BtnCapture"
+        android:id="@+id/BtnCpt"
         style="@style/Widget.AppCompat.Button.Small"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
