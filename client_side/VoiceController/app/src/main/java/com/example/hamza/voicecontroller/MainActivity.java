@@ -7,6 +7,18 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.EditText;
 
+// Speech to text imports
+import java.util.ArrayList;
+import java.util.Locale;
+import android.content.ActivityNotFoundException;
+import android.speech.RecognizerIntent;
+import android.widget.ImageButton;
+import android.widget.TextView;
+import android.widget.Toast;
+
+/*
+An android activity class to test the VoiceGenerator and VoiceRecognizers
+ */
 public class MainActivity extends AppCompatActivity
 {
     // Properties
@@ -15,6 +27,11 @@ public class MainActivity extends AppCompatActivity
     private final int LONG_DURATION = 5000;
     private final int SHORT_DURATION = 1200;
     private VoiceGenerator speaker;
+
+    // VoiceRecognizer
+    private TextView txtSpeechInput;
+    private ImageButton btnSpeak;
+    private final int REQ_CODE_SPEECH_INPUT = 100;
 
     // Methods
     @Override
@@ -25,6 +42,37 @@ public class MainActivity extends AppCompatActivity
 
         // textToSpeech Initialization
         checkTTS();
+
+        // SpeechToText
+        txtSpeechInput = (TextView) findViewById(R.id.txtSpeechInput);
+        btnSpeak = (ImageButton) findViewById(R.id.btnSpeak);
+
+        btnSpeak.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                promptSpeechInput();
+            }
+        });
+    }
+
+    /**
+     * Showing google speech input dialog
+     * */
+    private void promptSpeechInput() {
+        Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
+                RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault());
+        intent.putExtra(RecognizerIntent.EXTRA_PROMPT,
+                getString(R.string.speech_prompt));
+        try {
+            startActivityForResult(intent, REQ_CODE_SPEECH_INPUT);
+        } catch (ActivityNotFoundException a) {
+            Toast.makeText(getApplicationContext(),
+                    getString(R.string.speech_not_supported),
+                    Toast.LENGTH_SHORT).show();
+        }
     }
 
     /** Called when the user taps the Send button */
@@ -55,6 +103,8 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data)
     {
+        super.onActivityResult(requestCode, resultCode, data); // speechToText
+
         if(requestCode == CHECK_CODE)
         {
             if(resultCode == TextToSpeech.Engine.CHECK_VOICE_DATA_PASS)
@@ -66,6 +116,22 @@ public class MainActivity extends AppCompatActivity
                 Intent install = new Intent();
                 install.setAction(TextToSpeech.Engine.ACTION_INSTALL_TTS_DATA);
                 startActivity(install);
+            }
+        }
+
+        // speechToText
+
+
+        switch (requestCode)
+        {
+            case REQ_CODE_SPEECH_INPUT: {
+                if (resultCode == RESULT_OK && null != data) {
+
+                    ArrayList<String> result = data
+                            .getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
+                    txtSpeechInput.setText(result.get(0));
+                }
+                break;
             }
         }
     }
