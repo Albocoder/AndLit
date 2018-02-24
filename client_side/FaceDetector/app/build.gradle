@@ -31,6 +31,7 @@ dependencies {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
 
+
     implementation 'android.arch.persistence.room:runtime:1.0.0'
 
     annotationProcessor 'android.arch.lifecycle:compiler:1.0.0-rc1'

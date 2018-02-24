@@ -99,6 +99,7 @@ public class FaceOperator {
         Runtime.getRuntime().gc(); // if you delete this you are fucked! DON'T DO IT FFS!!!
         return facesArray;
     }
+    public Mat getScene() { return scene; }
     private synchronized void initializeDetector() {
         if (frontDetector == null) {
             try {

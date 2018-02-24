@@ -36,8 +36,6 @@ public class ImgGrabber extends Activity {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        // get the view related components
-
         // connect to the database
         imageLocation = new File(this.getIntent().
                 getStringExtra(IntermediateCameraActivity.ARGUMENT_KEY));

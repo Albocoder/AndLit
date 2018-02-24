@@ -1,11 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<AbsoluteLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:gravity="top|center"
-    android:orientation="vertical"
-    tools:context=".ImgAnalysisBundle" >
+    tools:context=".IntermediateCameraActivity" >
 
     <ImageView
         android:id="@+id/AnalyzedImg"
@@ -19,9 +17,10 @@
         style="@style/Widget.AppCompat.Button.Small"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_x="166dp"
-        android:layout_y="460dp"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="13dp"
         android:background="@drawable/bg_green_circle_button"
         android:src="@drawable/bg_green_circle_button" />
 
-</AbsoluteLayout>
+</RelativeLayout>

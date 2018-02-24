@@ -17,6 +17,9 @@ public interface known_ppl_dao {
     void insertEntry(KnownPPL person);
 
     // SELECTION
+    @Query("select * from known_ppl")
+    List<KnownPPL> getAllRecords();
+
     @Query("select `id` from known_ppl")
     List<Integer> getAllIDs();
 

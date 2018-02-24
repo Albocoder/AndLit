@@ -5,9 +5,12 @@ import android.app.ProgressDialog;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -29,14 +32,11 @@ import albocoder.github.com.facedetector.database.entities.training_face;
 import albocoder.github.com.facedetector.face.Face;
 import albocoder.github.com.facedetector.face.FaceOperator;
 import albocoder.github.com.facedetector.face.FaceRecognizerSingleton;
-import albocoder.github.com.facedetector.face.RecognizedFace;
 import albocoder.github.com.facedetector.utils.StorageHelper;
 
 import static org.bytedeco.javacpp.opencv_core.LINE_8;
 import static org.bytedeco.javacpp.opencv_imgcodecs.imread;
 import static org.bytedeco.javacpp.opencv_imgcodecs.imwrite;
-import static org.bytedeco.javacpp.opencv_imgproc.CV_FONT_HERSHEY_PLAIN;
-import static org.bytedeco.javacpp.opencv_imgproc.putText;
 import static org.bytedeco.javacpp.opencv_imgproc.rectangle;
 
 public class IntermediateCameraActivity extends Activity {
@@ -48,22 +48,26 @@ public class IntermediateCameraActivity extends Activity {
     // fields
     private File imageLocation;
     FaceRecognizerSingleton frs;
+    FaceOperator fop;
     private AppDatabase db;
 
     // view fields
-    private ImageView analyzed;
+    private ImageView analyzed; Canvas paintableCanvas;
     private Button takeImage;
     ProgressDialog progress;
+    int SCREEN_HEIGHT,SCREEN_WIDTH;
+    double widthRatio,heightRatio;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.show_image_processed);
         takeImage = (Button) findViewById(R.id.BtnCpt);
         analyzed = (ImageView) findViewById(R.id.AnalyzedImg);
 
         db = AppDatabase.getDatabase(this);
-        train(); frs = new FaceRecognizerSingleton(this);
+        train(); frs = new FaceRecognizerSingleton(this);// todo check if useless
 
         File root = new File(getFilesDir(), ImgGrabber.CAPTURED_DIR);
         if (!root.exists())
@@ -95,23 +99,68 @@ public class IntermediateCameraActivity extends Activity {
                 progress.show();
             }
         });
+        fop = null;
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+        SCREEN_HEIGHT = displayMetrics.heightPixels;
+        SCREEN_WIDTH = displayMetrics.widthPixels;
+        paintableCanvas = null;
+
+        analyzed.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                if(fop == null)
+                    return true;
+                switch (event.getAction()) {
+                    case MotionEvent.ACTION_DOWN:
+                        Face[] faces = fop.getFaces();
+                        for(int i = 0; i < faces.length;i++)
+                            if(faces[i].getBoundingBoxWithRatio().contains(new
+                                    opencv_core.Point(((int)event.getX()),((int)event.getY())))){
+                                Log.i(TAG,"CLICKED IN FACE"+i+"!");
+//                                if(paintableCanvas != null){
+//                                    paintableCanvas.drawRect(new Rect(faces[i].getBoundingBoxWithRatio().tl().x(),
+//                                            faces[i].getBoundingBoxWithRatio().tl().y(),faces[i].getBoundingBoxWithRatio().br().x(),
+//                                            faces[i].getBoundingBoxWithRatio().br().y()),new Paint());
+//                                    analyzed.draw(paintableCanvas);
+//                                }
+
+                            }
+                        break;
+                    case MotionEvent.ACTION_UP:
+                        v.performClick();
+                        break;
+                    default:
+                        break;
+                }
+                return true;
+            }
+        });
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if(requestCode == REQUEST_IMG_ANALYSIS) {
             if (imageLocation.length() == 0)
-                Toast.makeText(this, "Error in taking the image!", Toast.LENGTH_SHORT);
+                Toast.makeText(this, "Error in taking the image!", Toast.LENGTH_SHORT).show();
             else {
-                imwrite(imageLocation.getAbsolutePath(),process());
+                fop = process();
                 Bitmap result = BitmapFactory.decodeFile(imageLocation.getAbsolutePath());
+//                Bitmap tmp = Bitmap.createBitmap(result.getWidth(),result.getHeight(),Bitmap.Config.ARGB_8888);
+//                paintableCanvas = new Canvas(tmp);
+//                paintableCanvas.drawBitmap(result,0,0,null);
+//                analyzed.draw(paintableCanvas);
                 analyzed.setImageBitmap(result);
             }
+            if(imageLocation!= null)
+                imageLocation.delete();
             progress.dismiss();
         }
     }
 
     private void exitActivity(int code){
+        if(imageLocation!= null)
+            imageLocation.delete();
         setResult(code);
         finish();
     }
@@ -121,9 +170,12 @@ public class IntermediateCameraActivity extends Activity {
         if(imageLocation!= null)
             imageLocation.delete();
     }
-    opencv_core.Mat process() {
+    FaceOperator process() {
         opencv_core.Mat toAnalyze = imread(imageLocation.getAbsolutePath());
-//        resize(toAnalyze,toAnalyze,new opencv_core.Size(900,1000)); // todo remove this line and test
+        Bitmap result = BitmapFactory.decodeFile(imageLocation.getAbsolutePath());
+        widthRatio = (double) SCREEN_WIDTH/(double)result.getWidth();
+        heightRatio = (double) SCREEN_HEIGHT/(double) result.getHeight();
+
         FaceOperator fop = new FaceOperator(this,toAnalyze);
         Face[] faces = fop.getFaces();
         if (faces == null)
@@ -134,19 +186,20 @@ public class IntermediateCameraActivity extends Activity {
             int w = aFacesArray.getBoundingBox().width();
             int h = aFacesArray.getBoundingBox().height();
 
-            RecognizedFace rf = frs.recognize(aFacesArray);
-            int [] labels = rf.getLabels();
-            //double [] conf = rf.getConfidences();
-
-            KnownPPL p = db.knownPplDao().getEntryWithID(labels[0]);
-            if (p!= null)
-                putText(toAnalyze,p.name+" "+p.sname,new opencv_core.Point(x, y),CV_FONT_HERSHEY_PLAIN
-                        ,6, opencv_core.Scalar.MAGENTA,4,1,false);
+            // this is used to reset the rect to the screen size
+            aFacesArray.getBoundingBoxWithRatio(widthRatio,heightRatio);
+//            RecognizedFace rf = frs.recognize(aFacesArray);
+//            int [] labels = rf.getLabels();
+//
+//            KnownPPL p = db.knownPplDao().getEntryWithID(labels[0]);
+//            if (p!= null)
+//                putText(toAnalyze,p.name+" "+p.sname,new opencv_core.Point(x, y),CV_FONT_HERSHEY_PLAIN
+//                        ,6, opencv_core.Scalar.MAGENTA,4,1,false);
             rectangle(toAnalyze,new opencv_core.Point(x, y), new opencv_core.Point(x + w, y + h)
                     , opencv_core.Scalar.GREEN,2, LINE_8,0);
         }
-        fop.destroy();
-        return toAnalyze;
+        imwrite(imageLocation.getAbsolutePath(),toAnalyze);
+        return fop;
     }
     void train(){
         if (frs != null)

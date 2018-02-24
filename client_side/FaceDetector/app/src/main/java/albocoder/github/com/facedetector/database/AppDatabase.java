@@ -38,7 +38,7 @@ public abstract class AppDatabase extends RoomDatabase {
     public static final String DATABASE_NAME = "local-andlit-database";
 
     public static AppDatabase getDatabase(Context context) {
-        if (INSTANCE == null) {
+        if (INSTANCE == null || !INSTANCE.isOpen()) {
             INSTANCE = Room.databaseBuilder(context, AppDatabase.class,DATABASE_NAME)
                             // Don't uncomment this!
                             .allowMainThreadQueries()

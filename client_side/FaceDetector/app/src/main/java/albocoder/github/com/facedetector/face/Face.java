@@ -1,5 +1,6 @@
 package albocoder.github.com.facedetector.face;
 
+import org.bytedeco.javacpp.opencv_core;
 import org.bytedeco.javacpp.opencv_core.Mat;
 import org.bytedeco.javacpp.opencv_core.Rect;
 import org.bytedeco.javacpp.opencv_core.Size;
@@ -18,14 +19,21 @@ public class Face {
 
     // class fields
     private Rect boundingBox;
-    private Mat faceContent;        // must always be 80x80
+    private Mat faceContent;        // must always be 100x100
 
     // calculated-later fields
     private int local_id;
     private Mat gScaledFace;
 
+    // ratio for bounding box
+    private double widthRatio;
+    private double heightRatio;
+    private Rect bbRatioed;
+
     // constructors
     public Face(Rect bb,Mat content){
+        widthRatio = 0;
+        heightRatio = 0;
         boundingBox = bb;
         faceContent = content;
         resize(content,faceContent,new Size(WIDTH,HEIGHT));
@@ -43,6 +51,21 @@ public class Face {
     public Face(Mat content) { this (null,content); }
     // useful functions
     public Rect getBoundingBox(){return boundingBox;}
+    public Rect getBoundingBoxWithRatio(double widthRatio,double heightRatio) {
+        int x = getBoundingBox().x();
+        int y = getBoundingBox().y();
+        int w = getBoundingBox().width();
+        int h = getBoundingBox().height();
+        this.widthRatio = widthRatio;
+        this.heightRatio = heightRatio;
+
+        bbRatioed = new opencv_core.Rect((int)(x*widthRatio),
+                (int)(y*heightRatio),(int)(w*widthRatio),(int)(h*heightRatio));
+        return bbRatioed;
+    }
+    public Rect getBoundingBoxWithRatio(){ return bbRatioed; }
+    public double getWidthRatio() { return widthRatio; }
+    public double getHeightRatio() { return  heightRatio; }
     public Mat getBGRContent(){return faceContent;}
     public Mat getRGBContent() {
         if(faceContent == null)
