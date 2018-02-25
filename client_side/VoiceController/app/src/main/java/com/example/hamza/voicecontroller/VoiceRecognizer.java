@@ -1,7 +1,7 @@
 package com.example.hamza.voicecontroller;
 
 /**
- * Created by hamza on 2/19/18.
+ * Created by hamza
  */
 
 public class VoiceRecognizer

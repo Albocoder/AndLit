@@ -22,10 +22,7 @@ An android activity class to test the VoiceGenerator and VoiceRecognizers
 public class MainActivity extends AppCompatActivity
 {
     // Properties
-    public static String EXTRA_MESSAGE;
     private final int CHECK_CODE = 0x1;
-    private final int LONG_DURATION = 5000;
-    private final int SHORT_DURATION = 1200;
     private VoiceGenerator speaker;
 
     // VoiceRecognizer
@@ -47,10 +44,11 @@ public class MainActivity extends AppCompatActivity
         txtSpeechInput = (TextView) findViewById(R.id.txtSpeechInput);
         btnSpeak = (ImageButton) findViewById(R.id.btnSpeak);
 
-        btnSpeak.setOnClickListener(new View.OnClickListener() {
-
+        btnSpeak.setOnClickListener(new View.OnClickListener()
+        {
             @Override
-            public void onClick(View v) {
+            public void onClick(View v)
+            {
                 promptSpeechInput();
             }
         });
@@ -59,19 +57,19 @@ public class MainActivity extends AppCompatActivity
     /**
      * Showing google speech input dialog
      * */
-    private void promptSpeechInput() {
+    private void promptSpeechInput()
+    {
         Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
-        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
-                RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
         intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault());
-        intent.putExtra(RecognizerIntent.EXTRA_PROMPT,
-                getString(R.string.speech_prompt));
-        try {
+        intent.putExtra(RecognizerIntent.EXTRA_PROMPT, getString(R.string.speech_prompt));
+        try
+        {
             startActivityForResult(intent, REQ_CODE_SPEECH_INPUT);
-        } catch (ActivityNotFoundException a) {
-            Toast.makeText(getApplicationContext(),
-                    getString(R.string.speech_not_supported),
-                    Toast.LENGTH_SHORT).show();
+        }
+        catch (ActivityNotFoundException a)
+        {
+            Toast.makeText(getApplicationContext(), getString(R.string.speech_not_supported), Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -120,18 +118,13 @@ public class MainActivity extends AppCompatActivity
         }
 
         // speechToText
-
-
-        switch (requestCode)
+        if(requestCode == REQ_CODE_SPEECH_INPUT)
         {
-            case REQ_CODE_SPEECH_INPUT: {
-                if (resultCode == RESULT_OK && null != data) {
+            if(resultCode == RESULT_OK && null != data)
+            {
 
-                    ArrayList<String> result = data
-                            .getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
-                    txtSpeechInput.setText(result.get(0));
-                }
-                break;
+                ArrayList<String> result = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
+                txtSpeechInput.setText(result.get(0));
             }
         }
     }
