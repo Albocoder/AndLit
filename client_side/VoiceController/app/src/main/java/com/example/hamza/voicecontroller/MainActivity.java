@@ -42,8 +42,6 @@ public class MainActivity extends AppCompatActivity
         // Must be in onCreate Method of the calling activity
         checkTTS();
 
-
-
         // SpeechToText
         txtSpeechInput = (TextView) findViewById(R.id.txtSpeechInput);
         btnSpeak = (ImageButton) findViewById(R.id.btnSpeak);
