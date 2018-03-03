@@ -1,7 +1,5 @@
 package com.example.mehmet.andlit.voice;
 
-package com.example.hamza.voicecontroller;
-
 import java.util.HashMap;
 import java.util.Locale;
 import android.content.Context;
