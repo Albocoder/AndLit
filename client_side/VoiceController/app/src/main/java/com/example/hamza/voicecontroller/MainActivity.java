@@ -22,10 +22,8 @@ An android activity class to test the VoiceGenerator and VoiceRecognizers
 public class MainActivity extends AppCompatActivity
 {
     // Properties
-    public static String EXTRA_MESSAGE;
+    // Required for TextToSpeech
     private final int CHECK_CODE = 0x1;
-    private final int LONG_DURATION = 5000;
-    private final int SHORT_DURATION = 1200;
     private VoiceGenerator speaker;
 
     // VoiceRecognizer
@@ -40,17 +38,19 @@ public class MainActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        // textToSpeech Initialization
+        // Required for TextToSpeech
+        // Must be in onCreate Method of the calling activity
         checkTTS();
 
         // SpeechToText
         txtSpeechInput = (TextView) findViewById(R.id.txtSpeechInput);
         btnSpeak = (ImageButton) findViewById(R.id.btnSpeak);
 
-        btnSpeak.setOnClickListener(new View.OnClickListener() {
-
+        btnSpeak.setOnClickListener(new View.OnClickListener()
+        {
             @Override
-            public void onClick(View v) {
+            public void onClick(View v)
+            {
                 promptSpeechInput();
             }
         });
@@ -59,19 +59,19 @@ public class MainActivity extends AppCompatActivity
     /**
      * Showing google speech input dialog
      * */
-    private void promptSpeechInput() {
+    private void promptSpeechInput()
+    {
         Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
-        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
-                RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
         intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault());
-        intent.putExtra(RecognizerIntent.EXTRA_PROMPT,
-                getString(R.string.speech_prompt));
-        try {
+        intent.putExtra(RecognizerIntent.EXTRA_PROMPT, getString(R.string.speech_prompt));
+        try
+        {
             startActivityForResult(intent, REQ_CODE_SPEECH_INPUT);
-        } catch (ActivityNotFoundException a) {
-            Toast.makeText(getApplicationContext(),
-                    getString(R.string.speech_not_supported),
-                    Toast.LENGTH_SHORT).show();
+        }
+        catch (ActivityNotFoundException a)
+        {
+            Toast.makeText(getApplicationContext(), getString(R.string.speech_not_supported), Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -87,9 +87,9 @@ public class MainActivity extends AppCompatActivity
 
         // Text To Speech testing
         speaker.speak(message);
-        System.out.println(message);
     }
 
+    // Required for TextToSpeech
     // method to check if a TTS engine is installed on the device.
     // The check is performed by making use of the result of another Activity.
     private void checkTTS()
@@ -105,6 +105,7 @@ public class MainActivity extends AppCompatActivity
     {
         super.onActivityResult(requestCode, resultCode, data); // speechToText
 
+        // Required for TextToSpeech
         if(requestCode == CHECK_CODE)
         {
             if(resultCode == TextToSpeech.Engine.CHECK_VOICE_DATA_PASS)
@@ -120,18 +121,13 @@ public class MainActivity extends AppCompatActivity
         }
 
         // speechToText
-
-
-        switch (requestCode)
+        if(requestCode == REQ_CODE_SPEECH_INPUT)
         {
-            case REQ_CODE_SPEECH_INPUT: {
-                if (resultCode == RESULT_OK && null != data) {
+            if(resultCode == RESULT_OK && null != data)
+            {
 
-                    ArrayList<String> result = data
-                            .getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
-                    txtSpeechInput.setText(result.get(0));
-                }
-                break;
+                ArrayList<String> result = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
+                txtSpeechInput.setText(result.get(0));
             }
         }
     }
