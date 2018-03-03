@@ -27,12 +27,13 @@ import static org.bytedeco.javacpp.opencv_core.CV_32SC1;
 import static org.bytedeco.javacpp.opencv_face.createLBPHFaceRecognizer;
 
 public class FaceRecognizerSingleton {
+
     // constants
     public static final int SEARCH_RADIUS = 1;
     public static final int NEIGHBORS = 8;
     public static final int GRID_X = 8;
     public static final int GRID_Y = 8;
-    public static final double THRESHOLD = 9999;
+    public static final double THRESHOLD = 120;// todo: fix this
     public static final int TOP_PREDICTIONS = 1;
     public static final double INSTANCES_DETECTION_RATIO = 3.0;
     public static final double RELATIVE_RATIO = 0.25;
@@ -42,6 +43,7 @@ public class FaceRecognizerSingleton {
     // statics
     private static LBPHFaceRecognizer trainedModel;
     private static Classifier classifierMetadata;
+
     // fields
     private Context c;
 
@@ -56,10 +58,11 @@ public class FaceRecognizerSingleton {
         else if(mustTrainConditions())
             trainModel();
         else
-            trainModel();//loadTrainedModel(); todo CHANGE THIS in production code!!!!!!!!
+            loadTrainedModel();
     }
 
     public synchronized void trainModel() {
+        Log.d(TAG,"Training started automatically...");
         AppDatabase db = AppDatabase.getDatabase(c);
         int trainingInstances = db.trainingFaceDao().getNumberOfTrainingInstances();
         if(trainingInstances == 0)
@@ -86,6 +89,7 @@ public class FaceRecognizerSingleton {
         Log.d(TAG,"Model finished training!");
         saveTrainedModel(allLabels.size(),trainingInstances);
     }
+
     public RecognizedFace recognize(Face face) {
         if (face == null)
             return null;
@@ -101,7 +105,6 @@ public class FaceRecognizerSingleton {
         IntPointer f = new IntPointer(minimumLabels);
         DoublePointer c = new DoublePointer(minimumLabels);
 
-        // predict  todo: fix this so that the prediction gives more than 1 label
         trainedModel.predict(face.getgscaleContent(),f,c);
         f.get(foundLabels);
         c.get(confidence);

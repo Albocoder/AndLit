@@ -100,7 +100,7 @@ public class FaceOperator {
         foundFaces = facesArray;
         mGray.release();
         System.gc();
-        Runtime.getRuntime().gc(); // if you delete this you are fucked! DON'T DO IT FFS!!!
+        Runtime.getRuntime().gc(); // DON'T DELETE THIS FFS!!!
         return facesArray;
     }
     public Mat getScene() { return scene; }
@@ -172,6 +172,19 @@ public class FaceOperator {
             recognizedFaces[i] = frs.recognize(ff[i]);
         return recognizedFaces;
     }
+    public RecognizedFace recognizeFace(int index) {
+        Face [] ff = this.getFaces();
+        if(index>=ff.length)
+            return null;
+        if(recognizedFaces != null) {
+            if(recognizedFaces[index] != null)
+                return recognizedFaces[index];
+        }else
+            recognizedFaces = new RecognizedFace[ff.length];
+        FaceRecognizerSingleton frs = new FaceRecognizerSingleton(context);
+        recognizedFaces[index] = frs.recognize(ff[index]);
+        return recognizedFaces[index];
+    }
 
     // Utility functions
     public void destroy() {
@@ -182,26 +195,28 @@ public class FaceOperator {
         System.gc();
         Runtime.getRuntime().gc();
     }
-    public void storeDetectedFaces() {
+    public void storeAllFaces() {
         Face [] ff = this.getFaces();
         for(Face f: ff)
             try {
-                saveDetectedFaceToDatabase(context,f);
+                if(f.getID() == -1)
+                    saveDetectedFaceToDatabase(context,f);
+                else
+                    saveTrainingFaceToDatabase(context,f);
             } catch (IOException|NoSuchAlgorithmException e) {
                 Log.e(TAG,"Couldn't save a face! Error encountered: "+e.getMessage());
             }
     }
-    public void storeRecognizedFaces() {
-        RecognizedFace [] ff = this.recognizeFaces();
-        for(RecognizedFace f: ff)
+    public void storeUnlabeledFaces() {
+        Face [] ff = this.getFaces();
+        for(Face f: ff)
             try {
-                saveDetectedFaceToDatabase(context,f);
+                if(f.getID() == -1)
+                    saveDetectedFaceToDatabase(context,f);
             } catch (IOException|NoSuchAlgorithmException e) {
                 Log.e(TAG,"Couldn't save a face! Error encountered: "+e.getMessage());
             }
     }
-    public void storeDetectedFacesThenDestroy(){ storeDetectedFaces(); destroy(); }
-    public void storeRecognizedFacesThenDestroy() {storeRecognizedFaces();destroy();}
 
     // static utility functions
     // referring: https://stackoverflow.com/questions/35469726/creating-directory-in-internal-storage

@@ -9,4 +9,6 @@
     <string name="sign_up_string"> <u>Sign Up</u></string>
     <string name="speech_not_supported">Not Supported</string>
     <string name="speech_prompt"> <u>Say Somethingp</u></string>
+    <string name="not_the_real_person">Manually label the face!</string>
+    <string name="profile_picture">Profile picture</string>
 </resources>

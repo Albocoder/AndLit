@@ -15,10 +15,13 @@ import java.util.List;
 public interface known_ppl_dao {
     // INSERTION
     @Insert
-    void insertEntry(KnownPPL person);
+    Long insertEntry(KnownPPL person);
 
     // SELECTION
-    @Query("select * from known_ppl")
+    @Query("select * from known_ppl where id != :i order by name ")
+    List<KnownPPL> getAllRecordsExceptID(int i);
+
+    @Query("select * from known_ppl order by name")
     List<KnownPPL> getAllRecords();
 
     @Query("select `id` from known_ppl")
