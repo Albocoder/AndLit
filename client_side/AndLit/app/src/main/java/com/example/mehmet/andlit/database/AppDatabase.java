@@ -13,11 +13,13 @@ import com.example.mehmet.andlit.database.daos.classifier_dao;
 import com.example.mehmet.andlit.database.daos.detected_faces_dao;
 import com.example.mehmet.andlit.database.daos.known_ppl_dao;
 import com.example.mehmet.andlit.database.daos.misc_info_dao;
+import com.example.mehmet.andlit.database.daos.settings_dao;
 import com.example.mehmet.andlit.database.daos.training_face_dao;
 import com.example.mehmet.andlit.database.daos.user_login_dao;
 import com.example.mehmet.andlit.database.entities.API_key;
 import com.example.mehmet.andlit.database.entities.Classifier;
 import com.example.mehmet.andlit.database.entities.KnownPPL;
+import com.example.mehmet.andlit.database.entities.Setting;
 import com.example.mehmet.andlit.database.entities.UserLogin;
 import com.example.mehmet.andlit.database.entities.detected_face;
 import com.example.mehmet.andlit.database.entities.misc_info;
@@ -25,7 +27,8 @@ import com.example.mehmet.andlit.database.entities.training_face;
 
 
 @Database(entities = {API_key.class, Classifier.class, detected_face.class, KnownPPL.class,
-        misc_info.class, UserLogin.class, training_face.class}, version = 1, exportSchema = false)
+        misc_info.class, UserLogin.class, training_face.class, Setting.class},
+        version = 1, exportSchema = false)
 public abstract class AppDatabase extends RoomDatabase {
     private static AppDatabase INSTANCE;
 
@@ -36,6 +39,7 @@ public abstract class AppDatabase extends RoomDatabase {
     public abstract misc_info_dao miscInfoDao();
     public abstract user_login_dao userLoginDao();
     public abstract training_face_dao trainingFaceDao();
+    public abstract settings_dao settingsDao();
 
     @VisibleForTesting
     public static final String DATABASE_NAME = "local-andlit-database";

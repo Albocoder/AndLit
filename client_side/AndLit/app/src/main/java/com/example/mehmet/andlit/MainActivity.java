@@ -2,8 +2,10 @@ package com.example.mehmet.andlit;
 
 import android.app.Fragment;
 import android.app.FragmentManager;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.design.widget.Snackbar;
 import android.util.Log;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -15,14 +17,18 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.speech.tts.TextToSpeech;
 
+import com.example.mehmet.andlit.CloudInterface.Authenticator;
 import com.example.mehmet.andlit.helperUI.HomeFragment;
 import com.example.mehmet.andlit.helperUI.SettingsFragment;
 import com.example.mehmet.andlit.helperUI.ShowImageFragment;
 import com.example.mehmet.andlit.helperUI.UILocalDBHelper;
 import com.example.mehmet.andlit.voice.VoiceGenerator;
 
+import java.io.IOException;
+
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
+    private static final String TAG = "MainActivity";
 
     Bundle userInfo;
     public boolean voiceControlEnabled = false;
@@ -30,15 +36,31 @@ public class MainActivity extends AppCompatActivity
 
     private final int CHECK_CODE = 0x1;
     public VoiceGenerator speaker;
-
+// todo: do this in the login part
+//    private class LoginRunner implements Runnable{
+//        Context c;
+//        public LoginRunner(Context c){
+//            this.c = c;
+//        }
+//        @Override
+//        public void run() {
+//            Authenticator a = new Authenticator(c);
+//            try {
+//                a.logout();
+//            } catch (Exception e) {}
+//        }
+//    }
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        // todo: do this in login part
+//        Thread t = new Thread(new LoginRunner(this));
+//        t.start();
+
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         checkTTS();
-
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
