@@ -1,7 +1,6 @@
 package com.example.hamza.voicecontroller;
 
 import android.content.Intent;
-import android.speech.tts.TextToSpeech;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -22,14 +21,8 @@ An android activity class to test the VoiceGenerator and VoiceRecognizers
 public class MainActivity extends AppCompatActivity
 {
     // Properties
-    // Required for TextToSpeech
-    private final int CHECK_CODE = 0x1;
-    private VoiceGenerator speaker;
-
-    // VoiceRecognizer
     private TextView txtSpeechInput;
     private ImageButton btnSpeak;
-    private final int REQ_CODE_SPEECH_INPUT = 100;
 
     // Methods
     @Override
@@ -38,12 +31,9 @@ public class MainActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        // Required for TextToSpeech
-        // Must be in onCreate Method of the calling activity
-        checkTTS();
-
         // SpeechToText
         txtSpeechInput = (TextView) findViewById(R.id.txtSpeechInput);
+        txtSpeechInput.setText("Text should be here");
         btnSpeak = (ImageButton) findViewById(R.id.btnSpeak);
 
         btnSpeak.setOnClickListener(new View.OnClickListener()
@@ -67,7 +57,7 @@ public class MainActivity extends AppCompatActivity
         intent.putExtra(RecognizerIntent.EXTRA_PROMPT, getString(R.string.speech_prompt));
         try
         {
-            startActivityForResult(intent, REQ_CODE_SPEECH_INPUT);
+            startActivityForResult(intent, 100);
         }
         catch (ActivityNotFoundException a)
         {
@@ -78,65 +68,26 @@ public class MainActivity extends AppCompatActivity
     /** Called when the user taps the Send button */
     public void sendMessage(View view)
     {
-        // Do something in response to button
-        //   Intent intent = new Intent(this, DisplayMessageActivity.class);
+        // Text To Speech testing
         EditText editText = (EditText) findViewById(R.id.editText);
         String message = editText.getText().toString();
-        //    intent.putExtra(EXTRA_MESSAGE, message);
-//        startActivity(intent);
-
-        // Text To Speech testing
+        VoiceGenerator speaker = new VoiceGenerator(this);
         speaker.speak(message);
     }
 
-    // Required for TextToSpeech
-    // method to check if a TTS engine is installed on the device.
-    // The check is performed by making use of the result of another Activity.
-    private void checkTTS()
-    {
-        Intent check = new Intent();
-        check.setAction(TextToSpeech.Engine.ACTION_CHECK_TTS_DATA);
-        startActivityForResult(check, CHECK_CODE);
-    }
-
-    // If tts is not installed then prompt user to install it
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data)
     {
         super.onActivityResult(requestCode, resultCode, data); // speechToText
 
-        // Required for TextToSpeech
-        if(requestCode == CHECK_CODE)
-        {
-            if(resultCode == TextToSpeech.Engine.CHECK_VOICE_DATA_PASS)
-            {
-                speaker = new VoiceGenerator(this);
-            }
-            else
-            {
-                Intent install = new Intent();
-                install.setAction(TextToSpeech.Engine.ACTION_INSTALL_TTS_DATA);
-                startActivity(install);
-            }
-        }
-
         // speechToText
-        if(requestCode == REQ_CODE_SPEECH_INPUT)
+        if(requestCode == 100)
         {
             if(resultCode == RESULT_OK && null != data)
             {
-
                 ArrayList<String> result = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
                 txtSpeechInput.setText(result.get(0));
             }
         }
-    }
-
-    // shutdown tts
-    @Override
-    protected void onDestroy()
-    {
-        super.onDestroy();
-        speaker.destroy();
     }
 }
