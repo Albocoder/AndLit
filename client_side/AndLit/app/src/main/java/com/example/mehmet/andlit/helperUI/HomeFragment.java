@@ -3,6 +3,7 @@ package com.example.mehmet.andlit.helperUI;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.content.ActivityNotFoundException;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.speech.RecognizerIntent;
@@ -17,6 +18,9 @@ import java.util.Locale;
 
 import com.example.mehmet.andlit.MainActivity;
 import com.example.mehmet.andlit.R;
+import com.example.mehmet.andlit.voice.VoiceToCommand;
+
+import static android.app.Activity.RESULT_OK;
 
 /**
  * Created by Mehmet on 1/21/2018.
@@ -84,7 +88,7 @@ public class HomeFragment extends Fragment {
         }
         catch (ActivityNotFoundException a)
         {
-            Toast.makeText(getApplicationContext(), "Speech Not Supported!", Toast.LENGTH_SHORT).show();
+            Toast.makeText(homeActivity.getApplicationContext(), "Speech Not Supported!", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -100,7 +104,7 @@ public class HomeFragment extends Fragment {
             if(resultCode == RESULT_OK && null != data)
             {
                 ArrayList<String> result = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
-                tw.setText(result.get(0));
+                VoiceToCommand.decide(result.get(0),homeActivity.getApplicationContext());
             }
         }
     }
