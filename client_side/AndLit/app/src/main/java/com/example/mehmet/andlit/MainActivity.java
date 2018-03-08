@@ -33,9 +33,6 @@ public class MainActivity extends AppCompatActivity
     Bundle userInfo;
     public boolean voiceControlEnabled = false;
     public boolean soundEnabled = true;
-
-    private final int CHECK_CODE = 0x1;
-    public VoiceGenerator speaker;
 // todo: do this in the login part
 //    private class LoginRunner implements Runnable{
 //        Context c;
@@ -95,11 +92,16 @@ public class MainActivity extends AppCompatActivity
         return true;
     }
 
+    /*
+    method to check if a TTS engine is installed on the device.
+    The check is performed by making use of the result of another Activity.
+    Only need to run once on each device
+    */
     private void checkTTS()
     {
         Intent check = new Intent();
         check.setAction(TextToSpeech.Engine.ACTION_CHECK_TTS_DATA);
-        startActivityForResult(check, CHECK_CODE);
+        startActivityForResult(check, 0x1);
     }
 
     @SuppressWarnings("StatementWithEmptyBody")
@@ -148,17 +150,14 @@ public class MainActivity extends AppCompatActivity
         getFragmentManager().beginTransaction().replace(id, toChange).commit();
     }
 
+    @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data)
     {
-        super.onActivityResult(requestCode, resultCode, data); // speechToText
+        super.onActivityResult(requestCode, resultCode, data); 
 
-        if(requestCode == CHECK_CODE)
+        if(requestCode == 0x1)
         {
-            if(resultCode == TextToSpeech.Engine.CHECK_VOICE_DATA_PASS)
-            {
-                speaker = new VoiceGenerator(this);
-            }
-            else
+            if(resultCode != TextToSpeech.Engine.CHECK_VOICE_DATA_PASS)
             {
                 Intent install = new Intent();
                 install.setAction(TextToSpeech.Engine.ACTION_INSTALL_TTS_DATA);
