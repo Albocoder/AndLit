@@ -26,8 +26,6 @@ public class HomeFragment extends Fragment {
     View myView;
     MainActivity homeActivity;
     FragmentManager fragmentManager;
-    private final int REQ_CODE_SPEECH_INPUT = 100;
-
 
     @Nullable
     @Override
@@ -35,8 +33,6 @@ public class HomeFragment extends Fragment {
         myView = inflater.inflate(R.layout.home_fragment_layout, container, false);
         return myView;
     }
-
-
 
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
@@ -82,14 +78,14 @@ public class HomeFragment extends Fragment {
         Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
         intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
         intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault());
-        intent.putExtra(RecognizerIntent.EXTRA_PROMPT, getString(R.string.speech_prompt));
+        intent.putExtra(RecognizerIntent.EXTRA_PROMPT, "Say Something!");
         try
         {
-            startActivityForResult(intent, REQ_CODE_SPEECH_INPUT);
+            startActivityForResult(intent, 100);
         }
         catch (ActivityNotFoundException a)
         {
-            Toast.makeText(homeActivity.getApplicationContext(), getString(R.string.speech_not_supported), Toast.LENGTH_SHORT).show();
+            Toast.makeText(getApplicationContext(), "Speech Not Supported!", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -97,17 +93,14 @@ public class HomeFragment extends Fragment {
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data)
     {
-        super.onActivityResult(requestCode, resultCode, data); // speechToText
-
+        super.onActivityResult(requestCode, resultCode, data);
 
         // speechToText
-        if(requestCode == REQ_CODE_SPEECH_INPUT)
+        if(requestCode == 100)
         {
-            if( null != data)
+            if(resultCode == RESULT_OK && null != data)
             {
-
                 ArrayList<String> result = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
-                TextView tw = homeActivity.findViewById(R.id.home_tts);
                 tw.setText(result.get(0));
             }
         }
