@@ -44,8 +44,7 @@ public class HomeFragment extends Fragment {
             public void onClick(View view) {
                 //TakePhotoFragment tpf = new TakePhotoFragment();
                 //tpf.setMainActivity(homeActivity);
-                //homeActivity.switchFragments(R.id.content_frame, tpf);
-                //homeActivity.speaker.speak("ooooooooooooooooooooooooooooooo");
+                //homeActivity.switchFragments(R.id.content_frame, tpf);                
                 takePhoto();
             }
         });
