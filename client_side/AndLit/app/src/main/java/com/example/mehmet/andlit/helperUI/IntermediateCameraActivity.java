@@ -7,6 +7,7 @@ import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
@@ -42,6 +43,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Random;
 
+import static com.example.mehmet.andlit.Settings.SettingsDefinedKeys.*;
 import static org.bytedeco.javacpp.opencv_core.LINE_8;
 import static org.bytedeco.javacpp.opencv_imgcodecs.imread;
 import static org.bytedeco.javacpp.opencv_imgcodecs.imwrite;
@@ -137,8 +139,16 @@ public class IntermediateCameraActivity extends Activity {
             if (imageLocation.length() == 0)
                 Toast.makeText(this, "Error in taking the image!", Toast.LENGTH_SHORT).show();
             else {
+                // using settings to check if user wants the detections to be saved in device
                 if(fop != null) {
-                    fop.storeUnlabeledFaces();
+                    db = AppDatabase.getDatabase(this);
+                    Setting s = db.settingsDao().getSettingWithKey(DETECTIONS_SAVE_FACES_ON_REFRESH);
+                    if(s == null) {
+                        db.settingsDao().insertSetting(new Setting(DETECTIONS_SAVE_FACES_ON_REFRESH, TRUE));
+                        fop.storeUnlabeledFaces();
+                    }
+                    else if(s.value.equals(TRUE))
+                        fop.storeUnlabeledFaces();
                     fop.destroy();
                 }
                 fop = process();
@@ -156,6 +166,31 @@ public class IntermediateCameraActivity extends Activity {
         super.onDestroy();
         if(imageLocation!= null)
             imageLocation.delete();
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        if(imageLocation == null)
+            return;
+        Bitmap result = BitmapFactory.decodeFile(imageLocation.getAbsolutePath());
+        widthRatio = (double) SCREEN_WIDTH/(double)result.getWidth();
+        heightRatio = (double) SCREEN_HEIGHT/(double) result.getHeight();
+        if(fop == null)
+            return;
+        Face[] faces = fop.getFaces();
+        if (faces == null)
+            return;
+        for (Face aFacesArray : faces) {
+            int x = aFacesArray.getBoundingBox().x();
+            int y = aFacesArray.getBoundingBox().y();
+            int w = aFacesArray.getBoundingBox().width();
+            int h = aFacesArray.getBoundingBox().height();
+
+            // this is used to reset the rect to the screen size
+            aFacesArray.getBoundingBoxWithRatio(widthRatio, heightRatio);
+        }
+        analyzed.setImageBitmap(result);
     }
 
     // helper function to cleanly exit the activity
@@ -484,5 +519,4 @@ public class IntermediateCameraActivity extends Activity {
             new File(filepath).delete();
         }
     }
-
 }

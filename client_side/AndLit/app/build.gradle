@@ -8,8 +8,8 @@ android {
     compileSdkVersion 26
     defaultConfig {
         applicationId "com.example.mehmet.andlit"
-        minSdkVersion 15
-        targetSdkVersion 26
+        minSdkVersion 14
+        targetSdkVersion 21
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"

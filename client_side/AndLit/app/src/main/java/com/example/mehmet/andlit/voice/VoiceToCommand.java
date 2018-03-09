@@ -8,7 +8,7 @@ import com.example.mehmet.andlit.helperUI.IntermediateCameraActivity;
 import java.util.StringTokenizer;
 
 public class VoiceToCommand {
-    private static final String[] verbsForStarting = {"start","initialize","play","begin","commence","begin"};
+    private static final String[] verbsForStarting = {"start","initialize","play","begin","commence","begin","open"};
     private static final String[] operations = {"camera","recognition","recognizer",
             "detection","detector","synchronization","synchronizer","training","trainer"};
 

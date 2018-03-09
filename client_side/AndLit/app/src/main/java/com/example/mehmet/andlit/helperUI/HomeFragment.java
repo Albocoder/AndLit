@@ -46,7 +46,6 @@ public class HomeFragment extends Fragment {
         homeActivity.findViewById(R.id.open_camera_button).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                //TakePhotoFragment tpf = new TakePhotoFragment();
                 //tpf.setMainActivity(homeActivity);
                 //homeActivity.switchFragments(R.id.content_frame, tpf);                
                 takePhoto();

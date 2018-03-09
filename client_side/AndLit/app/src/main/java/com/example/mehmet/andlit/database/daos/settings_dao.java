@@ -17,7 +17,7 @@ public interface settings_dao {
     void insertSetting(Setting s);
 
     @Query("select * from settings where `key`= :k")
-    Setting getSetttingWithKey(String k);
+    Setting getSettingWithKey(String k);
 
     @Query("select * from settings where value= :v")
     List<Setting> getSettingsWithValue(String v);

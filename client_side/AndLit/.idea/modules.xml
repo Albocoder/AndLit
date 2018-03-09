@@ -3,9 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/AndLit.iml" filepath="$PROJECT_DIR$/AndLit.iml" />
-      <module fileurl="file://C:\Users\Personal\Documents\GitHub\AndLit\client_side\AndLit\AndLit.iml" filepath="C:\Users\Personal\Documents\GitHub\AndLit\client_side\AndLit\AndLit.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
-      <module fileurl="file://C:\Users\Personal\Documents\GitHub\AndLit\client_side\AndLit\app\app.iml" filepath="C:\Users\Personal\Documents\GitHub\AndLit\client_side\AndLit\app\app.iml" />
     </modules>
   </component>
 </project>
