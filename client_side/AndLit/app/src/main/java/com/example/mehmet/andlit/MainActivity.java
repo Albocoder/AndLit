@@ -37,8 +37,9 @@ public class MainActivity extends AppCompatActivity
     private static final String TAG = "MainActivity";
 
     Bundle userInfo;
-    public boolean voiceControlEnabled = false;
+    public boolean voiceControlEnabled;
     public boolean soundEnabled = true;
+
 // todo: do this in the login part
 //    private class LoginRunner implements Runnable{
 //        Context c;
@@ -81,6 +82,10 @@ public class MainActivity extends AppCompatActivity
         checkTTS(); // checks tts installation
         // Settings
         SettingsController.loadSettings(this);
+        SharedPreferences sharedPref =
+                PreferenceManager.getDefaultSharedPreferences(this);
+        voiceControlEnabled = sharedPref.getBoolean
+                (SettingsDefinedKeys.VOICE_CONTROL, false);
     }
 
     @Override
