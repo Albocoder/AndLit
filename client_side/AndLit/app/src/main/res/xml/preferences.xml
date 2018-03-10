@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <android.support.v7.preference.SwitchPreferenceCompat
+        android:defaultValue="true"
+        android:key="voice_control"
+        android:summary="Turn On To Use Voice Commands"
+        android:title="Voice Control" />
+</PreferenceScreen>

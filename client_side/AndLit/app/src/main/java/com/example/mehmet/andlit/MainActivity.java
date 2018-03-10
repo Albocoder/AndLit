@@ -4,8 +4,10 @@ import android.app.Fragment;
 import android.app.FragmentManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
+import android.support.v7.preference.PreferenceManager;
 import android.util.Log;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -16,8 +18,12 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.speech.tts.TextToSpeech;
+import android.widget.Toast;
 
 import com.example.mehmet.andlit.CloudInterface.Authenticator;
+import com.example.mehmet.andlit.Settings.SettingsActivity;
+import com.example.mehmet.andlit.Settings.SettingsController;
+import com.example.mehmet.andlit.Settings.SettingsDefinedKeys;
 import com.example.mehmet.andlit.helperUI.HomeFragment;
 import com.example.mehmet.andlit.helperUI.SettingsFragment;
 import com.example.mehmet.andlit.helperUI.ShowImageFragment;
@@ -31,8 +37,9 @@ public class MainActivity extends AppCompatActivity
     private static final String TAG = "MainActivity";
 
     Bundle userInfo;
-    public boolean voiceControlEnabled = false;
+    public boolean voiceControlEnabled;
     public boolean soundEnabled = true;
+
 // todo: do this in the login part
 //    private class LoginRunner implements Runnable{
 //        Context c;
@@ -57,7 +64,6 @@ public class MainActivity extends AppCompatActivity
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        checkTTS();
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -73,6 +79,15 @@ public class MainActivity extends AppCompatActivity
         tpf.setHomeActivity(this);
         switchFragments(R.id.content_frame, tpf);
 
+        checkTTS(); // checks tts installation
+        // Settings
+        SettingsController.loadSettings(this);
+
+        // Loading the value of voiceControl
+        SharedPreferences sharedPref =
+                PreferenceManager.getDefaultSharedPreferences(this);
+        voiceControlEnabled = sharedPref.getBoolean
+                (SettingsDefinedKeys.VOICE_CONTROL, false);
     }
 
     @Override
@@ -122,8 +137,10 @@ public class MainActivity extends AppCompatActivity
             ShowImageFragment sim = new ShowImageFragment();
             switchFragments(contentFrameID, sim);
         } else if (id == R.id.nav_settings) {
-            SettingsFragment sf = new SettingsFragment();
-            switchFragments(contentFrameID, sf);
+//            SettingsFragment sf = new SettingsFragment();
+//            switchFragments(contentFrameID, sf);
+            Intent intent = new Intent(this, SettingsActivity.class);
+            startActivity(intent);
         } else if (id == R.id.nav_log_out){
             saveSettings();
             UILocalDBHelper uldb = new UILocalDBHelper(this);

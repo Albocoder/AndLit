@@ -43,6 +43,7 @@ public class HomeFragment extends Fragment {
         super.onActivityCreated(savedInstanceState);
         if(!homeActivity.voiceControlEnabled)
             homeActivity.findViewById(R.id.home_start_recording_button).setVisibility(View.INVISIBLE);
+
         homeActivity.findViewById(R.id.open_camera_button).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
