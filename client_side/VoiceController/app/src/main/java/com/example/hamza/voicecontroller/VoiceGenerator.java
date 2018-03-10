@@ -84,7 +84,6 @@ public class VoiceGenerator implements TextToSpeech.OnInitListener
         }
     }
 
-
     /*
     method to check if a TTS engine is installed on the device.
     The check is performed by making use of the result of another Activity.

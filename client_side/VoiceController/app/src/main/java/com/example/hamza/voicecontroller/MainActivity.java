@@ -32,9 +32,9 @@ public class MainActivity extends AppCompatActivity
         setContentView(R.layout.activity_main);
 
         // SpeechToText
-        txtSpeechInput = (TextView) findViewById(R.id.txtSpeechInput);
+        txtSpeechInput = findViewById(R.id.txtSpeechInput);
         txtSpeechInput.setText("Text should be here");
-        btnSpeak = (ImageButton) findViewById(R.id.btnSpeak);
+        btnSpeak = findViewById(R.id.btnSpeak);
 
         btnSpeak.setOnClickListener(new View.OnClickListener()
         {
@@ -54,14 +54,14 @@ public class MainActivity extends AppCompatActivity
         Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
         intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
         intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault());
-        intent.putExtra(RecognizerIntent.EXTRA_PROMPT, getString(R.string.speech_prompt));
+        intent.putExtra(RecognizerIntent.EXTRA_PROMPT, "Say Something!");
         try
         {
             startActivityForResult(intent, 100);
         }
         catch (ActivityNotFoundException a)
         {
-            Toast.makeText(getApplicationContext(), getString(R.string.speech_not_supported), Toast.LENGTH_SHORT).show();
+            Toast.makeText(getApplicationContext(), "Speech Not Supported!", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -71,14 +71,14 @@ public class MainActivity extends AppCompatActivity
         // Text To Speech testing
         EditText editText = (EditText) findViewById(R.id.editText);
         String message = editText.getText().toString();
-        VoiceGenerator speaker = new VoiceGenerator(this);
+        VoiceGenerator speaker = new VoiceGenerator(this.getApplicationContext());
         speaker.speak(message);
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data)
     {
-        super.onActivityResult(requestCode, resultCode, data); // speechToText
+        super.onActivityResult(requestCode, resultCode, data);
 
         // speechToText
         if(requestCode == 100)
