@@ -82,6 +82,8 @@ public class MainActivity extends AppCompatActivity
         checkTTS(); // checks tts installation
         // Settings
         SettingsController.loadSettings(this);
+
+        // Loading the value of voiceControl
         SharedPreferences sharedPref =
                 PreferenceManager.getDefaultSharedPreferences(this);
         voiceControlEnabled = sharedPref.getBoolean
