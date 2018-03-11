@@ -4,6 +4,12 @@
     <android.support.v7.preference.SwitchPreferenceCompat
         android:defaultValue="true"
         android:key="voice_control"
-        android:summary="Turn On To Use Voice Commands"
+        android:summary="Turn on to use voice commands"
         android:title="Voice Control" />
+
+    <android.support.v7.preference.SwitchPreferenceCompat
+        android:defaultValue="true"
+        android:key="save_unlabeled"
+        android:summary="Save the unlabeled detected faces when exiting or taking another image"
+        android:title="Save Unlabeled On Exit" />
 </PreferenceScreen>

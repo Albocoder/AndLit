@@ -5,9 +5,11 @@ import android.app.FragmentManager;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.speech.RecognizerIntent;
 import android.support.annotation.Nullable;
+import android.support.v7.preference.PreferenceManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,6 +20,7 @@ import java.util.Locale;
 
 import com.example.mehmet.andlit.MainActivity;
 import com.example.mehmet.andlit.R;
+import com.example.mehmet.andlit.Settings.SettingsDefinedKeys;
 import com.example.mehmet.andlit.voice.VoiceToCommand;
 
 import static android.app.Activity.RESULT_OK;
@@ -30,6 +33,7 @@ public class HomeFragment extends Fragment {
     View myView;
     MainActivity homeActivity;
     FragmentManager fragmentManager;
+    TextView ttsView;
 
     @Nullable
     @Override
@@ -41,7 +45,13 @@ public class HomeFragment extends Fragment {
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        if(!homeActivity.voiceControlEnabled)
+
+        // Checking voiceControl Settings
+        SharedPreferences sharedPref =
+                PreferenceManager.getDefaultSharedPreferences(homeActivity.getApplicationContext());
+        boolean voiceControl = sharedPref.getBoolean
+                (SettingsDefinedKeys.VOICE_CONTROL, false);
+        if(!voiceControl)
             homeActivity.findViewById(R.id.home_start_recording_button).setVisibility(View.INVISIBLE);
 
         homeActivity.findViewById(R.id.open_camera_button).setOnClickListener(new View.OnClickListener() {
@@ -58,6 +68,8 @@ public class HomeFragment extends Fragment {
                 promptSpeechInput();
             }
         });
+
+        ttsView = homeActivity.findViewById(R.id.home_tts);
     }
 
     void takePhoto(){
@@ -104,7 +116,8 @@ public class HomeFragment extends Fragment {
             if(resultCode == RESULT_OK && null != data)
             {
                 ArrayList<String> result = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
-                VoiceToCommand.decide(result.get(0),homeActivity.getApplicationContext());
+            //    VoiceToCommand.decide(result.get(0),homeActivity.getApplicationContext());
+                ttsView.setText(result.get(0));
             }
         }
     }
