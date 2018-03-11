@@ -8,7 +8,6 @@ import android.speech.tts.TextToSpeech;
 
 
 /**
- * Created by hamza
  * an encapuslation of google's text to speech engine
  * the constructor takes in a String input, initializes engine, speaks the input, and shuts down
  * In order to use this class. Simply create its instance and pass it the app context 

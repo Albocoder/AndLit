@@ -22,10 +22,6 @@ import static org.bytedeco.javacpp.opencv_imgcodecs.imwrite;
 import static org.bytedeco.javacpp.opencv_imgproc.COLOR_RGB2BGR;
 import static org.bytedeco.javacpp.opencv_imgproc.cvtColor;
 
-/**
- * Defined several functions to manage local storage.
- * Taken from: https://github.com/bytedeco/sample-projects/tree/master/javacv-android-camera-preview
- */
 public class StorageHelper {
     final static String TAG = "StorageHelper";
 

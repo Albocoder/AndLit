@@ -6,10 +6,6 @@ import android.support.v7.preference.PreferenceManager;
 
 import com.example.mehmet.andlit.R;
 
-/**
- * Created by hamza on 3/10/18.
- */
-
 public class SettingsController
 {
     public static void loadSettings(Context context)

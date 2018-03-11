@@ -1,142 +1,168 @@
 package com.example.mehmet.andlit;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
+import android.graphics.drawable.AnimationDrawable;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
-import android.support.annotation.Nullable;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ScrollView;
+import android.widget.TextView;
+import android.widget.Toast;
 
-import com.example.mehmet.andlit.helperUI.UICloudHelper;
-import com.example.mehmet.andlit.helperUI.UILocalDBHelper;
+import butterknife.BindView;
+import butterknife.ButterKnife;
 
-/**
- * Created by Mehmet on 2/12/2018.
- */
+public class SignupActivity extends AppCompatActivity {
+    private static final String TAG = "SignupActivity";
 
-public class SignUpActivity extends AppCompatActivity {
+    @BindView(R.id.input_name)
+    EditText _nameText;
+    @BindView(R.id.input_email)
+    EditText _emailText;
+    @BindView(R.id.input_password)
+    EditText _passwordText;
+    @BindView(R.id.input_reEnterPassword)
+    EditText _reEnterPasswordText;
+    @BindView(R.id.btn_signup)
+    Button _signupButton;
+    @BindView(R.id.link_login)
+    TextView _loginLink;
 
-    UILocalDBHelper uiLocalDBHelper;
-    UICloudHelper uiCloudHelper;
+    AnimationDrawable animationDrawable;
+    ScrollView sv;
+
     @Override
-    protected void onCreate(@Nullable Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        uiLocalDBHelper = new UILocalDBHelper(this);
-        uiCloudHelper = new UICloudHelper();
         setContentView(R.layout.activity_signup);
-        initButtons();
+        ButterKnife.bind(this);
 
-    }
+        sv = (ScrollView)findViewById(R.id.signupLayout);
+        animationDrawable = (AnimationDrawable) sv.getBackground();
+        animationDrawable.setEnterFadeDuration(5000);
+        animationDrawable.setExitFadeDuration(2000);
 
-    private void initButtons(){
-
-        Button registerButton = (Button) findViewById(R.id.register_new_button);
-        registerButton.setOnClickListener(
-                new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        final String username = ((EditText)findViewById(R.id.new_username_input)).getText().toString();
-                        final String password = ((EditText)findViewById(R.id.new_password_input)).getText().toString();
-                        final String email = ((EditText)findViewById(R.id.new_email_input)).getText().toString();
-                        Runnable r =  new Runnable() {
-                            @Override
-                            public synchronized void run() {
-                                Bundle args = new Bundle();
-                                args.putInt("register_success", register(email, username, password));
-                                Message msg = new Message();
-                                msg.setData(args);
-                                SignUpHandler.sendMessage(msg);
-                            }
-                        };
-                        Thread thread = new Thread(r);
-                        thread.start();
-                    }
-                }
-        );
-
-        Button goBackButton = (Button) findViewById(R.id.back_to_login_button);
-        goBackButton.setOnClickListener(
-                new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        Intent i = new Intent(getApplicationContext(), LoginActivity.class);
-                        startActivity(i);
-                        finish();
-                    }
-                }
-        );
-    }
-
-
-    public int register(String email, String username, String password){
-        int result = isValidSubmission(email, username, password);
-        if(result != 1)
-            return result;
-        return uiCloudHelper.userSignUp(email, username, password);
-    }
-
-    public void backToLogin(){
-
-    }
-
-    private int isValidSubmission(String email, String username, String pw){
-        return 1;
-        /*
-        if(!isEmailValid(email))
-            return -2;
-        if(username.length() < 6)
-            return -1;
-        if(pw.length() < 6 )
-            return -3;
-        return 1;*/
-    }
-
-    boolean isEmailValid(CharSequence email) {
-        return true;
-        //return android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches();
-    }
-
-    private synchronized void showPopUp(int status){
-        if (status == -2){
-            new AlertDialog.Builder(this)
-                    .setMessage("Something went wrong with email")
-                    .setPositiveButton("OK", null)
-                    .show();
-        }
-        else if (status == -1){
-            new AlertDialog.Builder(this)
-                    .setMessage("Something went wrong with username")
-                    .setPositiveButton("OK", null)
-                    .show();
-        }
-        else if (status == -3){
-            new AlertDialog.Builder(this)
-                    .setMessage("Password is too short")
-                    .setPositiveButton("OK", null)
-                    .show();
-        }
-    }
-
-
-
-    Handler SignUpHandler = new Handler(){
-        @Override
-        public void handleMessage(Message msg) {
-            Bundle messageInfo = msg.getData();
-            int registerInfo = messageInfo.getInt("register_success");
-            if(registerInfo < 0){
-                showPopUp(registerInfo);
+        _signupButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                signup();
             }
-            else{
-                //start new intent with newly acquired id and stuff
-                Intent i = new Intent(getApplicationContext(), MainActivity.class);
-                startActivity(i);
+        });
+
+        _loginLink.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Finish the registration screen and return to the Login activity
+                Intent intent = new Intent(getApplicationContext(),LoginActivity.class);
+                startActivity(intent);
                 finish();
+                overridePendingTransition(R.anim.push_left_in, R.anim.push_left_out);
             }
+        });
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (animationDrawable != null && !animationDrawable.isRunning())
+            animationDrawable.start();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (animationDrawable != null && animationDrawable.isRunning())
+            animationDrawable.stop();
+    }
+
+    public void signup() {
+        Log.d(TAG, "Signup");
+
+        if (!validate()) {
+            onSignupFailed();
+            return;
         }
-    };
+
+        _signupButton.setEnabled(false);
+
+        final ProgressDialog progressDialog = new ProgressDialog(SignupActivity.this,
+                R.style.AppTheme_Dark_Dialog);
+        progressDialog.setIndeterminate(true);
+        progressDialog.setMessage("Creating Account...");
+        progressDialog.show();
+
+        String name = _nameText.getText().toString();
+        String email = _emailText.getText().toString();
+        String password = _passwordText.getText().toString();
+        String reEnterPassword = _reEnterPasswordText.getText().toString();
+
+        // TODO: Implement your own signup logic here.
+
+        new android.os.Handler().postDelayed(
+                new Runnable() {
+                    public void run() {
+                        // On complete call either onSignupSuccess or onSignupFailed
+                        // depending on success
+                        onSignupSuccess();
+                        // onSignupFailed();
+                        progressDialog.dismiss();
+                    }
+                }, 3000);
+    }
+
+
+    public void onSignupSuccess() {
+        _signupButton.setEnabled(true);
+        setResult(RESULT_OK, null);
+        finish();
+    }
+
+    public void onSignupFailed() {
+        Toast.makeText(getBaseContext(), "Login failed", Toast.LENGTH_LONG).show();
+
+        _signupButton.setEnabled(true);
+    }
+
+    public boolean validate() {
+        boolean valid = true;
+
+        String name = _nameText.getText().toString();
+        String email = _emailText.getText().toString();
+        String password = _passwordText.getText().toString();
+        String reEnterPassword = _reEnterPasswordText.getText().toString();
+
+        if (name.isEmpty() || name.length() < 3) {
+            _nameText.setError("at least 3 characters");
+            valid = false;
+        } else {
+            _nameText.setError(null);
+        }
+
+        if (email.isEmpty() || !android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+            _emailText.setError("enter a valid email address");
+            valid = false;
+        } else {
+            _emailText.setError(null);
+        }
+
+        if (password.isEmpty() || password.length() < 4 || password.length() > 10) {
+            _passwordText.setError("between 4 and 10 alphanumeric characters");
+            valid = false;
+        } else {
+            _passwordText.setError(null);
+        }
+
+        if (reEnterPassword.isEmpty() || reEnterPassword.length() < 4 || reEnterPassword.length() > 10 || !(reEnterPassword.equals(password))) {
+            _reEnterPasswordText.setError("Password Do not match");
+            valid = false;
+        } else {
+            _reEnterPasswordText.setError(null);
+        }
+
+        return valid;
+    }
 }

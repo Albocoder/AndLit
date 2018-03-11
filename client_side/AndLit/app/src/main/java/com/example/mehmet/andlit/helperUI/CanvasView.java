@@ -12,9 +12,6 @@ import android.view.View;
 
 import java.util.ArrayList;
 
-/**
- * Created by Mehmet on 2/25/2018.
- */
 
 public class CanvasView extends View {
     public int width;

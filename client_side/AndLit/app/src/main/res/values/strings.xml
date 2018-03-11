@@ -12,6 +12,8 @@
     <string name="not_the_real_person">Manually label the face!</string>
     <string name="profile_picture">Profile picture</string>
 
+
     <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_world">Hello world!</string>
     <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>
