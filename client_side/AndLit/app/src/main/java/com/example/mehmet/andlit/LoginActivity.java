@@ -84,7 +84,7 @@ public class LoginActivity extends AppCompatActivity {
         Log.d(TAG, "Login");
 
         if (!validate()) {
-            onLoginFailed();
+            onLoginFailed("Invalid form data!");
             return;
         }
 
@@ -136,8 +136,8 @@ public class LoginActivity extends AppCompatActivity {
         finish();
     }
 
-    public void onLoginFailed() {
-        Toast.makeText(getBaseContext(), "Login failed", Toast.LENGTH_LONG).show();
+    public void onLoginFailed(String msg) {
+        Toast.makeText(getBaseContext(), "Error: "+msg, Toast.LENGTH_LONG).show();
 
         _loginButton.setEnabled(true);
     }
@@ -145,18 +145,18 @@ public class LoginActivity extends AppCompatActivity {
     public boolean validate() {
         boolean valid = true;
 
-        String email = _emailText.getText().toString();
+        String username = _emailText.getText().toString();
         String password = _passwordText.getText().toString();
 
-        if (email.isEmpty() || !android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-            _emailText.setError("enter a valid email address");
+        if (username.isEmpty() || !username.matches("[A-Za-z0-9_]+")) {
+            _emailText.setError("enter a valid username");
             valid = false;
         } else {
             _emailText.setError(null);
         }
 
-        if (password.isEmpty() || password.length() < 4 || password.length() > 10) {
-            _passwordText.setError("between 4 and 10 alphanumeric characters");
+        if (password.isEmpty() || password.length() <= 6 || password.length() >= 20) {
+            _passwordText.setError("between 6 and 20 alphanumeric characters");
             valid = false;
         } else {
             _passwordText.setError(null);

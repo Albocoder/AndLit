@@ -83,7 +83,7 @@ public class SignupActivity extends AppCompatActivity {
         Log.d(TAG, "Signup");
 
         if (!validate()) {
-            onSignupFailed();
+            onSignupFailed("Invalid form data!");
             return;
         }
 
@@ -101,7 +101,6 @@ public class SignupActivity extends AppCompatActivity {
         String reEnterPassword = _reEnterPasswordText.getText().toString();
 
         // TODO: Implement your own signup logic here.
-
         new android.os.Handler().postDelayed(
                 new Runnable() {
                     public void run() {
@@ -121,8 +120,8 @@ public class SignupActivity extends AppCompatActivity {
         finish();
     }
 
-    public void onSignupFailed() {
-        Toast.makeText(getBaseContext(), "Login failed", Toast.LENGTH_LONG).show();
+    public void onSignupFailed(String msg) {
+        Toast.makeText(getBaseContext(), "Error: "+msg, Toast.LENGTH_LONG).show();
 
         _signupButton.setEnabled(true);
     }
@@ -135,9 +134,12 @@ public class SignupActivity extends AppCompatActivity {
         String password = _passwordText.getText().toString();
         String reEnterPassword = _reEnterPasswordText.getText().toString();
 
-        if (name.isEmpty() || name.length() < 3) {
-            _nameText.setError("at least 3 characters");
+        if (name.isEmpty() || name.length() <= 8 ) {
+            _nameText.setError("at least 8 characters");
             valid = false;
+            if(!name.matches("[A-Za-z0-9_]+")) {
+                _nameText.setError("only use english letters, numbers and underscore");
+            }
         } else {
             _nameText.setError(null);
         }
@@ -149,15 +151,15 @@ public class SignupActivity extends AppCompatActivity {
             _emailText.setError(null);
         }
 
-        if (password.isEmpty() || password.length() < 4 || password.length() > 10) {
-            _passwordText.setError("between 4 and 10 alphanumeric characters");
+        if (password.isEmpty() || password.length() <= 6 || password.length() >= 20) {
+            _passwordText.setError("between 6 and 20 alphanumeric characters");
             valid = false;
         } else {
             _passwordText.setError(null);
         }
 
-        if (reEnterPassword.isEmpty() || reEnterPassword.length() < 4 || reEnterPassword.length() > 10 || !(reEnterPassword.equals(password))) {
-            _reEnterPasswordText.setError("Password Do not match");
+        if (reEnterPassword.isEmpty() || reEnterPassword.length() <= 6 || reEnterPassword.length() >= 20 || !(reEnterPassword.equals(password))) {
+            _reEnterPasswordText.setError("password do not match");
             valid = false;
         } else {
             _reEnterPasswordText.setError(null);
