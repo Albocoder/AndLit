@@ -83,11 +83,6 @@ public class MainActivity extends AppCompatActivity
         // Settings
         SettingsController.loadSettings(this);
 
-        // Loading the value of voiceControl
-        SharedPreferences sharedPref =
-                PreferenceManager.getDefaultSharedPreferences(this);
-        voiceControlEnabled = sharedPref.getBoolean
-                (SettingsDefinedKeys.VOICE_CONTROL, false);
     }
 
     @Override
