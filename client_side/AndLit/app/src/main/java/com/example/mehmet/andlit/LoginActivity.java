@@ -126,12 +126,6 @@ public class LoginActivity extends AppCompatActivity {
 
         _loginButton.setEnabled(false);
 
-        final ProgressDialog progressDialog = new ProgressDialog(LoginActivity.this,
-                R.style.AppTheme_Dark_Dialog);
-        progressDialog.setIndeterminate(true);
-        progressDialog.setMessage("Authenticating...");
-        progressDialog.show();
-
         final String username = _emailText.getText().toString();
         final String password = _passwordText.getText().toString();
 
@@ -160,15 +154,15 @@ public class LoginActivity extends AppCompatActivity {
         String username = _emailText.getText().toString();
         String password = _passwordText.getText().toString();
 
-        if (username.isEmpty() || !username.matches("[A-Za-z0-9_]+")) {
+        if (username.isEmpty() || username.length() < 8 || !username.matches("[A-Za-z0-9_]+")) {
             _emailText.setError("enter a valid username");
             valid = false;
         } else {
             _emailText.setError(null);
         }
 
-        if (password.isEmpty() || password.length() <= 6 || password.length() >= 20) {
-            _passwordText.setError("between 6 and 20 alphanumeric characters");
+        if (password.isEmpty() || password.length() < 6 || password.length() > 30) {
+            _passwordText.setError("between 6 and 30 alphanumeric characters");
             valid = false;
         } else {
             _passwordText.setError(null);
@@ -177,40 +171,46 @@ public class LoginActivity extends AppCompatActivity {
         return valid;
     }
 
-    private class LoginTask extends AsyncTask<String, Void, Void>
-    {
+    private class LoginTask extends AsyncTask<String, Void, Integer> {
 
-        private ProgressDialog Dialog = new ProgressDialog(LoginActivity.this,R.style.AppTheme_Dark_Dialog);
+        private ProgressDialog progressDialog =
+                new ProgressDialog(LoginActivity.this,R.style.AppTheme_Dark_Dialog);
 
         protected void onPreExecute() {
             // Display the loading spinner
-            Dialog.setMessage("Authenticating.. ");
-            Dialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-            Dialog.setInverseBackgroundForced(false);
-            Dialog.setIndeterminate(true);
-            Dialog.setCancelable(false);
-            Dialog.show();
+            progressDialog.setMessage("Authenticating...");
+            progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+            progressDialog.setInverseBackgroundForced(false);
+            progressDialog.setIndeterminate(true);
+            progressDialog.setCancelable(false);
+            progressDialog.show();
         }
 
         @Override
-        protected Void doInBackground(String... paramsObj) {
+        protected Integer doInBackground(String... paramsObj) {
             try {
                 UserLogin ul = a.login(paramsObj[0],paramsObj[1]);
-                if ( ul == null ) {
-                    Log.d(TAG,"Wrong credentials!");
-                    return null;
-                }
+                if ( ul == null )
+                    return 1;
             } catch ( IOException e ) {
-                Log.d(TAG,"No internet connection!");
-                return null;
+                return 2;
             }
-            // On complete call either onLoginSuccess or onLoginFailed
-            onLoginSuccess();
-            return null;
+            return 0;
         }
 
-        protected void onPostExecute(Void unused) {
-            Dialog.dismiss();
+        protected void onPostExecute(Integer ret) {
+            progressDialog.dismiss();
+            switch (ret){
+                case(1):
+                    onLoginFailed("Wrong credentials!");
+                    break;
+                case(2):
+                    onLoginFailed("No internet connection!");
+                    break;
+                default:
+                    onLoginSuccess();
+                    break;
+            }
         }
     }
 }
