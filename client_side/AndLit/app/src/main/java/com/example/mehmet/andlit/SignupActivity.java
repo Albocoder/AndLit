@@ -101,10 +101,10 @@ public class SignupActivity extends AppCompatActivity {
         String email = _emailText.getText().toString();
         String password = _passwordText.getText().toString();
 
-        new LoginTask().execute(name,email,password);
+        new RegisterTask().execute(name,email,password);
     }
 
-    private class LoginTask extends AsyncTask<String, Void, Integer> {
+    private class RegisterTask extends AsyncTask<String, Void, Integer> {
 
         private ProgressDialog progressDialog =
                 new ProgressDialog(SignupActivity.this,R.style.AppTheme_Dark_Dialog);
@@ -135,7 +135,7 @@ public class SignupActivity extends AppCompatActivity {
             progressDialog.dismiss();
             switch (ret){
                 case(1):
-                    onSignupFailed("Wrong credentials!");
+                    onSignupFailed("Username or email already exists!");
                     break;
                 case(2):
                     onSignupFailed("No internet connection!");
@@ -155,7 +155,6 @@ public class SignupActivity extends AppCompatActivity {
 
     public void onSignupFailed(String msg) {
         Toast.makeText(getBaseContext(), "Error: "+msg, Toast.LENGTH_LONG).show();
-
         _signupButton.setEnabled(true);
     }
 
@@ -167,13 +166,14 @@ public class SignupActivity extends AppCompatActivity {
         String password = _passwordText.getText().toString();
         String reEnterPassword = _reEnterPasswordText.getText().toString();
 
-        if (name.isEmpty() || name.length() < 8 ) {
-            _nameText.setError("at least 8 characters");
+        if (name.isEmpty() || name.length() < 8 || name.length() > 30) {
+            _nameText.setError("between 8 and 30 characters");
             valid = false;
-            if(!name.matches("[A-Za-z0-9_]+")) {
-                _nameText.setError("only use english letters, numbers and underscore");
-            }
-        } else {
+        } else if(!name.matches("[A-Za-z0-9_]+")) {
+            _nameText.setError("only use english letters, numbers and underscore");
+            valid = false;
+        }
+        else {
             _nameText.setError(null);
         }
 

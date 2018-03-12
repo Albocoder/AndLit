@@ -7,10 +7,12 @@ import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.text.Html;
 import android.util.DisplayMetrics;
@@ -25,6 +27,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.mehmet.andlit.R;
+import com.example.mehmet.andlit.Settings.SettingsDefinedKeys;
 import com.example.mehmet.andlit.database.AppDatabase;
 import com.example.mehmet.andlit.database.entities.*;
 import com.example.mehmet.andlit.face.*;
@@ -62,6 +65,7 @@ public class IntermediateCameraActivity extends Activity {
     private FaceOperator fop;
     private AppDatabase db;
     private List<KnownPPL> allKnownPpl;
+    private Boolean saveOnExit;
 
     // view fields
     private ImageView analyzed;
@@ -94,6 +98,9 @@ public class IntermediateCameraActivity extends Activity {
         train(); frs = new FaceRecognizerSingleton(this);
         // setting up file that holds the image from camera
         setupImageHoldingFile();
+        // setting up settings to operate on
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
+        saveOnExit = sharedPref.getBoolean(SettingsDefinedKeys.SAVE_UNLABELED_ON_EXIT, false);
         // setting up listeners
         takeImage.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -141,13 +148,7 @@ public class IntermediateCameraActivity extends Activity {
             else {
                 // using settings to check if user wants the detections to be saved in device
                 if(fop != null) {
-                    db = AppDatabase.getDatabase(this);
-                    Setting s = db.settingsDao().getSettingWithKey(DETECTIONS_SAVE_FACES_ON_REFRESH);
-                    if(s == null) {
-                        db.settingsDao().insertSetting(new Setting(DETECTIONS_SAVE_FACES_ON_REFRESH, TRUE));
-                        fop.storeUnlabeledFaces();
-                    }
-                    else if(s.value.equals(TRUE))
+                    if(saveOnExit)
                         fop.storeUnlabeledFaces();
                     fop.destroy();
                 }

@@ -17,7 +17,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.mehmet.andlit.CloudInterface.Authenticator;
-import com.example.mehmet.andlit.Settings.SettingsActivity;
 import com.example.mehmet.andlit.database.entities.UserLogin;
 
 import java.io.IOException;
@@ -134,16 +133,14 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void goToHomePage() {
-        Intent intent = new Intent(this.getApplicationContext(), HomeActivity.class);
-        startActivity(intent);
-
+        Intent i = new Intent(this,HomeActivity.class);
+        startActivity(i);
         finish();
     }
 
     public void onLoginSuccess() {
         _loginButton.setEnabled(true);
         goToHomePage();
-        finish();
     }
 
     public void onLoginFailed(String msg) {
@@ -157,10 +154,15 @@ public class LoginActivity extends AppCompatActivity {
         String username = _emailText.getText().toString();
         String password = _passwordText.getText().toString();
 
-        if (username.isEmpty() || username.length() < 8 || !username.matches("[A-Za-z0-9_]+")) {
-            _emailText.setError("enter a valid username");
+        if (username.isEmpty() || username.length() < 8 || username.length() > 30) {
+            _emailText.setError("between 8 to 30 characters");
             valid = false;
-        } else {
+        }
+        else if (!username.matches("[A-Za-z0-9_]+")) {
+            _emailText.setError("only use english letters, numbers and underscore");
+            valid = false;
+        }
+        else {
             _emailText.setError(null);
         }
 
