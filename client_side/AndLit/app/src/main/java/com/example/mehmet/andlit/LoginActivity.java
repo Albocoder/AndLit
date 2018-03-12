@@ -17,6 +17,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.mehmet.andlit.CloudInterface.Authenticator;
+import com.example.mehmet.andlit.Settings.SettingsActivity;
 import com.example.mehmet.andlit.database.entities.UserLogin;
 
 import java.io.IOException;
@@ -133,7 +134,9 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void goToHomePage() {
-        // todo: add logic for going to home page
+        Intent intent = new Intent(this.getApplicationContext(), HomeActivity.class);
+        startActivity(intent);
+
         finish();
     }
 
