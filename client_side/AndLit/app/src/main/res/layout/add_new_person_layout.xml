@@ -37,17 +37,19 @@
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
         android:layout_below="@+id/profileImage"
-        android:layout_marginTop="62dp"
+        android:layout_marginTop="41dp"
         android:hint="Name*" />
 
     <Button
         android:id="@+id/newPersonButton"
-        style="@style/Widget.AppCompat.Button.Colored"
+        style="@style/Base.DialogWindowTitleBackground.AppCompat"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
-        android:text="Save" />
+        android:layout_below="@+id/newSname"
+        android:text="Save"
+        android:textColor="@color/accent"
+        android:textSize="18sp" />
 
 </RelativeLayout>

@@ -42,6 +42,7 @@ public class SignupActivity extends AppCompatActivity {
     private ScrollView sv;
     private Authenticator a;
 
+    // ********************************* ACTIVITY STUFF ********************************* //
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -87,6 +88,8 @@ public class SignupActivity extends AppCompatActivity {
             animationDrawable.stop();
     }
 
+
+    // ********************************* HELPER STUFF ********************************* //
     public void signup() {
         Log.d(TAG, "Signup");
 
@@ -102,49 +105,6 @@ public class SignupActivity extends AppCompatActivity {
         String password = _passwordText.getText().toString();
 
         new RegisterTask().execute(name,email,password);
-    }
-
-    private class RegisterTask extends AsyncTask<String, Void, Integer> {
-
-        private ProgressDialog progressDialog =
-                new ProgressDialog(SignupActivity.this,R.style.AppTheme_Dark_Dialog);
-
-        protected void onPreExecute() {
-            // Display the loading spinner
-            progressDialog.setMessage("Registering...");
-            progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-            progressDialog.setInverseBackgroundForced(false);
-            progressDialog.setIndeterminate(true);
-            progressDialog.setCancelable(false);
-            progressDialog.show();
-        }
-
-        @Override
-        protected Integer doInBackground(String... paramsObj) {
-            try {
-                UserLogin ul = a.register(paramsObj[0],paramsObj[1],paramsObj[2]);
-                if ( ul == null )
-                    return 1;
-            } catch ( IOException e ) {
-                return 2;
-            }
-            return 0;
-        }
-
-        protected void onPostExecute(Integer ret) {
-            progressDialog.dismiss();
-            switch (ret){
-                case(1):
-                    onSignupFailed("Username or email already exists!");
-                    break;
-                case(2):
-                    onSignupFailed("No internet connection!");
-                    break;
-                default:
-                    onSignupSuccess();
-                    break;
-            }
-        }
     }
 
     public void onSignupSuccess() {
@@ -199,5 +159,52 @@ public class SignupActivity extends AppCompatActivity {
         }
 
         return valid;
+    }
+
+
+    // ********************************* REGISTRATION CLASS ********************************* //
+    private class RegisterTask extends AsyncTask<String, Void, Integer> {
+
+        private ProgressDialog progressDialog =
+                new ProgressDialog(SignupActivity.this,R.style.AppTheme_Dark_Dialog);
+
+        @Override
+        protected void onPreExecute() {
+            // Display the loading spinner
+            progressDialog.setMessage("Registering...");
+            progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+            progressDialog.setInverseBackgroundForced(false);
+            progressDialog.setIndeterminate(true);
+            progressDialog.setCancelable(false);
+            progressDialog.show();
+        }
+
+        @Override
+        protected Integer doInBackground(String... paramsObj) {
+            try {
+                UserLogin ul = a.register(paramsObj[0],paramsObj[1],paramsObj[2]);
+                if ( ul == null )
+                    return 1;
+            } catch ( IOException e ) {
+                return 2;
+            }
+            return 0;
+        }
+
+        @Override
+        protected void onPostExecute(Integer ret) {
+            progressDialog.dismiss();
+            switch (ret){
+                case(1):
+                    onSignupFailed("Username or email already exists!");
+                    break;
+                case(2):
+                    onSignupFailed("No internet connection!");
+                    break;
+                default:
+                    onSignupSuccess();
+                    break;
+            }
+        }
     }
 }

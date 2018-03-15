@@ -11,15 +11,21 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.example.mehmet.andlit.CloudInterface.Authenticator;
 import com.example.mehmet.andlit.Settings.SettingsActivity;
 import com.example.mehmet.andlit.Settings.SettingsDefinedKeys;
+import com.example.mehmet.andlit.database.AppDatabase;
+import com.example.mehmet.andlit.helperUI.IntermediateCameraActivity;
+import com.example.mehmet.andlit.voice.VoiceToCommand;
+import com.example.mehmet.andlit.voice.VoiceToCommandEnglish;
 
 import java.util.ArrayList;
 import java.util.Locale;
 
 public class HomeActivity extends AppCompatActivity
 {
-    // Properties
+    // View related Properties
     private TextView txtSpeechInput;
 
     @Override
@@ -27,15 +33,13 @@ public class HomeActivity extends AppCompatActivity
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
-
         // Camera button init
         Button cameraButton = findViewById(R.id.camera_button);
         cameraButton.setOnClickListener(new View.OnClickListener()
         {
             @Override
-            public void onClick(View v)
-            {
-                // To do: Camera Button Stuff
+            public void onClick(View v) {
+                loadCameraScreen();
             }
         });
 
@@ -47,6 +51,17 @@ public class HomeActivity extends AppCompatActivity
             public void onClick(View v)
             {
                 loadSettingsScreen();
+            }
+        });
+
+        Button logoutButton = findViewById(R.id.logoutButton);
+        logoutButton.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View view) {
+                new Authenticator(view.getContext()).logout();
+                Intent i = new Intent(view.getContext(),LoginActivity.class);
+                startActivity(i);
+                finish();
             }
         });
 
@@ -83,6 +98,11 @@ public class HomeActivity extends AppCompatActivity
         startActivity(intent);
     }
 
+    private void loadCameraScreen(){
+        Intent i = new Intent(this, IntermediateCameraActivity.class);
+        startActivity(i);
+    }
+
     /**
      * Showing google speech input dialog
      * */
@@ -116,6 +136,10 @@ public class HomeActivity extends AppCompatActivity
 
                 // result.get(0) holds the voice input in string form
                 txtSpeechInput.setText(result.get(0));  // testing the input by displaying on a text view
+                VoiceToCommand vc;
+                //todo if langauge settings are english
+                vc = new VoiceToCommandEnglish(this);
+                vc.decide(result.get(0));
             }
         }
     }

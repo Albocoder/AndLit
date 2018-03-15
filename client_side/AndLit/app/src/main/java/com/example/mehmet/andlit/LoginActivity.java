@@ -181,6 +181,7 @@ public class LoginActivity extends AppCompatActivity {
         private ProgressDialog progressDialog =
                 new ProgressDialog(LoginActivity.this,R.style.AppTheme_Dark_Dialog);
 
+        @Override
         protected void onPreExecute() {
             // Display the loading spinner
             progressDialog.setMessage("Authenticating...");
@@ -203,6 +204,7 @@ public class LoginActivity extends AppCompatActivity {
             return 0;
         }
 
+        @Override
         protected void onPostExecute(Integer ret) {
             progressDialog.dismiss();
             switch (ret){
