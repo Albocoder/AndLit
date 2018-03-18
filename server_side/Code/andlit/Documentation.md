@@ -10,27 +10,52 @@ Sample httpie command:
 ```
 http --verify=no --json POST https://andlit.info/users/create username='mamed' email='mamed@mamed.com' password='somesuperpasswordhere'
 ```
-
+Sample response body on successful request:
+```
+{
+    "email": "mamed@mamed.com",
+    "id": 2,
+    "token": "4f7b3a8a64f19b5fe7ede69d28ed26f084d5301c",
+    "username": "mamed"
+}
+```
 ### Getting User Information:
 In order to get user information, users need to submit a GET request to https://andlit.info/users/getprofile, with their authorization token. Upon successful request, username, email, id, and authorization token will be returned in the response.
 
 Sample httpie command:
 ```
-http --verify=no --json GET https://andlit.info/users/getprofile 'Authorization: Token [authorization token]'
+http --verify=no --json GET https://andlit.info/users/getprofile 'Authorization: Token 4f7b3a8a64f19b5fe7ede69d28ed26f084d5301c'
 ```
-
+Sample response body on successful request:
+```
+{
+    "email": "mamed@mamed.com",
+    "id": 2,
+    "token": "4f7b3a8a64f19b5fe7ede69d28ed26f084d5301c",
+    "username": "mamed"
+}
+```
 ### Changing User Password
 In order to change user password, users need to submit a PUT request to https://andlit.info/users/changepass with authorization token and password for their new password. 
 
 Sample httpie command:
 ```
-http --verify=no --json PUT https://andlit.info/users/changepass 'Authorization: Token [authorization token]' password='superduperpasswordhere'
+http --verify=no --json PUT https://andlit.info/users/changepass 'Authorization: Token 4f7b3a8a64f19b5fe7ede69d28ed26f084d5301c' password='superduperpasswordhere'
 ```
-
+Sample response body on successful request:
+```
+"Changed the password successfully!"
+```
 ### Retrieving Authentication Token
 In order to retrieve authentication token for the user, users need to submit a POST request to https://andlit.info/users/gettoken with username and password. Upon successful request, authorization token will be returned in the response.
 
 Sample httpie command:
 ```
 http --verify=no --json POST https://andlit.info/users/gettoken username='mamed' password='superduperpasswordhere'
+```
+Sample response body on successful request:
+```
+{
+    "token": "4f7b3a8a64f19b5fe7ede69d28ed26f084d5301c"
+}
 ```
