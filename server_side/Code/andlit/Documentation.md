@@ -68,6 +68,11 @@ services that are embedded into our platform.
 ### Describing an image with labels
 This endpoint corresponds to google-cloud-vision api's [label_detection](https://cloud.google.com/vision/docs/detecting-labels) endpoint. By submitting an image users can receive labels, and relative confidence scores for that image. Users can submit images both in raw format, or as a base64 encoded text. In order to do so, they need to submit a POST request to https://andlit.info/vision/describe/ with authorization token and an image. 
 
+The picture below was used for demonstration of this endpoint:
+
+![alt text](../../sample_images/dollar.jpg)
+
+
 Sample httpie command for posting image in raw format:
 ```
 http --form --verify=no POST https://andlit.info/vision/describe/ 'Authorization: Token 4f7b3a8a64f19b5fe7ede69d28ed26f084d5301c' image@dollar.jpg
@@ -94,6 +99,11 @@ Sample response body on successful request:
 ```
 ### Retrieving text from an image
 This endpoint corresponds to google-cloud-vision api's [document_text_detection](https://cloud.google.com/vision/docs/detecting-fulltext) endpoint. By submitting an image users can receive the full text in the image, alongside with block and paragraph boundary information. Users can submit images both in raw format, or as a base64 encoded text. In order to do so, they need to submit a POST request to https://andlit.info/vision/read/ with authorization token and an image. 
+
+The picture below was used for demonstration of this endpoint:
+
+![alt text](../../sample_images/zen.png)
+
 
 Sample httpie command for posting image in raw format:
 ```
