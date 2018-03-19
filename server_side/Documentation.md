@@ -70,7 +70,7 @@ This endpoint corresponds to google-cloud-vision api's [label_detection](https:/
 
 The picture below was used for demonstration of this endpoint:
 
-![alt text](../../sample_images/dollar.jpg)
+![alt text](sample_images/dollar.jpg)
 
 
 Sample httpie command for posting image in raw format:
@@ -102,7 +102,7 @@ This endpoint corresponds to google-cloud-vision api's [document_text_detection]
 
 The picture below was used for demonstration of this endpoint:
 
-![alt text](../../sample_images/zen.png)
+![alt text](sample_images/zen.png)
 
 
 Sample httpie command for posting image in raw format:
