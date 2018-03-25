@@ -14,7 +14,7 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.andlit.CloudInterface.Authenticator;
+import com.andlit.CloudInterface.Authentication.Authenticator;
 import com.andlit.database.entities.UserLogin;
 
 import java.io.IOException;

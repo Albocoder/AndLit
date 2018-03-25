@@ -1,4 +1,4 @@
-package com.andlit.CloudInterface;
+package com.andlit.CloudInterface.Authentication;
 
 import android.content.Context;
 

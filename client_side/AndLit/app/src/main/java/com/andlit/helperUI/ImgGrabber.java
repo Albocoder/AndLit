@@ -1,6 +1,5 @@
 package com.andlit.helperUI;
 
-import android.Manifest;
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.ClipData;
@@ -14,8 +13,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.annotation.Nullable;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
 import android.support.v4.content.FileProvider;
 import android.util.Log;
 import android.widget.Toast;
@@ -86,13 +83,7 @@ public class ImgGrabber extends Activity {
             }
         }
         try{
-            if(ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_DENIED) {
-                ActivityCompat.requestPermissions(this, new String[] {Manifest.permission.CAMERA}, 1337);
-                startActivityForResult(i, CAPTURE_IMAGE_REQUEST);
-            }
-            else {
-                startActivityForResult(i, CAPTURE_IMAGE_REQUEST);
-            }
+            startActivityForResult(i, CAPTURE_IMAGE_REQUEST);
         }
         catch (ActivityNotFoundException e) {
             Toast.makeText(this,"No camera was found in device!", Toast.LENGTH_LONG).show();
@@ -136,5 +127,4 @@ public class ImgGrabber extends Activity {
         setResult(code);
         finish();
     }
-
 }

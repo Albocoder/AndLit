@@ -1,5 +1,6 @@
 package com.andlit.helperUI;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -8,12 +9,16 @@ import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
+import android.support.design.widget.Snackbar;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.text.Html;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -91,7 +96,6 @@ public class IntermediateCameraActivity extends Activity {
         DisplayMetrics displayMetrics = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
         SCREEN_HEIGHT = displayMetrics.heightPixels;
-        SCREEN_WIDTH = displayMetrics.widthPixels;
         allKnownPpl = db.knownPplDao().getAllRecords();
         // todo remove train() and just // instantiate FaceRecognizerSingleton
         train(); frs = new FaceRecognizerSingleton(this);
@@ -104,13 +108,7 @@ public class IntermediateCameraActivity extends Activity {
         takeImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                progress.show();
-                Intent i = new Intent(IntermediateCameraActivity.this
-                        ,ImgGrabber.class);
-                i.putExtra(ARGUMENT_KEY,imageLocation.getAbsolutePath());
-                i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                i.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                startActivityForResult(i,REQUEST_IMG_ANALYSIS);
+                startCameraActivity();
             }
         });
         analyzed.setOnTouchListener(new View.OnTouchListener() {
@@ -168,6 +166,7 @@ public class IntermediateCameraActivity extends Activity {
             imageLocation.delete();
     }
 
+    // TODO: FIX THIS!!!
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
@@ -203,6 +202,20 @@ public class IntermediateCameraActivity extends Activity {
 
 
     // ********************************** UI related functions ***********************************//
+    public void startCameraActivity(){
+        if(ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this,new String[] {Manifest.permission.CAMERA}, 1337);
+        }
+        else {
+            progress.show();
+            Intent i = new Intent(IntermediateCameraActivity.this
+                    , ImgGrabber.class);
+            i.putExtra(ARGUMENT_KEY, imageLocation.getAbsolutePath());
+            i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            i.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            startActivityForResult(i, REQUEST_IMG_ANALYSIS);
+        }
+    }
     private void showPopUpForTrueFace( RecognizedFace rf ) {
         // initializing
         if(rf.getFace().getID() <=0 )
@@ -334,7 +347,11 @@ public class IntermediateCameraActivity extends Activity {
                     long id = db.knownPplDao().insertEntry(newPerson);
                     rf.getFace().setID((int)id);
                     try {
-                        FaceOperator.saveTrainingFaceToDatabase(view.getContext(),rf);
+                        training_face f = FaceOperator.saveTrainingFaceToDatabase(view.getContext(),rf); // check this
+                        if( f == null )
+                            Snackbar.make(view,"Couldn't save instance to database!",Snackbar.LENGTH_SHORT);
+                        else
+                            allKnownPpl.add(newPerson);
                         dialog.dismiss();
                     } catch (IOException|NoSuchAlgorithmException e) {
                         Toast.makeText(view.getContext(),
