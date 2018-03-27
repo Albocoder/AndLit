@@ -1,4 +1,4 @@
-package com.andlit.Settings;
+package com.andlit.settings;
 
 
 import android.os.Bundle;

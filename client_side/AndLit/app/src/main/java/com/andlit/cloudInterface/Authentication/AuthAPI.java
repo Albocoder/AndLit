@@ -1,4 +1,4 @@
-package com.andlit.CloudInterface.Authentication;
+package com.andlit.cloudInterface.Authentication;
 
 import com.google.gson.JsonObject;
 

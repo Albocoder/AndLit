@@ -1,4 +1,4 @@
-package com.andlit.CloudInterface.Authentication;
+package com.andlit.cloudInterface.Authentication;
 
 import android.content.Context;
 
@@ -53,11 +53,15 @@ public class Authenticator {
         int code = resp.code();
         if ( code >= 200 && code < 300) {
             JsonObject res = resp.body();
+            if(res == null)
+                return null;
             String accessToken = res.get("token").getAsString();
             resp = a.getInfoForLoggedInUser("Token "+accessToken).execute();
             code = resp.code();
             if( code >= 200 && code < 300) {
                 res = resp.body();
+                if(res == null)
+                    return null;
                 long id = res.get("id").getAsLong();
                 UserLogin ul = new UserLogin(id,un,accessToken);
                 logout();
@@ -80,6 +84,8 @@ public class Authenticator {
         int code = resp.code();
         if( code >= 200 && code < 300 ) {
             o = resp.body();
+            if(o == null)
+                return null;
             try {
                 long id = o.get("id").getAsLong();
                 String username = o.get("username").getAsString();

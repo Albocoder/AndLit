@@ -32,7 +32,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.andlit.R;
-import com.andlit.Settings.SettingsDefinedKeys;
+import com.andlit.settings.SettingsDefinedKeys;
 import com.andlit.database.AppDatabase;
 import com.andlit.database.entities.*;
 import com.andlit.face.*;
@@ -380,6 +380,7 @@ public class IntermediateCameraActivity extends Activity {
                         (this, "default_profile.jpg","tmp", "default_profile.jpg");
                 photo = BitmapFactory.decodeFile(filePath);
                 new File(filePath).delete();
+                return photo;
             } catch (IOException e) {}
         photo = BitmapFactory.decodeFile(filePath);
         return photo;
@@ -465,7 +466,6 @@ public class IntermediateCameraActivity extends Activity {
         } catch (IOException e) {
             Log.d(TAG,"Couldn't open file to save the image!");
             exitActivity(-1);
-            return;
         }
     }
     // TODO: DELETE THIS IN PRODUCTION! USER WILL START WITH NO KNOWN INSTANCES!
@@ -492,7 +492,7 @@ public class IntermediateCameraActivity extends Activity {
 //        for (training_face tf : recs)
 //            FaceOperator.deleteTrainingInstance(this,tf);
 
-        List<Integer> erinIndex  = new ArrayList<Integer>();
+        List<Integer> erinIndex  = new ArrayList<>();
         erinIndex.add(1);erinIndex.add(2);erinIndex.add(3);erinIndex.add(4);erinIndex.add(5);
         List<Integer> obamaIndex  = new ArrayList<>();
         obamaIndex.add(6);obamaIndex.add(7);obamaIndex.add(8);obamaIndex.add(9);obamaIndex.add(10);obamaIndex.add(11);
@@ -500,16 +500,12 @@ public class IntermediateCameraActivity extends Activity {
         argertIndex.add(13);argertIndex.add(14);argertIndex.add(16);
         List<Integer> testing = new ArrayList<>();
         testing.add(15);testing.add(12);
-        Face detected = null;
+        Face detected;
         for(int i = 1; i < 17; i++) {
             String filepath;
             try {
                 filepath = StorageHelper.getFilePathFromAssets(this,"training/face"+i+".png","training","face"+i+".png");
             } catch (IOException e) { continue; }
-            String md5 = ""+r.nextLong()+r.nextInt();
-            try {
-                md5 = StorageHelper.MD5toHexString(StorageHelper.getMD5OfFile(filepath));
-            } catch (IOException|NoSuchAlgorithmException e) {}
 
             opencv_core.Mat m = imread(filepath);
             if (m==null)

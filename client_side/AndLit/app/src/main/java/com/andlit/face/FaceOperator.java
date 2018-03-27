@@ -260,9 +260,9 @@ public class FaceOperator {
             } catch (RuntimeException e) {
                 try{
                     db.detectedFacesDao().updateRowData(detection);
-                    Log.e(TAG, "First Try failed: "+e.getStackTrace().toString());
+                    Log.e(TAG, "First Try failed: "+e.getLocalizedMessage());
                 }catch (RuntimeException e2) {
-                    Log.e(TAG, "Second Try failed: "+e2.getStackTrace().toString());
+                    Log.e(TAG, "Second Try failed: "+e2.getLocalizedMessage());
                     imageFile.delete();
                     return null;
                 }
@@ -292,9 +292,9 @@ public class FaceOperator {
             } catch (SQLiteConstraintException e) {
                 try{
                     db.detectedFacesDao().updateRowData(detection);
-                    Log.e(TAG, "First Try failed: "+e.getStackTrace().toString());
+                    Log.e(TAG, "First Try failed: "+e.getLocalizedMessage());
                 }catch (RuntimeException e2) {
-                    Log.e(TAG, "Second Try failed: "+e2.getStackTrace().toString());
+                    Log.e(TAG, "Second Try failed: "+e2.getLocalizedMessage());
                     mFileTemp.delete();
                     return null;
                 }
@@ -340,9 +340,9 @@ public class FaceOperator {
             } catch (RuntimeException e) {
                 try{
                     db.trainingFaceDao().insertTrainingFace(trainingInstance);
-                    Log.e(TAG, "First Try failed: "+e.getStackTrace().toString());
+                    Log.e(TAG, "First Try failed: "+e.getLocalizedMessage());
                 }catch (RuntimeException e2) {
-                    Log.e(TAG, "Second Try failed: "+e2.getStackTrace().toString());
+                    Log.e(TAG, "Second Try failed: "+e2.getLocalizedMessage());
                     imageFile.delete();
                     return null;
                 }
@@ -372,9 +372,9 @@ public class FaceOperator {
             } catch (SQLiteConstraintException e) {
                 try{
                     db.trainingFaceDao().insertTrainingFace(trainingInstance);
-                    Log.e(TAG, "First Try failed: "+e.getStackTrace().toString());
+                    Log.e(TAG, "First Try failed: "+e.getLocalizedMessage());
                 }catch (RuntimeException e2) {
-                    Log.e(TAG, "Second Try failed: "+e2.getStackTrace().toString());
+                    Log.e(TAG, "Second Try failed: "+e2.getLocalizedMessage());
                     mFileTemp.delete();
                     return null;
                 }
@@ -504,9 +504,9 @@ public class FaceOperator {
             } catch (RuntimeException e) {
                 try{
                     db.trainingFaceDao().insertTrainingFace(trainingInstance);
-                    Log.e(TAG, "First Try failed: "+e.getStackTrace().toString());
+                    Log.e(TAG, "First Try failed: "+e.getLocalizedMessage());
                 }catch (RuntimeException e2) {
-                    Log.e(TAG, "Second Try failed: "+e2.getStackTrace().toString());
+                    Log.e(TAG, "Second Try failed: "+e2.getLocalizedMessage());
                     imageFile.delete();
                     return null;
                 }
@@ -536,9 +536,9 @@ public class FaceOperator {
             } catch (SQLiteConstraintException e) {
                 try{
                     db.trainingFaceDao().insertTrainingFace(trainingInstance);
-                    Log.e(TAG, "First Try failed: "+e.getStackTrace().toString());
+                    Log.e(TAG, "First Try failed: "+e.getLocalizedMessage());
                 }catch (RuntimeException e2) {
-                    Log.e(TAG, "Second Try failed: "+e2.getStackTrace().toString());
+                    Log.e(TAG, "Second Try failed: "+e2.getLocalizedMessage());
                     mFileTemp.delete();
                     return null;
                 }
@@ -599,7 +599,7 @@ public class FaceOperator {
                 return null;
             }
         } catch (IOException|NoSuchAlgorithmException e) {
-            Log.e(TAG,"Error trying to move face to training: "+e.getStackTrace().toString());
+            Log.e(TAG,"Error trying to move face to training: "+e.getLocalizedMessage());
             return null;
         }
     }

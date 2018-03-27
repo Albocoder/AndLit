@@ -1,4 +1,4 @@
-package com.andlit.Settings;
+package com.andlit.settings;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;

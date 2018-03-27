@@ -2,6 +2,7 @@ package com.andlit.face;
 
 import android.content.Context;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.andlit.database.AppDatabase;
 import com.andlit.database.entities.Classifier;
@@ -54,18 +55,15 @@ public class FaceRecognizerSingleton {
 
         if (trainedModel != null)
             return;
-        else if(mustTrainConditions())
-            trainModel();
         else
             loadTrainedModel();
     }
 
     public synchronized void trainModel() {
-        Log.d(TAG,"Training started automatically...");
         AppDatabase db = AppDatabase.getDatabase(c);
         int trainingInstances = db.trainingFaceDao().getNumberOfTrainingInstances();
         if(trainingInstances == 0)
-            throw new RuntimeException("No training instances found in database!");
+            Toast.makeText(c, "No training instances found! Synchronize?", Toast.LENGTH_SHORT).show();
 
         List<Integer> allLabels = db.trainingFaceDao().getAllPossibleRecognitions();
         // todo: check if this is better than putting the values hardcoded
@@ -110,8 +108,7 @@ public class FaceRecognizerSingleton {
         return new RecognizedFace(face,foundLabels,confidence);
     }
 
-    // private inner functions for modularity and nice stuff
-    private boolean mustTrainConditions() {
+    public boolean mustTrainConditions() {
         if(classifierMetadata == null)
             return true;
         AppDatabase db = AppDatabase.getDatabase(c);
@@ -151,7 +148,7 @@ public class FaceRecognizerSingleton {
             trainedModel.load(classifierFile.getAbsolutePath());
         }
         else
-            trainModel(); // todo get data from the cloud. The damn user has deleted the shit
+            trainModel();
     }
     private synchronized void saveTrainedModel(int numberOfDetections, int numInstTrained){
         File classifierFile;

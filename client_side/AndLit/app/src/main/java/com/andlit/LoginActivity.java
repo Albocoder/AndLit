@@ -1,5 +1,6 @@
 package com.andlit;
 
+import android.annotation.SuppressLint;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.graphics.drawable.AnimationDrawable;
@@ -14,7 +15,8 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.andlit.CloudInterface.Authentication.Authenticator;
+import com.andlit.cloudInterface.Authentication.Authenticator;
+import com.andlit.cron.CronMaster;
 import com.andlit.database.entities.UserLogin;
 
 import java.io.IOException;
@@ -50,6 +52,12 @@ public class LoginActivity extends AppCompatActivity {
         setContentView(R.layout.activity_login);
         ButterKnife.bind(this);
         a = new Authenticator(this);
+
+        // *********************** perform all the on-start operations *********************** //
+
+        CronMaster.fireAllCrons(this);
+
+        // *********************************************************************************** //
 
         if(a.isLoggedIn())
             goToHomePage();
@@ -174,6 +182,7 @@ public class LoginActivity extends AppCompatActivity {
         return valid;
     }
 
+    @SuppressLint("StaticFieldLeak")
     private class LoginTask extends AsyncTask<String, Void, Integer> {
 
         private ProgressDialog progressDialog =

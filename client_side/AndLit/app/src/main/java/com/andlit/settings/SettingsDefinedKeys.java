@@ -1,4 +1,4 @@
-package com.andlit.Settings;
+package com.andlit.settings;
 
 // This class will only have settings keys defined
 // all the variables must be "public static final String"

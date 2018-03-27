@@ -1,16 +1,14 @@
-package com.andlit.CloudInterface.Vision.models;
-
-import java.util.List;
+package com.andlit.cloudInterface.Vision.models;
 
 public class Description {
-    List<String> keywords;
-    public Description(List<String> k){
+    String []keywords;
+    public Description(String[] k){
         keywords = k;
     }
 
     @Override
     public String toString() {
-        StringBuffer sb = new StringBuffer("The photo is described by keywords like");
+        StringBuilder sb = new StringBuilder("The photo is described by keywords like");
         for(String s:keywords) {
             sb.append(", ");
             sb.append(s);

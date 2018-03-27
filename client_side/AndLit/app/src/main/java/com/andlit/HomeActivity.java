@@ -12,9 +12,9 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.andlit.CloudInterface.Authentication.Authenticator;
-import com.andlit.Settings.SettingsActivity;
-import com.andlit.Settings.SettingsDefinedKeys;
+import com.andlit.cloudInterface.Authentication.Authenticator;
+import com.andlit.settings.SettingsActivity;
+import com.andlit.settings.SettingsDefinedKeys;
 import com.andlit.helperUI.IntermediateCameraActivity;
 import com.andlit.voice.VoiceToCommand;
 import com.andlit.voice.VoiceToCommandEnglish;

@@ -1,4 +1,4 @@
-package com.andlit.CloudInterface.Vision;
+package com.andlit.cloudInterface.Vision;
 
 import com.google.gson.JsonObject;
 

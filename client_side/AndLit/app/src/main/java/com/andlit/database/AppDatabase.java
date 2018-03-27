@@ -26,7 +26,7 @@ import com.andlit.database.entities.training_face;
 
 
 @Database(entities = {API_key.class, Classifier.class, detected_face.class, KnownPPL.class,
-        misc_info.class, UserLogin.class, training_face.class, Setting.class},
+        misc_info.class, UserLogin.class, training_face.class},
         version = 1, exportSchema = false)
 public abstract class AppDatabase extends RoomDatabase {
     private static AppDatabase INSTANCE;
@@ -38,7 +38,6 @@ public abstract class AppDatabase extends RoomDatabase {
     public abstract misc_info_dao miscInfoDao();
     public abstract user_login_dao userLoginDao();
     public abstract training_face_dao trainingFaceDao();
-    public abstract settings_dao settingsDao();
 
     @VisibleForTesting
     public static final String DATABASE_NAME = "local-andlit-database";

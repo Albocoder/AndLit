@@ -1,5 +1,6 @@
 package com.andlit;
 
+import android.annotation.SuppressLint;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.graphics.drawable.AnimationDrawable;
@@ -14,7 +15,7 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.andlit.CloudInterface.Authentication.Authenticator;
+import com.andlit.cloudInterface.Authentication.Authenticator;
 import com.andlit.database.entities.UserLogin;
 
 import java.io.IOException;
@@ -163,6 +164,7 @@ public class SignupActivity extends AppCompatActivity {
 
 
     // ********************************* REGISTRATION CLASS ********************************* //
+    @SuppressLint("StaticFieldLeak")
     private class RegisterTask extends AsyncTask<String, Void, Integer> {
 
         private ProgressDialog progressDialog =
