@@ -27,32 +27,32 @@ public class TrainingAlarmReceiver extends BroadcastReceiver{
 //        FaceRecognizerSingleton frs = new FaceRecognizerSingleton(context);
 //        if(frs.mustTrainConditions())
 //            frs.trainModel();
-        NotificationCompat.Builder mBuilder = new
-                NotificationCompat.Builder(context)
-                .setContentTitle("AndLit app training")
-                .setContentText("Training of AndLit face recognizer started!")
-                .setAutoCancel(true)
-                .setSmallIcon(R.mipmap.icon);
-
-        NotificationManager notificationManager = (NotificationManager)
-                context.getSystemService(Context.NOTIFICATION_SERVICE);
-
-        int currentApiVersion = android.os.Build.VERSION.SDK_INT;
-
-        Notification notification;
-        if (currentApiVersion >= android.os.Build.VERSION_CODES.JELLY_BEAN) {
-            notification = mBuilder.build();
-        } else {
-            notification = mBuilder.getNotification();
-        }
-        notification.defaults |= Notification.DEFAULT_LIGHTS;
-        notification.defaults |= Notification.DEFAULT_SOUND;
-        notification.defaults |= Notification.FLAG_AUTO_CANCEL;
-        notification.flags = Notification.DEFAULT_LIGHTS
-                | Notification.FLAG_AUTO_CANCEL;
-
-        if(notificationManager != null)
-            notificationManager.notify(0x1111, notification);
+//        NotificationCompat.Builder mBuilder = new
+//                NotificationCompat.Builder(context)
+//                .setContentTitle("AndLit app training")
+//                .setContentText("Training of AndLit face recognizer started!")
+//                .setAutoCancel(true)
+//                .setSmallIcon(R.mipmap.icon);
+//
+//        NotificationManager notificationManager = (NotificationManager)
+//                context.getSystemService(Context.NOTIFICATION_SERVICE);
+//
+//        int currentApiVersion = android.os.Build.VERSION.SDK_INT;
+//
+//        Notification notification;
+//        if (currentApiVersion >= android.os.Build.VERSION_CODES.JELLY_BEAN) {
+//            notification = mBuilder.build();
+//        } else {
+//            notification = mBuilder.getNotification();
+//        }
+//        notification.defaults |= Notification.DEFAULT_LIGHTS;
+//        notification.defaults |= Notification.DEFAULT_SOUND;
+//        notification.defaults |= Notification.FLAG_AUTO_CANCEL;
+//        notification.flags = Notification.DEFAULT_LIGHTS
+//                | Notification.FLAG_AUTO_CANCEL;
+//
+//        if(notificationManager != null)
+//            notificationManager.notify(0x1111, notification);
 
         wl.release();
     }
@@ -63,8 +63,9 @@ public class TrainingAlarmReceiver extends BroadcastReceiver{
         PendingIntent pi = PendingIntent.getBroadcast(context, TRAINING_CODE, i, 0);
         if(am == null)
             return false;
+        // todo: check the settings and set the alarm accordingly
         am.setInexactRepeating(AlarmManager.RTC_WAKEUP, Calendar.getInstance().getTimeInMillis(),
-                10* 1000, pi);
+                24*60* 1000/* 24h interval */, pi);
         return true;
     }
 
