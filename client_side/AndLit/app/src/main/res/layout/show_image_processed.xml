@@ -9,8 +9,7 @@
         android:id="@+id/AnalyzedImg"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:adjustViewBounds="false"
-        android:scaleType="fitXY" />
+        android:adjustViewBounds="false" />
 
     <Button
         android:id="@+id/BtnCpt"
@@ -22,5 +21,23 @@
         android:layout_marginBottom="13dp"
         android:background="@drawable/bg_green_circle_button"
         android:src="@drawable/bg_green_circle_button" />
+
+    <Button
+        android:id="@+id/imgDescription"
+        android:layout_width="wrap_content"
+        android:layout_height="40dp"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true"
+        android:text="Describe" />
+
+    <Button
+        android:id="@+id/textRecognition"
+        android:layout_width="wrap_content"
+        android:layout_height="40dp"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:text="Text"
+        android:layout_alignParentLeft="true" />
 
 </RelativeLayout>

@@ -10,9 +10,9 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
@@ -32,6 +32,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.andlit.R;
+import com.andlit.cloudInterface.Vision.VisionEndpoint;
+import com.andlit.cloudInterface.Vision.models.Description;
+import com.andlit.cloudInterface.Vision.models.Text;
 import com.andlit.settings.SettingsDefinedKeys;
 import com.andlit.database.AppDatabase;
 import com.andlit.database.entities.*;
@@ -51,6 +54,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Random;
 
+import static com.andlit.utils.StorageHelper.moveFileToInternalMemory;
 import static org.bytedeco.javacpp.opencv_core.LINE_8;
 import static org.bytedeco.javacpp.opencv_imgcodecs.imread;
 import static org.bytedeco.javacpp.opencv_imgcodecs.imwrite;
@@ -63,54 +67,74 @@ public class IntermediateCameraActivity extends Activity {
     public static final String ARGUMENT_KEY = "filename";
     public static final int REQUEST_IMG_ANALYSIS = 1336;
 
-    // fields
+    // internal fields
     private File imageLocation;
-    private FaceRecognizerSingleton frs;
     private FaceOperator fop;
     private AppDatabase db;
+    private FaceRecognizerSingleton frs;
     private List<KnownPPL> allKnownPpl;
+    private VisionEndpoint vis;
+    private boolean first;
+
+    // external fields
+    private Description d;
+    private List<Text> t;
     private Boolean saveOnExit;
 
     // view fields
     private ImageView analyzed;
     private ProgressDialog progress;
-    int SCREEN_HEIGHT,SCREEN_WIDTH;
-    double widthRatio,heightRatio;
+    private int SCREEN_HEIGHT,SCREEN_WIDTH;
 
     // ********************* ACTIVITY FUNCTIONS ********************* //
     @Override
+    @SuppressLint("ClickableViewAccessibility")
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.show_image_processed);
-        // Setting up UI things
-        Button takeImage = findViewById(R.id.BtnCpt);
-        analyzed = findViewById(R.id.AnalyzedImg);
+
+        // Setting up progress dialog things
         progress = new ProgressDialog(this);
         progress.setTitle("Loading!");
         progress.setMessage("Please wait...");
         progress.setCancelable(false);
+        d = null;
+        t = null;
+        vis = null;
+        first = true;
+
         // instantiating database connection
         db = AppDatabase.getDatabase(this);
+
         // initializing more variables
         fop = null;
         DisplayMetrics displayMetrics = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
         SCREEN_HEIGHT = displayMetrics.heightPixels;
+        SCREEN_WIDTH = displayMetrics.widthPixels;
         allKnownPpl = db.knownPplDao().getAllRecords();
+
         // todo remove train() and just // instantiate FaceRecognizerSingleton
         train(); frs = new FaceRecognizerSingleton(this);
+
         // setting up file that holds the image from camera
         setupImageHoldingFile();
+
         // setting up settings to operate on
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
         saveOnExit = sharedPref.getBoolean(SettingsDefinedKeys.SAVE_UNLABELED_ON_EXIT, false);
+
         // setting up listeners
+        Button takeImage = findViewById(R.id.BtnCpt);
         takeImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 startCameraActivity();
             }
         });
+
+        // imageview is the background
+        analyzed = findViewById(R.id.AnalyzedImg);
         analyzed.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
@@ -135,6 +159,34 @@ public class IntermediateCameraActivity extends Activity {
                 return true;
             }
         });
+
+        // description button setup
+        Button describeImg = findViewById(R.id.imgDescription);
+        describeImg.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View view) {
+                if (d == null) {
+                    new DescribeImageAsync().execute();
+                    return;
+                }
+                // show popup for description
+                showImageDescription();
+            }
+        });
+
+        // text recognition button setup
+        Button textRecognize = findViewById(R.id.textRecognition);
+        textRecognize.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View view) {
+                if (t == null) {
+                    new RecognizeTextAsync().execute();
+                }
+                if (t == null)
+                    return;
+                //todo: add text box to image
+            }
+        });
     }
 
     @Override
@@ -143,15 +195,21 @@ public class IntermediateCameraActivity extends Activity {
             if (imageLocation.length() == 0)
                 Toast.makeText(this, "Error in taking the image!", Toast.LENGTH_SHORT).show();
             else {
+                if(vis != null)
+                    vis.destroy();
                 // using settings to check if user wants the detections to be saved in device
                 if(fop != null) {
                     if(saveOnExit)
                         fop.storeUnlabeledFaces();
                     fop.destroy();
                 }
-                fop = process();
                 Bitmap result = BitmapFactory.decodeFile(imageLocation.getAbsolutePath());
+                fop = process();
+                vis = new VisionEndpoint(this,result);
+                result = BitmapFactory.decodeFile(imageLocation.getAbsolutePath());
                 analyzed.setImageBitmap(result);
+                d = null;
+                t = null;
             }
             if(imageLocation!= null)
                 imageLocation.delete();
@@ -162,35 +220,40 @@ public class IntermediateCameraActivity extends Activity {
     @Override
     public void onDestroy() {
         super.onDestroy();
+        if(fop != null) {
+            if(saveOnExit)
+                fop.storeUnlabeledFaces();
+            fop.destroy();
+        }
         if(imageLocation!= null)
             imageLocation.delete();
     }
 
     // TODO: FIX THIS!!!
-    @Override
-    public void onConfigurationChanged(Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
-        if(imageLocation == null)
-            return;
-        Bitmap result = BitmapFactory.decodeFile(imageLocation.getAbsolutePath());
-        widthRatio = (double) SCREEN_WIDTH/(double)result.getWidth();
-        heightRatio = (double) SCREEN_HEIGHT/(double) result.getHeight();
-        if(fop == null)
-            return;
-        Face[] faces = fop.getFaces();
-        if (faces == null)
-            return;
-        for (Face aFacesArray : faces) {
-            int x = aFacesArray.getBoundingBox().x();
-            int y = aFacesArray.getBoundingBox().y();
-            int w = aFacesArray.getBoundingBox().width();
-            int h = aFacesArray.getBoundingBox().height();
-
-            // this is used to reset the rect to the screen size
-            aFacesArray.getBoundingBoxWithRatio(widthRatio, heightRatio);
-        }
-        analyzed.setImageBitmap(result);
-    }
+//    @Override
+//    public void onConfigurationChanged(Configuration newConfig) {
+//        super.onConfigurationChanged(newConfig);
+//        if(imageLocation == null)
+//            return;
+//        Bitmap result = BitmapFactory.decodeFile(imageLocation.getAbsolutePath());
+//        widthRatio = (double) SCREEN_WIDTH/(double)result.getWidth();
+//        heightRatio = (double) SCREEN_HEIGHT/(double) result.getHeight();
+//        if(fop == null)
+//            return;
+//        Face[] faces = fop.getFaces();
+//        if (faces == null)
+//            return;
+//        for (Face aFacesArray : faces) {
+//            int x = aFacesArray.getBoundingBox().x();
+//            int y = aFacesArray.getBoundingBox().y();
+//            int w = aFacesArray.getBoundingBox().width();
+//            int h = aFacesArray.getBoundingBox().height();
+//
+//            // this is used to reset the rect to the screen size
+//            aFacesArray.getBoundingBoxWithRatio(widthRatio, heightRatio);
+//        }
+//        analyzed.setImageBitmap(result);
+//    }
 
     // helper function to cleanly exit the activity
     private void exitActivity(int code){
@@ -200,6 +263,106 @@ public class IntermediateCameraActivity extends Activity {
         finish();
     }
 
+    // ********************************** UI related functions ***********************************//
+    @SuppressLint("StaticFieldLeak")
+    private class DescribeImageAsync extends AsyncTask<Void,Void,Integer> {
+
+        private ProgressDialog progressDialog = new ProgressDialog(
+                IntermediateCameraActivity.this, R.style.AppTheme_Dark_Dialog);
+
+        @Override
+        protected void onPreExecute() {
+            progressDialog.setTitle("Analyzing...");
+            progressDialog.setMessage("Please wait!");
+            progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+            progressDialog.setInverseBackgroundForced(false);
+            progressDialog.setIndeterminate(true);
+            progressDialog.setCancelable(false);
+            progressDialog.show();
+        }
+
+        @Override
+        protected Integer doInBackground(Void... paramsObj) {
+            if (vis == null)
+                return 1;
+            try {
+                d = vis.getDescriptionOfImageBinary();
+                if(d == null)
+                    return 2;
+            } catch (IOException e) {
+                return 3;
+            }
+            return 0;
+        }
+
+        @Override
+        protected void onPostExecute(Integer ret) {
+            progressDialog.dismiss();
+            switch (ret){
+                case (1):
+                    Snackbar.make(IntermediateCameraActivity.this.analyzed
+                            , "Picture not taken yet!", Snackbar.LENGTH_SHORT).show();
+                    break;
+                case (2):
+                    Snackbar.make(IntermediateCameraActivity.this.analyzed
+                            , "No internet connection or server is down!", Snackbar.LENGTH_SHORT).show();
+                    break;
+                default:
+                    showImageDescription();
+                    break;
+            }
+        }
+    }
+
+
+    @SuppressLint("StaticFieldLeak")
+    private class RecognizeTextAsync extends AsyncTask<Void,Void,Integer> {
+
+        private ProgressDialog progressDialog = new ProgressDialog(
+                IntermediateCameraActivity.this, R.style.AppTheme_Dark_Dialog);
+
+        @Override
+        protected void onPreExecute() {
+//            progressDialog.setTitle("Analyzing...");
+//            progressDialog.setMessage("Please wait!");
+//            progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+//            progressDialog.setInverseBackgroundForced(false);
+//            progressDialog.setIndeterminate(true);
+//            progressDialog.setCancelable(false);
+//            progressDialog.show();
+        }
+
+        @Override
+        protected Integer doInBackground(Void... paramsObj) {
+            if (vis == null)
+                return 1;
+            try {
+                t = vis.getTextFromImageBinary();
+                if(t == null)
+                    return 2;
+            } catch (IOException e) {
+                return 3;
+            }
+            return 0;
+        }
+
+        @Override
+        protected void onPostExecute(Integer ret) {
+//            progressDialog.dismiss();
+            switch (ret){
+                case (1):
+                    Snackbar.make(IntermediateCameraActivity.this.analyzed
+                            , "Picture not taken yet!", Snackbar.LENGTH_SHORT).show();
+                    break;
+                case (2):
+                    Snackbar.make(IntermediateCameraActivity.this.analyzed
+                            , "No internet connection or server is down!", Snackbar.LENGTH_SHORT).show();
+                    break;
+                default:
+                    break;
+            }
+        }
+    }
 
     // ********************************** UI related functions ***********************************//
     public void startCameraActivity(){
@@ -216,6 +379,8 @@ public class IntermediateCameraActivity extends Activity {
             startActivityForResult(i, REQUEST_IMG_ANALYSIS);
         }
     }
+
+
     private void showPopUpForTrueFace( RecognizedFace rf ) {
         // initializing
         if(rf.getFace().getID() <=0 )
@@ -249,6 +414,8 @@ public class IntermediateCameraActivity extends Activity {
         });
         dialog.show();
     }
+
+
     @SuppressLint("SetTextI18n")
     private void showPopUpForFace(final RecognizedFace rf) {
         // checking if true recognition is achieved!
@@ -270,9 +437,10 @@ public class IntermediateCameraActivity extends Activity {
             try {
                 defaultPhoto = StorageHelper.getFilePathFromAssets
                         (this, "default_profile.jpg","tmp", "default_profile.jpg");
-            } catch (IOException e) {}
+            } catch (IOException ignored) {}
             photo = BitmapFactory.decodeFile(defaultPhoto);
-            new File(defaultPhoto).delete();
+            if(defaultPhoto != null)
+                new File(defaultPhoto).delete();
         }
         else {
             db = AppDatabase.getDatabase(this);
@@ -320,6 +488,8 @@ public class IntermediateCameraActivity extends Activity {
         });
         dialog.show();
     }
+
+
     private void addNewFace(final RecognizedFace rf ) {
         final Dialog dialog = new Dialog(this);
         dialog.setContentView(R.layout.add_new_person_layout);
@@ -329,7 +499,7 @@ public class IntermediateCameraActivity extends Activity {
             Bitmap tmpb = BitmapFactory.decodeFile(tmp);
             profileImage.setImageBitmap(tmpb);
             new File(tmp).delete();
-        } catch (IOException e) {}
+        } catch (IOException ignored) {}
         final TextView name = dialog.findViewById(R.id.newName);
         final TextView sname = dialog.findViewById(R.id.newSname);
         Button save = dialog.findViewById(R.id.newPersonButton);
@@ -364,6 +534,22 @@ public class IntermediateCameraActivity extends Activity {
     }
 
 
+    private void showImageDescription() {
+        new AlertDialog.Builder(IntermediateCameraActivity.this)
+                .setTitle("Description")
+                .setMessage(d.toString())
+                .setIcon(android.R.drawable.ic_dialog_info)
+                /*.setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int whichButton) {
+                        rf.getFace().setID(i);
+                        saveRecognizedFace(rf);
+                        if(parent != null)
+                            parent.dismiss();
+                    }
+                })
+                .setNegativeButton(android.R.string.no, null)*/.show();
+    }
+
     //*********************************** HELPER FUNCTIONS ***************************************//
     // gets a single face from the database for that person of given ID
     private Bitmap getPhotoForDetection(int id) {
@@ -381,10 +567,12 @@ public class IntermediateCameraActivity extends Activity {
                 photo = BitmapFactory.decodeFile(filePath);
                 new File(filePath).delete();
                 return photo;
-            } catch (IOException e) {}
+            } catch (IOException ignored) {}
         photo = BitmapFactory.decodeFile(filePath);
         return photo;
     }
+
+
     // an adapter for known people list in manual labeling
     private PersonDataAdapter getKnownDataForKnownPerson(KnownPPL p){
         if (p.id <= 0)
@@ -401,21 +589,25 @@ public class IntermediateCameraActivity extends Activity {
             toReturn.add(new TwoStringDataHolder(i.key,i.desc));
         return toReturn;
     }
+
+
     // saves recognized face or shows UI error
     private void saveRecognizedFace(RecognizedFace rf){
         try {
             FaceOperator.saveTrainingFaceToDatabase(this,rf);
         } catch (IOException|NoSuchAlgorithmException e) {
-            Toast.makeText(this,Html.fromHtml("Couldn't save this person!<br />Error:"+e.getLocalizedMessage()),Toast.LENGTH_SHORT);
-            Log.e(TAG,e.getStackTrace().toString());
+            Toast.makeText(this,Html.fromHtml("Couldn't save this person!<br />Error:"+e.getLocalizedMessage()),Toast.LENGTH_SHORT).show();
+            Log.e(TAG,e.getLocalizedMessage());
         }
     }
+
+
     // this is called to process the image taken from camera
     public FaceOperator process() {
         opencv_core.Mat toAnalyze = imread(imageLocation.getAbsolutePath());
         Bitmap result = BitmapFactory.decodeFile(imageLocation.getAbsolutePath());
-        widthRatio = (double) SCREEN_WIDTH/(double)result.getWidth();
-        heightRatio = (double) SCREEN_HEIGHT/(double) result.getHeight();
+        double widthRatio = (double) SCREEN_WIDTH / (double) result.getWidth();
+        double heightRatio = (double) SCREEN_HEIGHT / (double) result.getHeight();
 
         FaceOperator fop = new FaceOperator(this,toAnalyze);
         Face[] faces = fop.getFaces();
@@ -428,13 +620,15 @@ public class IntermediateCameraActivity extends Activity {
             int h = aFacesArray.getBoundingBox().height();
 
             // this is used to reset the rect to the screen size
-            aFacesArray.getBoundingBoxWithRatio(widthRatio,heightRatio);
+            aFacesArray.getBoundingBoxWithRatio(widthRatio, heightRatio);
             rectangle(toAnalyze,new opencv_core.Point(x, y), new opencv_core.Point(x + w, y + h)
                     , opencv_core.Scalar.GREEN,2, LINE_8,0);
         }
         imwrite(imageLocation.getAbsolutePath(),toAnalyze);
         return fop;
     }
+
+
     // WARNING: Do not call this without user interaction!!! You might f*** up the classifier
     private void alertSettingIDForFace(final RecognizedFace rf, String newPerson, final int i, final Dialog parent){
         db = AppDatabase.getDatabase(this);
@@ -453,6 +647,8 @@ public class IntermediateCameraActivity extends Activity {
                 })
                 .setNegativeButton(android.R.string.no, null).show();
     }
+
+
     // this is called from onCreate to set up the file which will hold the image taken from camera
     private void setupImageHoldingFile() {
         File root = new File(getFilesDir(), ImgGrabber.CAPTURED_DIR);
@@ -468,6 +664,8 @@ public class IntermediateCameraActivity extends Activity {
             exitActivity(-1);
         }
     }
+
+
     // TODO: DELETE THIS IN PRODUCTION! USER WILL START WITH NO KNOWN INSTANCES!
     private void train() {
         if (frs != null)

@@ -13,7 +13,10 @@ import org.bytedeco.javacpp.opencv_objdetect.CascadeClassifier;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.DigestInputStream;
@@ -184,15 +187,41 @@ public class StorageHelper {
             defaultPlace.delete();
         return writeMat(c,m,defaultPlace.getAbsolutePath());
     }
-    public static Mat readMat(String path){
-        return imread(path);
+
+    public static String moveFileToInternalMemory(Context c, File f, String path,String fname) throws IOException {
+        File newFile = new File(c.getFilesDir() + File.separator + path, fname);
+        newFile.getParentFile().mkdirs();
+        char[] buff = new char[1024];
+        FileReader fr = new FileReader(f);
+        FileWriter fw = new FileWriter(newFile);
+        int len = fr.read(buff);
+        while(len > 0) {
+            fw.write(buff,0,len);
+            len = fr.read(buff);
+        }
+        return newFile.getAbsolutePath();
     }
 
-    public static String encodeImageToBase64(String path){
-        Bitmap bm = BitmapFactory.decodeFile(path);
+    public static String writePNGToInternalMemory(Context c, Bitmap bm, String path,String fname) throws IOException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        bm.compress(Bitmap.CompressFormat.PNG, 100, baos); //bm is the bitmap object
+        bm.compress(Bitmap.CompressFormat.PNG, 100, baos);
         byte[] b = baos.toByteArray();
-        return Base64.encodeToString(b, Base64.DEFAULT);
+        File newFile = new File(c.getFilesDir() + File.separator + path, fname);
+        newFile.getParentFile().mkdirs();
+        FileOutputStream fos = new FileOutputStream(newFile);
+        fos.write(b);
+        fos.close();
+        return newFile.getAbsolutePath();
+    }
+
+    public static String encodePNGImageToBase64(Bitmap bm){
+        if (bm == null)
+            return null;
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        bm.compress(Bitmap.CompressFormat.PNG, 100, baos);
+        byte[] b = baos.toByteArray();
+        String s = Base64.encodeToString(b, Base64.NO_WRAP);
+        Log.d("test",s);
+        return s;
     }
 }

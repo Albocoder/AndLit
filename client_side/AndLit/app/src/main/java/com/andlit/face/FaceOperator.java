@@ -350,7 +350,7 @@ public class FaceOperator {
         } else {
             // write to internal storage
             String filename = "face_" + timeInMillis + "_" + r.nextInt() + ".png";
-            File mFileTemp = new File(c.getFilesDir() + File.separator + DETECTIONS_PATH, filename);
+            File mFileTemp = new File(c.getFilesDir() + File.separator + TRAINING_PATH, filename);
             mFileTemp.getParentFile().mkdirs();
 
             // check if written
@@ -397,7 +397,7 @@ public class FaceOperator {
         if (ContextCompat.checkSelfPermission(c, Manifest.permission.WRITE_EXTERNAL_STORAGE)
                 ==PackageManager.PERMISSION_GRANTED && !privateData) {
             String filename = "face_" + timeInMillis + "_" + r.nextInt() + ".png";
-            File savingDir = new File(Environment.getExternalStorageDirectory(), DETECTIONS_PATH);
+            File savingDir = new File(Environment.getExternalStorageDirectory(), TRAINING_PATH);
 
             // check if directory exists
             if (!savingDir.exists())
@@ -514,7 +514,7 @@ public class FaceOperator {
         } else {
             // write to internal storage
             String filename = "face_" + timeInMillis + "_" + r.nextInt() + ".png";
-            File mFileTemp = new File(c.getFilesDir() + File.separator + DETECTIONS_PATH, filename);
+            File mFileTemp = new File(c.getFilesDir() + File.separator + TRAINING_PATH, filename);
             mFileTemp.getParentFile().mkdirs();
 
             // check if written
