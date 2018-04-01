@@ -1,5 +1,7 @@
 # Andlit API Documentation
 This document is to explain andlit api endpoints. Please open an issue for ambigious or wrong information. In order to test the api easily you can use httpie command line tool. For help in getting and using httpie please refer to https://httpie.org/.
+## All the package of offered services in postman: 
+https://github.com/Albocoder/AndLit/blob/master/server_side/ANDLIT_BACKEND.postman_collection.json
 
 ## User Accounts:
 These endpoints are collected under https://andlit.info/users/ url, and are specific to user related actions.
