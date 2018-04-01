@@ -119,6 +119,8 @@ public class VisionEndpoint {
             imgFile.delete();
     }
 
+    public File getImgFile(){ return imgFile; }
+
 
     /* ********************* HELPER FUNCTIONS *********************** */
     private Description getDescriptionFromCall(Call<JsonObject> call) throws IOException {
@@ -160,7 +162,9 @@ public class VisionEndpoint {
             for(String s:blocks) {
                 JsonObject block = reply.getAsJsonObject(s);
                 //todo fix this after server response is fixed
-                JsonObject blockBoundary = block.getAsJsonObject("block_boundary");
+                String blockBound = block.getAsJsonPrimitive("block_boundary").getAsString();
+                JsonParser p = new JsonParser();
+                JsonObject blockBoundary = p.parse(blockBound).getAsJsonObject();
                 JsonArray vertices = blockBoundary.getAsJsonArray("vertices");
                 int minx = 999999,maxx = -999999,miny = 999999,maxy = -999999;
                 for(JsonElement v:vertices) {
@@ -184,7 +188,7 @@ public class VisionEndpoint {
                     maxx = 0;
                 if (maxy < 0)
                     maxy = 0;
-                String blockText = block.getAsJsonObject("block_text").getAsString();
+                String blockText = block.getAsJsonPrimitive("block_text").getAsString();
                 Text tmp = new Text(new opencv_core.Rect(minx,miny,maxx-minx+1,maxy-miny+1),blockText);
                 textBlocks.add(tmp);
             }

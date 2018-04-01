@@ -69,8 +69,6 @@ public class TrainingAlarmReceiver extends BroadcastReceiver{
                     .setAutoCancel(true)
                     .setSmallIcon(R.mipmap.icon);
         }
-        notificationManager = (NotificationManager)
-                context.getSystemService(Context.NOTIFICATION_SERVICE);
 
         currentApiVersion = android.os.Build.VERSION.SDK_INT;
 
@@ -84,6 +82,8 @@ public class TrainingAlarmReceiver extends BroadcastReceiver{
         notification.defaults |= Notification.FLAG_AUTO_CANCEL;
         notification.flags = Notification.DEFAULT_LIGHTS
                 | Notification.FLAG_AUTO_CANCEL;
+        if(notificationManager != null)
+            notificationManager.notify(0x1111, notification);
         wl.release();
     }
 

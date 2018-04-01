@@ -10,6 +10,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
@@ -74,7 +75,6 @@ public class IntermediateCameraActivity extends Activity {
     private FaceRecognizerSingleton frs;
     private List<KnownPPL> allKnownPpl;
     private VisionEndpoint vis;
-    private boolean first;
 
     // external fields
     private Description d;
@@ -101,7 +101,6 @@ public class IntermediateCameraActivity extends Activity {
         d = null;
         t = null;
         vis = null;
-        first = true;
 
         // instantiating database connection
         db = AppDatabase.getDatabase(this);
@@ -145,10 +144,16 @@ public class IntermediateCameraActivity extends Activity {
                         Face[] faces = fop.getFaces();
                         for(int i = 0; i < faces.length;i++)
                             if(faces[i].getBoundingBoxWithRatio().contains(new
+                                    opencv_core.Point(((int)event.getX()),((int)event.getY()))))
+                                showPopUpForFace(fop.recognizeFace(i));
+                        if(t == null)
+                            break;
+                        for(Text t1:t) {
+                            if(t1.getRatioedLoc().contains(new
                                     opencv_core.Point(((int)event.getX()),((int)event.getY())))){
-                                RecognizedFace rf = fop.recognizeFace(i);
-                                showPopUpForFace(rf);
+                                showTextOfClickedArea(t1);
                             }
+                        }
                         break;
                     case MotionEvent.ACTION_UP:
                         v.performClick();
@@ -179,12 +184,8 @@ public class IntermediateCameraActivity extends Activity {
         textRecognize.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View view) {
-                if (t == null) {
-                    new RecognizeTextAsync().execute();
-                }
                 if (t == null)
-                    return;
-                //todo: add text box to image
+                    new RecognizeTextAsync().execute();
             }
         });
     }
@@ -230,30 +231,32 @@ public class IntermediateCameraActivity extends Activity {
     }
 
     // TODO: FIX THIS!!!
-//    @Override
-//    public void onConfigurationChanged(Configuration newConfig) {
-//        super.onConfigurationChanged(newConfig);
-//        if(imageLocation == null)
-//            return;
-//        Bitmap result = BitmapFactory.decodeFile(imageLocation.getAbsolutePath());
-//        widthRatio = (double) SCREEN_WIDTH/(double)result.getWidth();
-//        heightRatio = (double) SCREEN_HEIGHT/(double) result.getHeight();
-//        if(fop == null)
-//            return;
-//        Face[] faces = fop.getFaces();
-//        if (faces == null)
-//            return;
-//        for (Face aFacesArray : faces) {
-//            int x = aFacesArray.getBoundingBox().x();
-//            int y = aFacesArray.getBoundingBox().y();
-//            int w = aFacesArray.getBoundingBox().width();
-//            int h = aFacesArray.getBoundingBox().height();
-//
-//            // this is used to reset the rect to the screen size
-//            aFacesArray.getBoundingBoxWithRatio(widthRatio, heightRatio);
-//        }
-//        analyzed.setImageBitmap(result);
-//    }
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        if(imageLocation == null)
+            return;
+        if (vis == null)
+            return;
+        Bitmap result = BitmapFactory.decodeFile(vis.getImgFile().getAbsolutePath());
+        double widthRatio = (double) SCREEN_WIDTH/(double)result.getWidth();
+        double heightRatio = (double) SCREEN_HEIGHT/(double) result.getHeight();
+        if(fop == null)
+            return;
+        Face[] faces = fop.getFaces();
+        if (faces == null)
+            return;
+        for (Face aFacesArray : faces) {
+            int x = aFacesArray.getBoundingBox().x();
+            int y = aFacesArray.getBoundingBox().y();
+            int w = aFacesArray.getBoundingBox().width();
+            int h = aFacesArray.getBoundingBox().height();
+
+            // this is used to reset the rect to the screen size
+            aFacesArray.getBoundingBoxWithRatio(widthRatio, heightRatio);
+        }
+        analyzed.setImageBitmap(result);
+    }
 
     // helper function to cleanly exit the activity
     private void exitActivity(int code){
@@ -323,13 +326,13 @@ public class IntermediateCameraActivity extends Activity {
 
         @Override
         protected void onPreExecute() {
-//            progressDialog.setTitle("Analyzing...");
-//            progressDialog.setMessage("Please wait!");
-//            progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-//            progressDialog.setInverseBackgroundForced(false);
-//            progressDialog.setIndeterminate(true);
-//            progressDialog.setCancelable(false);
-//            progressDialog.show();
+            progressDialog.setTitle("Analyzing...");
+            progressDialog.setMessage("Please wait!");
+            progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+            progressDialog.setInverseBackgroundForced(false);
+            progressDialog.setIndeterminate(true);
+            progressDialog.setCancelable(false);
+            progressDialog.show();
         }
 
         @Override
@@ -348,7 +351,7 @@ public class IntermediateCameraActivity extends Activity {
 
         @Override
         protected void onPostExecute(Integer ret) {
-//            progressDialog.dismiss();
+            progressDialog.dismiss();
             switch (ret){
                 case (1):
                     Snackbar.make(IntermediateCameraActivity.this.analyzed
@@ -359,6 +362,7 @@ public class IntermediateCameraActivity extends Activity {
                             , "No internet connection or server is down!", Snackbar.LENGTH_SHORT).show();
                     break;
                 default:
+                    markFoundText();
                     break;
             }
         }
@@ -538,6 +542,59 @@ public class IntermediateCameraActivity extends Activity {
         new AlertDialog.Builder(IntermediateCameraActivity.this)
                 .setTitle("Description")
                 .setMessage(d.toString())
+                .setIcon(android.R.drawable.ic_dialog_info)
+                /*.setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int whichButton) {
+                        rf.getFace().setID(i);
+                        saveRecognizedFace(rf);
+                        if(parent != null)
+                            parent.dismiss();
+                    }
+                })
+                .setNegativeButton(android.R.string.no, null)*/.show();
+    }
+
+
+    private void markFoundText() {
+        if(t == null)
+            return;
+        Bitmap result = BitmapFactory.decodeFile(vis.getImgFile().getAbsolutePath());
+        double widthRatio = (double) SCREEN_WIDTH / (double) result.getWidth();
+        double heightRatio = (double) SCREEN_HEIGHT / (double) result.getHeight();
+        opencv_core.Mat toAnalyze = imread(vis.getImgFile().getAbsolutePath());
+
+        for (Text tmp:t){
+            tmp.getRatioedLoc(widthRatio,heightRatio);
+            opencv_core.Rect loc = tmp.getLoc();
+            int x = loc.x();
+            int y = loc.y();
+            int w = loc.width();
+            int h = loc.height();
+            rectangle(toAnalyze,new opencv_core.Point(x, y), new opencv_core.Point(x + w, y + h)
+                    , opencv_core.Scalar.CYAN,2, LINE_8,0);
+        }
+        Face[] faces = fop.getFaces();
+        for (Face aFacesArray : faces) {
+            int x = aFacesArray.getBoundingBox().x();
+            int y = aFacesArray.getBoundingBox().y();
+            int w = aFacesArray.getBoundingBox().width();
+            int h = aFacesArray.getBoundingBox().height();
+
+            // this is used to reset the rect to the screen size
+            aFacesArray.getBoundingBoxWithRatio(widthRatio, heightRatio);
+            rectangle(toAnalyze,new opencv_core.Point(x, y), new opencv_core.Point(x + w, y + h)
+                    , opencv_core.Scalar.GREEN,2, LINE_8,0);
+        }
+        imwrite(vis.getImgFile().getAbsolutePath(),toAnalyze);
+        result = BitmapFactory.decodeFile(vis.getImgFile().getAbsolutePath());
+        analyzed.setImageBitmap(result);
+    }
+
+
+    private void showTextOfClickedArea(Text t1){
+        new AlertDialog.Builder(IntermediateCameraActivity.this)
+                .setTitle("Text")
+                .setMessage(t1.getText())
                 .setIcon(android.R.drawable.ic_dialog_info)
                 /*.setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int whichButton) {
