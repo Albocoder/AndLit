@@ -1,0 +1,220 @@
+{
+	"variables": [],
+	"info": {
+		"name": "ANDLIT_BACKEND",
+		"_postman_id": "ff2c2835-8ec2-cf1a-38f2-0682be046fe5",
+		"description": "",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Get information about a user",
+			"request": {
+				"url": {
+					"raw": "https://andlit.info/users/getprofile?oauth_signature_method=HMAC-SHA1&oauth_timestamp=1520096126&oauth_nonce=EcMRTQ&oauth_version=1.0&oauth_signature=JdXtVjkl8ZF0fF+iJIUcsQqJ1eE=",
+					"protocol": "https",
+					"host": [
+						"andlit",
+						"info"
+					],
+					"path": [
+						"users",
+						"getprofile"
+					],
+					"query": [
+						{
+							"key": "oauth_signature_method",
+							"value": "HMAC-SHA1",
+							"equals": true,
+							"description": ""
+						},
+						{
+							"key": "oauth_timestamp",
+							"value": "1520096126",
+							"equals": true,
+							"description": ""
+						},
+						{
+							"key": "oauth_nonce",
+							"value": "EcMRTQ",
+							"equals": true,
+							"description": ""
+						},
+						{
+							"key": "oauth_version",
+							"value": "1.0",
+							"equals": true,
+							"description": ""
+						},
+						{
+							"key": "oauth_signature",
+							"value": "JdXtVjkl8ZF0fF+iJIUcsQqJ1eE=",
+							"equals": true,
+							"description": ""
+						},
+						{
+							"key": "username",
+							"value": "'albocoder'",
+							"equals": true,
+							"description": "",
+							"disabled": true
+						},
+						{
+							"key": "email",
+							"value": "'albocoder@gmail.com'",
+							"equals": true,
+							"description": "",
+							"disabled": true
+						},
+						{
+							"key": "password",
+							"value": "'somesexypassword'",
+							"equals": true,
+							"description": "",
+							"disabled": true
+						}
+					],
+					"variable": []
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					},
+					{
+						"key": "Authorization",
+						"value": "Token 4f7b3a8a64f19b5fe7ede69d28ed26f084d5301c",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"username\":\"xhenitheshit\",\n\t\"email\":\"xheni@shit.al\",\n\t\"password\":\"xheni1234\"\n}"
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "Create a new user",
+			"request": {
+				"url": "https://andlit.info/users/create",
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"username\":\"<unique username here>\",\n\t\"email\":\"<unique email here>\",\n\t\"password\":\"<unique pw here>\"\n}"
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "change password",
+			"request": {
+				"url": "https://andlit.info/users/changepass",
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					},
+					{
+						"key": "Authorization",
+						"value": "Token 4f7b3a8a64f19b5fe7ede69d28ed26f084d5301c",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"password\":\"mamed123\"\n}"
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "Log in the user",
+			"request": {
+				"url": "https://andlit.info/users/gettoken",
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"username\":\"mamed\",\n\t\"password\":\"mamed123\"\n}"
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "TextRecognition",
+			"request": {
+				"url": "https://andlit.info/vision/read/",
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Token 4f7b3a8a64f19b5fe7ede69d28ed26f084d5301c",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "image",
+							"description": "",
+							"type": "file",
+							"src": "zen.png"
+						}
+					]
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "ImgDescription",
+			"request": {
+				"url": "https://andlit.info/vision/describe/",
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Token 4f7b3a8a64f19b5fe7ede69d28ed26f084d5301c",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "image",
+							"description": "",
+							"type": "file",
+							"src": "zen.png"
+						}
+					]
+				},
+				"description": ""
+			},
+			"response": []
+		}
+	]
+}
