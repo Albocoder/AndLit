@@ -72,7 +72,7 @@ public class HomeActivity extends AppCompatActivity
         txtSpeechInput.setText("Voice Input Should Display Here!");
     }
 
-    private void voiceButtonInit()
+    public void voiceButtonInit()
     {
         Button voiceButton = findViewById(R.id.voice_button);
         voiceButton.setOnClickListener(new View.OnClickListener()
@@ -149,5 +149,6 @@ public class HomeActivity extends AppCompatActivity
         super.onResume();
 
         voiceButtonInit();
+
     }
 }

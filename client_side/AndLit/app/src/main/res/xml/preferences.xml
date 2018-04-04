@@ -12,4 +12,19 @@
         android:key="save_unlabeled"
         android:summary="Save the unlabeled detected faces when exiting or taking another image"
         android:title="Save Unlabeled On Exit" />
+
+    <android.support.v7.preference.SwitchPreferenceCompat
+        android:defaultValue="true"
+        android:key="audio_feedback"
+        android:summary="Turn on to receive audio feedback from the device"
+        android:title="Audio Feedback" />
+
+    <android.support.v7.preference.ListPreference
+        android:summary="Choose the frequency at which you would like your device to train"
+        android:key="training_frequency"
+        android:title="Training Frequency"
+        android:dialogTitle="Choose Training Frequency"
+        android:entries="@array/TrainingFrequencyEntries"
+        android:entryValues="@array/TrainingFrequencyValues"
+        android:defaultValue="Daily" />
 </PreferenceScreen>
