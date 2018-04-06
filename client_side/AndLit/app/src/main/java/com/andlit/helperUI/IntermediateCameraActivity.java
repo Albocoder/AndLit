@@ -6,6 +6,7 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -60,6 +61,7 @@ import static org.bytedeco.javacpp.opencv_core.LINE_8;
 import static org.bytedeco.javacpp.opencv_imgcodecs.imread;
 import static org.bytedeco.javacpp.opencv_imgcodecs.imwrite;
 import static org.bytedeco.javacpp.opencv_imgproc.rectangle;
+import static org.bytedeco.javacpp.opencv_imgproc.resize;
 
 public class IntermediateCameraActivity extends Activity {
 
@@ -83,7 +85,6 @@ public class IntermediateCameraActivity extends Activity {
 
     // view fields
     private ImageView analyzed;
-    private ProgressDialog progress;
     private int SCREEN_HEIGHT,SCREEN_WIDTH;
 
     // ********************* ACTIVITY FUNCTIONS ********************* //
@@ -92,12 +93,6 @@ public class IntermediateCameraActivity extends Activity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.show_image_processed);
-
-        // Setting up progress dialog things
-        progress = new ProgressDialog(this);
-        progress.setTitle("Loading!");
-        progress.setMessage("Please wait...");
-        progress.setCancelable(false);
         d = null;
         t = null;
         vis = null;
@@ -198,23 +193,13 @@ public class IntermediateCameraActivity extends Activity {
             else {
                 if(vis != null)
                     vis.destroy();
-                // using settings to check if user wants the detections to be saved in device
                 if(fop != null) {
                     if(saveOnExit)
                         fop.storeUnlabeledFaces();
                     fop.destroy();
                 }
-                Bitmap result = BitmapFactory.decodeFile(imageLocation.getAbsolutePath());
-                fop = process();
-                vis = new VisionEndpoint(this,result);
-                result = BitmapFactory.decodeFile(imageLocation.getAbsolutePath());
-                analyzed.setImageBitmap(result);
-                d = null;
-                t = null;
+                new ProcessInputAsync().execute(imageLocation,analyzed,this.getApplicationContext());
             }
-            if(imageLocation!= null)
-                imageLocation.delete();
-            progress.dismiss();
         }
     }
 
@@ -228,34 +213,36 @@ public class IntermediateCameraActivity extends Activity {
         }
         if(imageLocation!= null)
             imageLocation.delete();
+        exitActivity(0);
     }
 
     // TODO: FIX THIS!!!
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
-        if(imageLocation == null)
-            return;
         if (vis == null)
             return;
         Bitmap result = BitmapFactory.decodeFile(vis.getImgFile().getAbsolutePath());
-        double widthRatio = (double) SCREEN_WIDTH/(double)result.getWidth();
-        double heightRatio = (double) SCREEN_HEIGHT/(double) result.getHeight();
+        double widthRatio = (double) SCREEN_WIDTH / (double) result.getWidth();
+        double heightRatio = (double) SCREEN_HEIGHT / (double) result.getHeight();
+        if(newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            double tmp = heightRatio;
+            heightRatio = widthRatio;
+            widthRatio = tmp;
+        }
+        analyzed.setImageBitmap(result);
+
         if(fop == null)
             return;
         Face[] faces = fop.getFaces();
         if (faces == null)
             return;
-        for (Face aFacesArray : faces) {
-            int x = aFacesArray.getBoundingBox().x();
-            int y = aFacesArray.getBoundingBox().y();
-            int w = aFacesArray.getBoundingBox().width();
-            int h = aFacesArray.getBoundingBox().height();
-
-            // this is used to reset the rect to the screen size
+        for (Face aFacesArray : faces)
             aFacesArray.getBoundingBoxWithRatio(widthRatio, heightRatio);
-        }
-        analyzed.setImageBitmap(result);
+        if(t == null)
+            return;
+        for (Text t1:t)
+            t1.getRatioedLoc(widthRatio,heightRatio);
     }
 
     // helper function to cleanly exit the activity
@@ -308,7 +295,7 @@ public class IntermediateCameraActivity extends Activity {
                     break;
                 case (2):
                     Snackbar.make(IntermediateCameraActivity.this.analyzed
-                            , "No internet connection or server is down!", Snackbar.LENGTH_SHORT).show();
+                            , "No internet, server down or image too large!", Snackbar.LENGTH_SHORT).show();
                     break;
                 default:
                     showImageDescription();
@@ -359,12 +346,55 @@ public class IntermediateCameraActivity extends Activity {
                     break;
                 case (2):
                     Snackbar.make(IntermediateCameraActivity.this.analyzed
-                            , "No internet connection or server is down!", Snackbar.LENGTH_SHORT).show();
+                            , "No internet, server down or image too large!", Snackbar.LENGTH_SHORT).show();
                     break;
                 default:
                     markFoundText();
                     break;
             }
+        }
+    }
+
+    @SuppressLint("StaticFieldLeak")
+    private class ProcessInputAsync extends AsyncTask<Object,Void,Void> {
+
+        private ProgressDialog progressDialog = new ProgressDialog(
+                IntermediateCameraActivity.this, R.style.AppTheme_Dark_Dialog);
+        private ImageView analyzed;
+        private File imageLocation;
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            progressDialog.setTitle("Analyzing capture...");
+            progressDialog.setMessage("Please wait!");
+            progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+            progressDialog.setInverseBackgroundForced(false);
+            progressDialog.setIndeterminate(true);
+            progressDialog.setCancelable(false);
+            progressDialog.show();
+        }
+
+        @Override
+        protected Void doInBackground(Object... args) {
+            imageLocation = (File) args[0];
+            analyzed = (ImageView) args[1];
+            Context c = (Context) args[2];
+            process();
+            Bitmap result = BitmapFactory.decodeFile(imageLocation.getAbsolutePath());
+            vis = new VisionEndpoint(c,result);
+            d = null;
+            t = null;
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+            progressDialog.dismiss();
+            Bitmap result = BitmapFactory.decodeFile(imageLocation.getAbsolutePath());
+            analyzed.setImageBitmap(result);
+            imageLocation.delete();
         }
     }
 
@@ -374,7 +404,6 @@ public class IntermediateCameraActivity extends Activity {
             ActivityCompat.requestPermissions(this,new String[] {Manifest.permission.CAMERA}, 1337);
         }
         else {
-            progress.show();
             Intent i = new Intent(IntermediateCameraActivity.this
                     , ImgGrabber.class);
             i.putExtra(ARGUMENT_KEY, imageLocation.getAbsolutePath());
@@ -666,7 +695,7 @@ public class IntermediateCameraActivity extends Activity {
         double widthRatio = (double) SCREEN_WIDTH / (double) result.getWidth();
         double heightRatio = (double) SCREEN_HEIGHT / (double) result.getHeight();
 
-        FaceOperator fop = new FaceOperator(this,toAnalyze);
+        fop = new FaceOperator(this,toAnalyze);
         Face[] faces = fop.getFaces();
         if (faces == null)
             return null;

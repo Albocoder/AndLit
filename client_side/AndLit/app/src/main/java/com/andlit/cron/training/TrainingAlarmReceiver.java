@@ -7,7 +7,9 @@ import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.PowerManager;
+import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
 
 import com.andlit.R;
@@ -93,9 +95,18 @@ public class TrainingAlarmReceiver extends BroadcastReceiver{
         PendingIntent pi = PendingIntent.getBroadcast(context, TRAINING_CODE, i, 0);
         if(am == null)
             return false;
-        // todo: check the settings and set the alarm accordingly
-        am.setInexactRepeating(AlarmManager.RTC_WAKEUP, Calendar.getInstance().getTimeInMillis(),
-                AlarmManager.INTERVAL_DAY/* daily interval */, pi);
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        String trainingValue = sharedPreferences.getString("training_frequency", "No Selection");
+        String [] entries = context.getResources().getStringArray(R.array.TrainingFrequencyValues);
+        if (trainingValue.equals(entries[0]))
+                am.setInexactRepeating(AlarmManager.RTC_WAKEUP, Calendar.getInstance().getTimeInMillis(),
+                        AlarmManager.INTERVAL_DAY, pi);
+        else if (trainingValue.equals(entries[1]))
+            am.setInexactRepeating(AlarmManager.RTC_WAKEUP, Calendar.getInstance().getTimeInMillis(),
+                    AlarmManager.INTERVAL_DAY * 7, pi);
+        else
+            am.setInexactRepeating(AlarmManager.RTC_WAKEUP, Calendar.getInstance().getTimeInMillis(),
+                    AlarmManager.INTERVAL_DAY * 30, pi);
         return true;
     }
 

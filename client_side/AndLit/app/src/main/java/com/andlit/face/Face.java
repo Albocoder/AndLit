@@ -14,12 +14,12 @@ import static org.bytedeco.javacpp.opencv_imgproc.resize;
 
 public class Face {
     // class constants
-    private static final int WIDTH = 100;
-    private static final int HEIGHT = 100;
+    private static final int WIDTH = 200;
+    private static final int HEIGHT = 200;
 
     // class fields
     private Rect boundingBox;
-    private Mat faceContent;        // must always be 100x100
+    private Mat faceContent;        // must always be 200x200
 
     // calculated-later fields
     private int local_id;

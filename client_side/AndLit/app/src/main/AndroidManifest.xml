@@ -31,7 +31,6 @@
 
     <!-- ******************************* application ***************************** -->
     <application
-        android:configChanges="orientation|screenSize"
         android:icon="@mipmap/icon"
         android:label="@string/app_name"
         android:largeHeap="true"
@@ -59,7 +58,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".helperUI.IntermediateCameraActivity" />
+        <activity android:name=".helperUI.IntermediateCameraActivity" android:configChanges="orientation|screenSize"/>
         <activity
             android:name=".helperUI.ImgGrabber"
             android:launchMode="singleInstance" />
