@@ -11,4 +11,8 @@ public final class SettingsDefinedKeys {
     public static final String VOICE_CONTROL = "voice_control";
 
     public static final String SAVE_UNLABELED_ON_EXIT = "save_unlabeled";
+
+    public static final String TRAINING_FREQUENCY = "training_frequency";
+
+    public static final String AUDIO_FEEDBACK = "audio_feedback";
 }
