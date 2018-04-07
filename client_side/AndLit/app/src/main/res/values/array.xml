@@ -11,4 +11,12 @@
         <item>Weekly</item>
         <item>Monthly</item>
     </string-array>
+
+    <string-array name="LanguageEntries">
+        <item>English</item>
+    </string-array>
+
+    <string-array name="LanguageValues">
+        <item>English</item>
+    </string-array>
 </resources>

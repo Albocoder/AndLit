@@ -27,4 +27,13 @@
         android:entries="@array/TrainingFrequencyEntries"
         android:entryValues="@array/TrainingFrequencyValues"
         android:defaultValue="Daily" />
+
+    <android.support.v7.preference.ListPreference
+        android:summary="Choose your language"
+        android:key="language"
+        android:title="Language"
+        android:dialogTitle="Choose Language"
+        android:entries="@array/LanguageEntries"
+        android:entryValues="@array/LanguageValues"
+        android:defaultValue="English" />
 </PreferenceScreen>

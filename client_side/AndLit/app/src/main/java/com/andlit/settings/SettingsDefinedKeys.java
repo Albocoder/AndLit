@@ -15,4 +15,6 @@ public final class SettingsDefinedKeys {
     public static final String TRAINING_FREQUENCY = "training_frequency";
 
     public static final String AUDIO_FEEDBACK = "audio_feedback";
+
+    public static final String LANGUAGE = "language";
 }
