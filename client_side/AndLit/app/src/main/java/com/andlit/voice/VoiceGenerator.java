@@ -3,8 +3,12 @@ package com.andlit.voice;
 import java.util.HashMap;
 import java.util.Locale;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.media.AudioManager;
+import android.preference.PreferenceManager;
 import android.speech.tts.TextToSpeech;
+
+import com.andlit.settings.SettingsDefinedKeys;
 
 
 /**
@@ -20,15 +24,15 @@ public class VoiceGenerator implements TextToSpeech.OnInitListener
     // Properties
     private static TextToSpeech tts = null;
     private static boolean ready = false;
-    private static Context context;
+    private static String currentLocale;
 
     // Constructor
-    public VoiceGenerator(Context context)
-    {
-        this.context = context;
-
-        if(tts == null)
+    public VoiceGenerator(Context context) {
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(context);
+        String locale = sharedPref.getString(SettingsDefinedKeys.LANGUAGE, "en");
+        if(tts == null || !currentLocale.equals(locale))
             tts = new TextToSpeech(context, this);
+        currentLocale = locale;
     }
 
     // Methods
@@ -43,7 +47,12 @@ public class VoiceGenerator implements TextToSpeech.OnInitListener
         if(status == TextToSpeech.SUCCESS)
         {
             // Change this to match your locale
-            tts.setLanguage(Locale.US);
+            switch (currentLocale) {
+                //case("tr"):
+                default:
+                    tts.setLanguage(Locale.US);
+                break;
+            }
             ready = true;
         }
         else
@@ -58,7 +67,7 @@ public class VoiceGenerator implements TextToSpeech.OnInitListener
         // Speak only if the TTS is ready
         if(ready && tts != null)
         {
-            HashMap<String, String> hash = new HashMap<String,String>();
+            HashMap<String, String> hash = new HashMap<>();
             hash.put(TextToSpeech.Engine.KEY_PARAM_STREAM,
                     String.valueOf(AudioManager.STREAM_NOTIFICATION));
             tts.speak(text, TextToSpeech.QUEUE_ADD, hash);

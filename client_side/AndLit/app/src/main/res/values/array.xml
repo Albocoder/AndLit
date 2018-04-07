@@ -17,6 +17,6 @@
     </string-array>
 
     <string-array name="LanguageValues">
-        <item>English</item>
+        <item>en</item>
     </string-array>
 </resources>

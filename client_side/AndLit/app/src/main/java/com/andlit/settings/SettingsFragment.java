@@ -5,6 +5,8 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import com.andlit.R;
+import com.andlit.cron.CronMaster;
+
 import android.support.v7.preference.PreferenceFragmentCompat;
 import android.widget.Toast;
 
@@ -23,6 +25,7 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Shared
         {
             // Do something when training frequency is changed
             Context context = this.getActivity().getApplicationContext();
+            CronMaster.fireTrainingAlarm(context);
             CharSequence text = "Training Frequency Changed!";
             int duration = Toast.LENGTH_SHORT;
             Toast toast = Toast.makeText(context, text, duration);

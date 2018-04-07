@@ -15,7 +15,7 @@ import android.widget.Toast;
 import com.andlit.cloudInterface.Authentication.Authenticator;
 import com.andlit.settings.SettingsActivity;
 import com.andlit.settings.SettingsDefinedKeys;
-import com.andlit.helperUI.IntermediateCameraActivity;
+import com.andlit.UI.IntermediateCameraActivity;
 import com.andlit.voice.VoiceToCommand;
 import com.andlit.voice.VoiceToCommandEnglish;
 

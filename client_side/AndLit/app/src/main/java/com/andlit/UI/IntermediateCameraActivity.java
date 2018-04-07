@@ -1,4 +1,4 @@
-package com.andlit.helperUI;
+package com.andlit.UI;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
@@ -41,10 +41,11 @@ import com.andlit.settings.SettingsDefinedKeys;
 import com.andlit.database.AppDatabase;
 import com.andlit.database.entities.*;
 import com.andlit.face.*;
-import com.andlit.helperUI.listRelated.PersonDataAdapter;
-import com.andlit.helperUI.listRelated.PotentialPeopleAdapter;
-import com.andlit.helperUI.listRelated.TwoStringDataHolder;
+import com.andlit.UI.helperUI.listRelated.PersonDataAdapter;
+import com.andlit.UI.helperUI.listRelated.PotentialPeopleAdapter;
+import com.andlit.UI.helperUI.listRelated.TwoStringDataHolder;
 import com.andlit.utils.StorageHelper;
+import com.andlit.voice.VoiceGenerator;
 
 import org.bytedeco.javacpp.opencv_core;
 
@@ -56,12 +57,10 @@ import java.util.Date;
 import java.util.List;
 import java.util.Random;
 
-import static com.andlit.utils.StorageHelper.moveFileToInternalMemory;
 import static org.bytedeco.javacpp.opencv_core.LINE_8;
 import static org.bytedeco.javacpp.opencv_imgcodecs.imread;
 import static org.bytedeco.javacpp.opencv_imgcodecs.imwrite;
 import static org.bytedeco.javacpp.opencv_imgproc.rectangle;
-import static org.bytedeco.javacpp.opencv_imgproc.resize;
 
 public class IntermediateCameraActivity extends Activity {
 
@@ -77,11 +76,12 @@ public class IntermediateCameraActivity extends Activity {
     private FaceRecognizerSingleton frs;
     private List<KnownPPL> allKnownPpl;
     private VisionEndpoint vis;
+    private VoiceGenerator speaker;
 
     // external fields
     private Description d;
     private List<Text> t;
-    private Boolean saveOnExit;
+    private Boolean saveOnExit,audioFeedback;
 
     // view fields
     private ImageView analyzed;
@@ -96,6 +96,8 @@ public class IntermediateCameraActivity extends Activity {
         d = null;
         t = null;
         vis = null;
+        // instantiating voice generator
+        speaker = new VoiceGenerator(this);
 
         // instantiating database connection
         db = AppDatabase.getDatabase(this);
@@ -116,6 +118,7 @@ public class IntermediateCameraActivity extends Activity {
 
         // setting up settings to operate on
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
+        audioFeedback = sharedPref.getBoolean(SettingsDefinedKeys.AUDIO_FEEDBACK, false);
         saveOnExit = sharedPref.getBoolean(SettingsDefinedKeys.SAVE_UNLABELED_ON_EXIT, false);
 
         // setting up listeners
@@ -145,9 +148,8 @@ public class IntermediateCameraActivity extends Activity {
                             break;
                         for(Text t1:t) {
                             if(t1.getRatioedLoc().contains(new
-                                    opencv_core.Point(((int)event.getX()),((int)event.getY())))){
+                                    opencv_core.Point(((int)event.getX()),((int)event.getY()))))
                                 showTextOfClickedArea(t1);
-                            }
                         }
                         break;
                     case MotionEvent.ACTION_UP:
@@ -188,6 +190,7 @@ public class IntermediateCameraActivity extends Activity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if(requestCode == REQUEST_IMG_ANALYSIS) {
+
             if (imageLocation.length() == 0)
                 Toast.makeText(this, "Error in taking the image!", Toast.LENGTH_SHORT).show();
             else {
@@ -392,9 +395,21 @@ public class IntermediateCameraActivity extends Activity {
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
             progressDialog.dismiss();
+            //todo y not speaking
+            if(audioFeedback)
+                speaker.speak("Image was processed and ready to query.");
             Bitmap result = BitmapFactory.decodeFile(imageLocation.getAbsolutePath());
             analyzed.setImageBitmap(result);
             imageLocation.delete();
+
+            Face[] faces = fop.getFaces();
+            if(audioFeedback)
+                if (faces.length > 1)
+                    speaker.speak("Found "+faces.length+" faces in the image.");
+                else if (faces.length == 1)
+                    speaker.speak("Found one face in the image.");
+                else
+                    speaker.speak("Found no faces in the image.");
         }
     }
 
@@ -464,7 +479,8 @@ public class IntermediateCameraActivity extends Activity {
         Bitmap photo;
         PersonDataAdapter pdAdapter = null;
         if(bestPrediction == -1) { // todo find what label the classifier returns as instance not found
-            Toast.makeText(this,"Person not recognized!",Toast.LENGTH_SHORT).show();
+            if(audioFeedback)
+                speaker.speak("Face not recognized.");
             title = "Unknown Person";
             String defaultPhoto = null;
             try {
@@ -479,6 +495,8 @@ public class IntermediateCameraActivity extends Activity {
             db = AppDatabase.getDatabase(this);
             KnownPPL p = db.knownPplDao().getPersonWithID(bestPrediction);
             title =  p.name+" "+p.sname;
+            if(audioFeedback)
+                speaker.speak("Face predicted to be of "+title+".");
             photo = getPhotoForDetection(p.id);
             pdAdapter = getKnownDataForKnownPerson(p);
         }
@@ -498,6 +516,8 @@ public class IntermediateCameraActivity extends Activity {
                 final TextView personID = view.findViewById(R.id.description);
                 String idString = personID.getText().toString();
                 int id = Integer.parseInt(idString.substring(3));
+                if(audioFeedback)
+                    speaker.speak("You are about to correct the prediction.");
                 alertSettingIDForFace(rf,personName.getText().toString(),id,dialog);
             }
         });
@@ -568,6 +588,8 @@ public class IntermediateCameraActivity extends Activity {
 
 
     private void showImageDescription() {
+        if(audioFeedback)
+            speaker.speak(d.toString());
         new AlertDialog.Builder(IntermediateCameraActivity.this)
                 .setTitle("Description")
                 .setMessage(d.toString())
@@ -617,10 +639,19 @@ public class IntermediateCameraActivity extends Activity {
         imwrite(vis.getImgFile().getAbsolutePath(),toAnalyze);
         result = BitmapFactory.decodeFile(vis.getImgFile().getAbsolutePath());
         analyzed.setImageBitmap(result);
+        if(audioFeedback)
+            if (t.size() > 1)
+                speaker.speak("Found "+t.size()+" text blocks.");
+            else if (t.size() == 1)
+                speaker.speak("Found one text block.");
+            else
+                speaker.speak("Found no text block.");
     }
 
 
-    private void showTextOfClickedArea(Text t1){
+    private void showTextOfClickedArea(Text t1) {
+        if(audioFeedback)
+            speaker.speak(t1.getText());
         new AlertDialog.Builder(IntermediateCameraActivity.this)
                 .setTitle("Text")
                 .setMessage(t1.getText())
@@ -689,16 +720,18 @@ public class IntermediateCameraActivity extends Activity {
 
 
     // this is called to process the image taken from camera
-    public FaceOperator process() {
+    public void process() {
+        if(audioFeedback)
+            speaker.speak("Processing image.");
         opencv_core.Mat toAnalyze = imread(imageLocation.getAbsolutePath());
         Bitmap result = BitmapFactory.decodeFile(imageLocation.getAbsolutePath());
         double widthRatio = (double) SCREEN_WIDTH / (double) result.getWidth();
         double heightRatio = (double) SCREEN_HEIGHT / (double) result.getHeight();
-
         fop = new FaceOperator(this,toAnalyze);
         Face[] faces = fop.getFaces();
+
         if (faces == null)
-            return null;
+            return;
         for (Face aFacesArray : faces) {
             int x = aFacesArray.getBoundingBox().x();
             int y = aFacesArray.getBoundingBox().y();
@@ -711,7 +744,6 @@ public class IntermediateCameraActivity extends Activity {
                     , opencv_core.Scalar.GREEN,2, LINE_8,0);
         }
         imwrite(imageLocation.getAbsolutePath(),toAnalyze);
-        return fop;
     }
 
 

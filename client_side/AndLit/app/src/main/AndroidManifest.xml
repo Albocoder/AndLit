@@ -58,15 +58,14 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".helperUI.IntermediateCameraActivity" android:configChanges="orientation|screenSize"/>
+        <activity android:name=".UI.IntermediateCameraActivity" android:configChanges="orientation|screenSize"/>
         <activity
-            android:name=".helperUI.ImgGrabber"
+            android:name=".UI.ImgGrabber"
             android:launchMode="singleInstance" />
         <activity
             android:name=".settings.SettingsActivity"
             android:label="Settings" />
         <activity android:name=".HomeActivity" />
-
 
         <!--*************************** Cron related ***************************-->
         <receiver android:name=".cron.OnBootAutoStart">

@@ -1,4 +1,4 @@
-package com.andlit.helperUI;
+package com.andlit.UI;
 
 import android.app.Activity;
 import android.content.ActivityNotFoundException;

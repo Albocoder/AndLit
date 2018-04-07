@@ -3,7 +3,7 @@ package com.andlit.voice;
 import android.content.Context;
 import android.content.Intent;
 
-import com.andlit.helperUI.IntermediateCameraActivity;
+import com.andlit.UI.IntermediateCameraActivity;
 
 import java.util.StringTokenizer;
 

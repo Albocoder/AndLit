@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">AndLit</string>
+
+    <string name="not_the_real_person">El ile yüzü etiket et!</string>
+    <string name="profile_picture">Profil fotoğrafı</string>
+
+</resources>
