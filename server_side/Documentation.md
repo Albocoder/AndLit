@@ -8,6 +8,7 @@ https://github.com/Albocoder/AndLit/blob/master/server_side/ANDLIT_BACKEND.postm
 1. [User Accounts](#user-accounts)
 2. [Vision](#vision)
 3. [Image Upload](#image-upload)
+4. [File Upload](#file-upload)
 
 ## User Accounts:
 These endpoints are collected under https://andlit.info/users/ url, and are specific to user related actions.
