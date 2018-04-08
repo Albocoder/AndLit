@@ -64,6 +64,18 @@ public class VisionEndpoint {
         }
     }
 
+    public VisionEndpoint(Context c,File f){
+        Retrofit api = new Retrofit.Builder().baseUrl("https://andlit.info")
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+
+        db = AppDatabase.getDatabase(c);
+        ul = db.userLoginDao().getLoginEntry().get(0);
+        a = api.create(VisionAPI.class);
+        this.c = c;
+        imgFile = f;
+    }
+
     public Description getDescriptionOfImageBinary() throws IOException {
         if(imgFile == null)
             return null;

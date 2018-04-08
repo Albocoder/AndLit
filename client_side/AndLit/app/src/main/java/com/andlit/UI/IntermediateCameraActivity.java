@@ -34,6 +34,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.andlit.R;
+import com.andlit.UI.helperUI.ImgGrabber;
 import com.andlit.cloudInterface.Vision.VisionEndpoint;
 import com.andlit.cloudInterface.Vision.models.Description;
 import com.andlit.cloudInterface.Vision.models.Text;
@@ -62,6 +63,7 @@ import static org.bytedeco.javacpp.opencv_imgcodecs.imread;
 import static org.bytedeco.javacpp.opencv_imgcodecs.imwrite;
 import static org.bytedeco.javacpp.opencv_imgproc.rectangle;
 
+// TODO: this will be reworked for better modularity and using session framework
 public class IntermediateCameraActivity extends Activity {
 
     // constants
@@ -297,6 +299,10 @@ public class IntermediateCameraActivity extends Activity {
                             , "Picture not taken yet!", Snackbar.LENGTH_SHORT).show();
                     break;
                 case (2):
+                    Snackbar.make(IntermediateCameraActivity.this.analyzed
+                            , "Image too large!", Snackbar.LENGTH_SHORT).show();
+                    break;
+                case(3):
                     Snackbar.make(IntermediateCameraActivity.this.analyzed
                             , "No internet, server down or image too large!", Snackbar.LENGTH_SHORT).show();
                     break;

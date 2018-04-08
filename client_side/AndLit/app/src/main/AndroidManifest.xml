@@ -60,7 +60,7 @@
         </activity>
         <activity android:name=".UI.IntermediateCameraActivity" android:configChanges="orientation|screenSize"/>
         <activity
-            android:name=".UI.ImgGrabber"
+            android:name=".UI.helperUI.ImgGrabber"
             android:launchMode="singleInstance" />
         <activity
             android:name=".settings.SettingsActivity"

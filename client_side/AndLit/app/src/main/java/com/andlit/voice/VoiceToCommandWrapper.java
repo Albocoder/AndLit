@@ -1,7 +1,27 @@
 package com.andlit.voice;
 
-public class VoiceToCommandWrapper {
-    public VoiceToCommandWrapper() {
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 
+import com.andlit.settings.SettingsDefinedKeys;
+
+public class VoiceToCommandWrapper {
+
+    private VoiceToCommand v;
+
+    public VoiceToCommandWrapper(Context c) {
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(c);
+        String locale = sharedPref.getString(SettingsDefinedKeys.LANGUAGE,"en");
+        switch (locale) {
+            //case("tr")
+            default:
+                v = new VoiceToCommandEnglish(c);
+            break;
+        }
+    }
+
+    public boolean decide(String command) {
+        return v.decide(command);
     }
 }
