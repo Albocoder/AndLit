@@ -1,5 +1,6 @@
 # Andlit API Documentation
 This document is to explain andlit api endpoints. Please open an issue for ambigious or wrong information. In order to test the api easily you can use httpie command line tool. For help in getting and using httpie please refer to https://httpie.org/.
+
 ## All the package of offered services in postman: 
 https://github.com/Albocoder/AndLit/blob/master/server_side/ANDLIT_BACKEND.postman_collection.json
 
@@ -132,3 +133,61 @@ Sample response body on successful request:
     }
 }
 ```
+
+## Image Upload And Retrieval
+These api endpoints serve services for storing and retrieving image files on the server. 
+### Uploading Image
+Each user can upload an image file, either in raw format or in base64 encoded form, to the server for backup purposes. To do so user needs to submit a POST request to https://andlit.info/images/upload/ with an image, its MD5 hash code, and their authorization token. Hash code should be unique for the images that user uploads to the server. Upon successfull POST request, details of the image will be returned to the user.
+
+Sample httpie command for uploading image in raw format:
+```
+http --form --verify=no POST https://andlit.info/images/upload/ 'Authorization: Token 4f7b3a8a64f19b5fe7ede69d28ed26f084d5301c' image@dollar.jpg image_hash='879a176e6d3eeca563e0caabbe000555'
+```
+Note: for posting image in raw format, provide the relative path to the image after the `@` sign.
+
+Sample httpie command for posting image in base64 encoded format:
+```
+http --json --verify=no POST https://andlit.info/images/upload/ 'Authorization: Token 4f7b3a8a64f19b5fe7ede69d28ed26f084d5301c' image_hash='879a176e6d3eeca563e0caabbe000555' image="data:image/jpeg;base64,/9j/4AAQSkZJRgABA..."
+```
+Note: for posting image in base64 encoded format, make sure to include `data:image/jpeg;base64` in the beginning of the image field. Also make sure not to include any newlines for the base64 encoded text. 
+
+Sample response body on successful request:
+```
+{
+    "image": "/media/images/2/050154e2-8b0.jpg",
+    "image_hash": "879a176e6d3eeca563e0caabbe000555",
+    "pk": 1
+}
+```
+
+### Retrieving list of images owned by user
+By using this endpoint users can get list of the images they have stored on the server. In order to do so, they need to submit a GET request to https://andlit.info/images/list/ with their authorization token.
+
+Sample httpie command for getting the list of images stored in the server:
+```
+http --form --verify=no GET https://andlit.info/images/list/ 'Authorization: Token 4f7b3a8a64f19b5fe7ede69d28ed26f084d5301c'
+``` 
+
+Sample response body on successful request:
+```
+{
+    "image": "https://andlit.info/media/images/2/050154e2-8b0.jpg",
+    "image_hash": "879a176e6d3eeca563e0caabbe000555",
+    "pk": 1
+},
+{
+    "image": "https://andlit.info/media/images/2/zen.png",
+    "image_hash": "f86fc5f9a18eb29cac84f4e0503d2875",
+    "pk": 2
+}
+```
+
+### Retrieving a single image from the server
+Users can retrieve the images they have store in the server in a binary format. In order to do so, they need to submit a GET request to https://andlit.info/images/get/ with the image's md5 hash and their authorization token.
+
+Sample httpie command for getting the list of images stored in the server:
+```
+http --form --verify=no GET https://andlit.info/images/get/ 'Authorization: Token 4f7b3a8a64f19b5fe7ede69d28ed26f084d5301c' image_hash='879a176e6d3eeca563e0caabbe000555'
+``` 
+
+Upon successfull request a binary data will be returned to the user. By default httpie does not show this on the console output. In order to save the data, `--output img.jpg` can be added to the beginning of the httpie command, and binary data will be stored in img.jpg file.
