@@ -4,6 +4,11 @@ This document is to explain andlit api endpoints. Please open an issue for ambig
 ## All the package of offered services in postman: 
 https://github.com/Albocoder/AndLit/blob/master/server_side/ANDLIT_BACKEND.postman_collection.json
 
+## Content:
+1. [User Accounts](#user-accounts)
+2. [Vision](#vision)
+3. [Image Upload](#image-upload)
+
 ## User Accounts:
 These endpoints are collected under https://andlit.info/users/ url, and are specific to user related actions.
 
@@ -134,7 +139,7 @@ Sample response body on successful request:
 }
 ```
 
-## Image Upload And Retrieval
+## Image Upload
 These api endpoints serve services for storing and retrieving image files on the server. 
 ### Uploading Image
 Each user can upload an image file, either in raw format or in base64 encoded form, to the server for backup purposes. To do so user needs to submit a POST request to https://andlit.info/images/upload/ with an image, its MD5 hash code, and their authorization token. Hash code should be unique for the images that user uploads to the server. Upon successfull POST request, details of the image will be returned to the user.
