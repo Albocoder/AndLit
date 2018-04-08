@@ -4,6 +4,7 @@ import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.speech.RecognizerIntent;
+import android.speech.tts.TextToSpeech;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.preference.PreferenceManager;
@@ -11,14 +12,12 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import com.andlit.cloudInterface.Authentication.Authenticator;
 import com.andlit.settings.SettingsActivity;
 import com.andlit.settings.SettingsDefinedKeys;
 import com.andlit.UI.IntermediateCameraActivity;
 import com.andlit.voice.VoiceToCommand;
 import com.andlit.voice.VoiceToCommandEnglish;
-
 import java.util.ArrayList;
 import java.util.Locale;
 
@@ -113,7 +112,7 @@ public class HomeActivity extends AppCompatActivity
         intent.putExtra(RecognizerIntent.EXTRA_PROMPT, "Say Something!");
         try
         {
-            startActivityForResult(intent, 100);
+            startActivityForResult(intent, RequestCodes.SPEECH_INPUT_RC);
         }
         catch (ActivityNotFoundException a)
         {
@@ -127,7 +126,7 @@ public class HomeActivity extends AppCompatActivity
         super.onActivityResult(requestCode, resultCode, data);
 
         // speechToText
-        if(requestCode == 100)
+        if(requestCode == RequestCodes.SPEECH_INPUT_RC)
         {
             if(resultCode == RESULT_OK && null != data)
             {
@@ -141,6 +140,28 @@ public class HomeActivity extends AppCompatActivity
                 vc.decide(result.get(0));
             }
         }
+
+        // Audio Feedback
+        if(requestCode == RequestCodes.AUDIO_FEEDBACK_RC)
+        {
+            if(resultCode != TextToSpeech.Engine.CHECK_VOICE_DATA_PASS)
+            {
+                Intent install = new Intent();
+                install.setAction(TextToSpeech.Engine.ACTION_INSTALL_TTS_DATA);
+                startActivity(install);
+            }
+        }
+    }
+
+    /*
+    method to check if a TTS engine is installed on the device.
+    The check is performed by making use of the result of another Activity.
+    */
+    private void checkTTS()
+    {
+        Intent check = new Intent();
+        check.setAction(TextToSpeech.Engine.ACTION_CHECK_TTS_DATA);
+        startActivityForResult(check, RequestCodes.AUDIO_FEEDBACK_RC);
     }
 
     @Override
@@ -149,6 +170,5 @@ public class HomeActivity extends AppCompatActivity
         super.onResume();
 
         voiceButtonInit();
-
     }
 }

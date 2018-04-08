@@ -13,7 +13,7 @@
         android:required="true" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
-    <uses-permission android:name="com.android.alarm.permission.SET_ALARM"/>
+    <uses-permission android:name="com.android.alarm.permission.SET_ALARM" />
 
     <!-- ************************* features ***************************** -->
     <uses-feature
@@ -55,10 +55,13 @@
             android:theme="@style/AppTheme.Dark">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".UI.IntermediateCameraActivity" android:configChanges="orientation|screenSize"/>
+        <activity
+            android:name=".UI.IntermediateCameraActivity"
+            android:configChanges="orientation|screenSize" />
         <activity
             android:name=".UI.helperUI.ImgGrabber"
             android:launchMode="singleInstance" />
@@ -67,14 +70,17 @@
             android:label="Settings" />
         <activity android:name=".HomeActivity" />
 
-        <!--*************************** Cron related ***************************-->
+        <!-- *************************** Cron related *************************** -->
         <receiver android:name=".cron.OnBootAutoStart">
             <intent-filter>
-                <action android:name="android.intent.action.BOOT_COMPLETED"/>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
         </receiver>
-        <receiver android:process=":remote" android:name=".cron.training.TrainingAlarmReceiver"/>
+        <receiver
+            android:name=".cron.training.TrainingAlarmReceiver"
+            android:process=":remote" />
 
+        <activity android:name=".Camera.CameraActivity"></activity>
     </application>
 
 </manifest>
