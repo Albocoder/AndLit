@@ -1,22 +1,22 @@
 package com.andlit.session;
 
 import android.annotation.SuppressLint;
-import android.app.ProgressDialog;
+import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
+import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.support.design.widget.Snackbar;
+import android.widget.Toast;
 
-import com.andlit.R;
-import com.andlit.UI.IntermediateCameraActivity;
+import com.andlit.RequestCodes;
+import com.andlit.camera.BitmapWrapper;
+import com.andlit.camera.CameraActivity;
 import com.andlit.cloudInterface.Vision.VisionEndpoint;
 import com.andlit.cloudInterface.Vision.models.Description;
 import com.andlit.cloudInterface.Vision.models.Text;
 import com.andlit.database.AppDatabase;
-import com.andlit.database.entities.KnownPPL;
 import com.andlit.face.Face;
 import com.andlit.face.FaceOperator;
 import com.andlit.face.FaceRecognizerSingleton;
@@ -31,12 +31,12 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
-import static org.bytedeco.javacpp.opencv_core.LINE_8;
+import static com.andlit.utils.StorageHelper.writePNGToInternalMemory;
 import static org.bytedeco.javacpp.opencv_imgcodecs.imread;
 import static org.bytedeco.javacpp.opencv_imgcodecs.imwrite;
 import static org.bytedeco.javacpp.opencv_imgproc.rectangle;
 
-public class Session {
+public class Session extends Activity {
     // FLAG CONSTANTS
     private static final int NOT_RUN_YET = -1;
     private static final int SUCCESFUL = 0;
@@ -54,7 +54,7 @@ public class Session {
     private static final String IMG_DESC_START = "Getting image description from the server!";
 
     // session control variables
-    private boolean isVoiceSession;
+    protected boolean isVoiceSession;
     private boolean saveOnExit;
 
     // initialized when session starts
@@ -62,7 +62,6 @@ public class Session {
     private AppDatabase db;
     private FaceRecognizerSingleton frs;
     private VoiceToCommandWrapper vc;
-    private Context c;
     //todo: private Camerathingy cam
 
     // calculated in session
@@ -75,36 +74,41 @@ public class Session {
 
 
 
-    // ************************* SESSION SETUP FUNCTIONS ************************ //
-    public Session(Context c) {
+    // ************************* SESSION ACTIVITY FUNCTIONS ************************ //
+    public void destroySession(){ restartSession(); }
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState){
+        super.onCreate(savedInstanceState);
         // setting up control variables
-        this.c = c;
-        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(c);
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
         saveOnExit = sharedPref.getBoolean(SettingsDefinedKeys.SAVE_UNLABELED_ON_EXIT,false);
         isVoiceSession = sharedPref.getBoolean(SettingsDefinedKeys.AUDIO_FEEDBACK,false);
         // start
         restartSession();
     }
-    public Session(Context c,boolean v) {
-        // setting up control variables
-        this.c = c;
-        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(c);
-        saveOnExit = sharedPref.getBoolean(SettingsDefinedKeys.SAVE_UNLABELED_ON_EXIT,false);
-        isVoiceSession = v;
-        // start
-        restartSession();
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode,resultCode,data);
+        if(requestCode == RequestCodes.CAMERA_ACTIVITY_RC) {
+            if( resultCode == Activity.RESULT_OK){
+                try {
+                    String path = writePNGToInternalMemory(this,BitmapWrapper.bitmap,"tmp","tmpimg.png");
+                    if(vis != null)
+                        vis.destroy();
+                    vis = new VisionEndpoint(this,new File(path));
+                    Toast.makeText(this,"it works!",Toast.LENGTH_SHORT).show();
+                } catch (IOException ignored) {}
+            }
+        }
     }
-
-    public void destroySession(){ restartSession(); }
-
-
 
 
     // ***************************** ACTION FUNCTIONS *************************** //
-    public boolean getPicture() {
-        //todo do this!
-        audioFeedback(PICTURE_SUCCESS);
-        return true;
+    public void getPicture() {
+        Intent i = new Intent(this, CameraActivity.class);
+        startActivityForResult(i,RequestCodes.CAMERA_ACTIVITY_RC);
     }
 
     public boolean detectFaces() {
@@ -118,7 +122,7 @@ public class Session {
         }
         if(fop == null) {
             opencv_core.Mat toAnalyze = imread(vis.getImgFile().getAbsolutePath());
-            fop = new FaceOperator(c, toAnalyze);
+            fop = new FaceOperator(this, toAnalyze);
         }
         fop.getFaces();
         audioFeedback(ANALYSIS_SUCCESS);
@@ -219,10 +223,10 @@ public class Session {
 
     // **************************** INNER FUNCTIONS ***************************** //
     private void restartSession() {
-        speaker = new VoiceGenerator(c);
-        db = AppDatabase.getDatabase(c);
-        frs = new FaceRecognizerSingleton(c);
-        vc = new VoiceToCommandWrapper(c);
+        speaker = new VoiceGenerator(this);
+        db = AppDatabase.getDatabase(this);
+        frs = new FaceRecognizerSingleton(this);
+        vc = new VoiceToCommandWrapper(this);
         if(vis != null)
             vis.destroy();
         if(fop != null) {

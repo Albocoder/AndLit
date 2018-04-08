@@ -1,8 +1,8 @@
-package com.andlit.Camera;
+package com.andlit.camera;
 
 import android.graphics.Bitmap;
 
-enum BitmapWrapper
+public enum BitmapWrapper
 {
     INSTANCE;
 

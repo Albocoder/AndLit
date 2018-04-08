@@ -1,4 +1,4 @@
-package com.andlit.UI.helperUI.listRelated;
+package com.andlit.ui.helperUI.listRelated;
 
 import android.annotation.SuppressLint;
 import android.content.Context;

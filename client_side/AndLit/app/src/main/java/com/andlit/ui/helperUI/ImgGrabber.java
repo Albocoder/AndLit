@@ -1,4 +1,4 @@
-package com.andlit.UI.helperUI;
+package com.andlit.ui.helperUI;
 
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
@@ -18,7 +18,7 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.andlit.BuildConfig;
-import com.andlit.UI.IntermediateCameraActivity;
+import com.andlit.ui.IntermediateCameraActivity;
 
 import java.io.File;
 import java.io.FileOutputStream;

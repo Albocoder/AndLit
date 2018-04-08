@@ -60,10 +60,10 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".UI.IntermediateCameraActivity"
+            android:name=".ui.IntermediateCameraActivity"
             android:configChanges="orientation|screenSize" />
         <activity
-            android:name=".UI.helperUI.ImgGrabber"
+            android:name=".ui.helperUI.ImgGrabber"
             android:launchMode="singleInstance" />
         <activity
             android:name=".settings.SettingsActivity"
@@ -80,7 +80,9 @@
             android:name=".cron.training.TrainingAlarmReceiver"
             android:process=":remote" />
 
-        <activity android:name=".Camera.CameraActivity"></activity>
+        <activity android:name=".camera.CameraActivity" />
+        <activity android:name=".session.Session" />
+        <activity android:name=".ui.HandsFreeMode" />
     </application>
 
 </manifest>

@@ -202,7 +202,7 @@ public class StorageHelper {
         return newFile.getAbsolutePath();
     }
 
-    public static String writePNGToInternalMemory(Context c, Bitmap bm, String path,String fname) throws IOException {
+    public static String writePNGToInternalMemory(Context c, @NonNull Bitmap bm, String path,String fname) throws IOException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         bm.compress(Bitmap.CompressFormat.PNG, 100, baos);
         byte[] b = baos.toByteArray();

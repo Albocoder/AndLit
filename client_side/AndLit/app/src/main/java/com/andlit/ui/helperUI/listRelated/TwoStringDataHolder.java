@@ -1,4 +1,4 @@
-package com.andlit.UI.helperUI.listRelated;
+package com.andlit.ui.helperUI.listRelated;
 
 /**
  * Created by albocoder on 2/28/18.

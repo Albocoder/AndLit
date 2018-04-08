@@ -1,4 +1,4 @@
-package com.andlit.UI.helperUI.listRelated;
+package com.andlit.ui.helperUI.listRelated;
 
 import android.content.Context;
 import android.support.annotation.NonNull;

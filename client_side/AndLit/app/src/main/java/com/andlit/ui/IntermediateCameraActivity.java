@@ -1,4 +1,4 @@
-package com.andlit.UI;
+package com.andlit.ui;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
@@ -34,7 +34,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.andlit.R;
-import com.andlit.UI.helperUI.ImgGrabber;
+import com.andlit.ui.helperUI.ImgGrabber;
 import com.andlit.cloudInterface.Vision.VisionEndpoint;
 import com.andlit.cloudInterface.Vision.models.Description;
 import com.andlit.cloudInterface.Vision.models.Text;
@@ -42,9 +42,9 @@ import com.andlit.settings.SettingsDefinedKeys;
 import com.andlit.database.AppDatabase;
 import com.andlit.database.entities.*;
 import com.andlit.face.*;
-import com.andlit.UI.helperUI.listRelated.PersonDataAdapter;
-import com.andlit.UI.helperUI.listRelated.PotentialPeopleAdapter;
-import com.andlit.UI.helperUI.listRelated.TwoStringDataHolder;
+import com.andlit.ui.helperUI.listRelated.PersonDataAdapter;
+import com.andlit.ui.helperUI.listRelated.PotentialPeopleAdapter;
+import com.andlit.ui.helperUI.listRelated.TwoStringDataHolder;
 import com.andlit.utils.StorageHelper;
 import com.andlit.voice.VoiceGenerator;
 

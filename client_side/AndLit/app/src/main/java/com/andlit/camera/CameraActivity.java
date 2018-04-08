@@ -1,4 +1,4 @@
-package com.andlit.Camera;
+package com.andlit.camera;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;

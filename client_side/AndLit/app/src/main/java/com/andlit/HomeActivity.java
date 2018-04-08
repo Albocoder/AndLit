@@ -8,14 +8,17 @@ import android.speech.tts.TextToSpeech;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.preference.PreferenceManager;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 import com.andlit.cloudInterface.Authentication.Authenticator;
+import com.andlit.session.Session;
 import com.andlit.settings.SettingsActivity;
 import com.andlit.settings.SettingsDefinedKeys;
-import com.andlit.UI.IntermediateCameraActivity;
+import com.andlit.ui.HandsFreeMode;
+import com.andlit.ui.IntermediateCameraActivity;
 import com.andlit.voice.VoiceToCommand;
 import com.andlit.voice.VoiceToCommandEnglish;
 import java.util.ArrayList;
@@ -23,6 +26,8 @@ import java.util.Locale;
 
 public class HomeActivity extends AppCompatActivity
 {
+    private static final String TAG = "HomeActivity";
+
     // View related Properties
     private TextView txtSpeechInput;
 
@@ -60,6 +65,14 @@ public class HomeActivity extends AppCompatActivity
                 Intent i = new Intent(view.getContext(),LoginActivity.class);
                 startActivity(i);
                 finish();
+            }
+        });
+
+        Button handsFree = findViewById(R.id.handsfree_button);
+        handsFree.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View view) {
+                startActivity(new Intent(view.getContext(), HandsFreeMode.class));
             }
         });
 
