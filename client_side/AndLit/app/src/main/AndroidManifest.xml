@@ -69,6 +69,11 @@
             android:name=".settings.SettingsActivity"
             android:label="Settings" />
         <activity android:name=".HomeActivity" />
+        <activity android:name=".camera.CameraActivity" />
+        <activity
+            android:name=".ui.HandsFreeMode"
+            android:screenOrientation="portrait"
+            android:configChanges="orientation|screenSize|keyboardHidden"/>
 
         <!-- *************************** Cron related *************************** -->
         <receiver android:name=".cron.OnBootAutoStart">
@@ -77,12 +82,8 @@
             </intent-filter>
         </receiver>
         <receiver
-            android:name=".cron.training.TrainingAlarmReceiver"
-            android:process=":remote" />
-
-        <activity android:name=".camera.CameraActivity" />
-        <activity android:name=".session.Session" />
-        <activity android:name=".ui.HandsFreeMode" />
+        android:name=".cron.training.TrainingAlarmReceiver"
+        android:process=":remote" />
     </application>
 
 </manifest>

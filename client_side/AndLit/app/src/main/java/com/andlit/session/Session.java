@@ -7,7 +7,7 @@ import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.widget.Toast;
+import android.util.Log;
 
 import com.andlit.RequestCodes;
 import com.andlit.camera.BitmapWrapper;
@@ -29,11 +29,10 @@ import org.bytedeco.javacpp.opencv_core;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.Random;
 
 import static com.andlit.utils.StorageHelper.writePNGToInternalMemory;
 import static org.bytedeco.javacpp.opencv_imgcodecs.imread;
-import static org.bytedeco.javacpp.opencv_imgcodecs.imwrite;
-import static org.bytedeco.javacpp.opencv_imgproc.rectangle;
 
 public abstract class Session extends Activity {
     // FLAG CONSTANTS
@@ -42,8 +41,10 @@ public abstract class Session extends Activity {
     private static final int RESULT_ERROR = 1;
 
     // logging constants
+    private static String TAG = "Session";
     // FAILURE
     private static final String PICTURE_UNAVAILABLE = "Session has no picture available!";
+    private static final String PICTURE_EXISTS = "Picture already exists. Please restart session!";
     // SUCCESS
     private static final String PICTURE_SUCCESS = "Picture was taken successfully!";
     private static final String ANALYSIS_SUCCESS = "Face detection terminated successfully!";
@@ -54,6 +55,7 @@ public abstract class Session extends Activity {
     // session control variables
     protected boolean isVoiceSession;
     private boolean saveOnExit;
+    protected String randPictureName;
 
     // initialized when session starts
     private VoiceGenerator speaker;
@@ -75,8 +77,6 @@ public abstract class Session extends Activity {
     public void destroySession(){
         restartSession();
         speaker.destroy();
-        AppDatabase.destroyInstance();
-        finish();
     }
 
     @Override
@@ -85,9 +85,13 @@ public abstract class Session extends Activity {
         if(getLayoutId() != 0)
             setContentView(getLayoutId());
         // setting up control variables
+        TAG += ""+new Random().nextInt();
+        randPictureName = ""+new Random().nextLong()+".png";
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
         saveOnExit = sharedPref.getBoolean(SettingsDefinedKeys.SAVE_UNLABELED_ON_EXIT,false);
         isVoiceSession = sharedPref.getBoolean(SettingsDefinedKeys.AUDIO_FEEDBACK,false);
+        // running arbitrary code from child
+        onCreateChild();
         // start
         restartSession();
     }
@@ -95,29 +99,54 @@ public abstract class Session extends Activity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode,resultCode,data);
+        // running arbitrary code from the child
+        onActivityResultChild(requestCode,resultCode,data);
+        // proceed with own code
         if(requestCode == RequestCodes.CAMERA_ACTIVITY_RC) {
             if( resultCode == Activity.RESULT_OK){
                 try {
-                    String path = writePNGToInternalMemory(this,BitmapWrapper.bitmap,"tmp","tmpimg.png");
+                    if(randPictureName == null)
+                        randPictureName = ""+new Random().nextLong()+".png";
+
+                    String path = writePNGToInternalMemory(this,BitmapWrapper.bitmap,"tmp",randPictureName);
                     if(vis != null)
                         vis.destroy();
                     vis = new VisionEndpoint(this,new File(path));
-                    Toast.makeText(this,"it works!",Toast.LENGTH_SHORT).show();
+                    Log.d(TAG,"Picture taken successfully!");
+                    audioFeedback(PICTURE_SUCCESS);
                 } catch (IOException ignored) {}
             }
         }
     }
 
     @Override
+    protected void onRestart(){
+        super.onRestart();
+        restartSession();
+        onRestartChild();
+    }
+
+    @Override
     protected void onDestroy() {
         super.onDestroy();
         destroySession();
+        onDestroyChild();
     }
 
-    protected abstract int getLayoutId();
+
+    // *************************** OVERRIDABLE FUNCTIONS ************************ //
+    protected int getLayoutId(){return 0;}
+    protected void onActivityResultChild(int requestCode, int resultCode, Intent data){}
+    protected void onDestroyChild(){}
+    protected void onCreateChild(){}
+    protected void onRestartChild(){}
 
     // ***************************** ACTION FUNCTIONS *************************** //
     public void getPicture() {
+        if(vis != null) {
+            audioFeedback(PICTURE_EXISTS);
+            return;
+        }
         Intent i = new Intent(this, CameraActivity.class);
         startActivityForResult(i,RequestCodes.CAMERA_ACTIVITY_RC);
     }

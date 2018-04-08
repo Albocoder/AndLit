@@ -73,7 +73,7 @@ public class HomeActivity extends AppCompatActivity
         handsFree.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View view) {
-                startActivity(new Intent(view.getContext(), HandsFreeMode.class));
+                loadHandsFreeMode();
             }
         });
 
@@ -102,6 +102,11 @@ public class HomeActivity extends AppCompatActivity
             voiceButton.setVisibility(View.VISIBLE);
         else
             voiceButton.setVisibility(View.INVISIBLE);
+    }
+
+    private void loadHandsFreeMode(){
+        Intent i = new Intent(this, HandsFreeMode.class);
+        startActivity(i);
     }
 
     private void loadSettingsScreen()
