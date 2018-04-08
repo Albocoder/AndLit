@@ -11,7 +11,6 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import com.andlit.cloudInterface.Authentication.Authenticator;
 import com.andlit.settings.SettingsActivity;
 import com.andlit.settings.SettingsDefinedKeys;
@@ -113,7 +112,7 @@ public class HomeActivity extends AppCompatActivity
         intent.putExtra(RecognizerIntent.EXTRA_PROMPT, "Say Something!");
         try
         {
-            startActivityForResult(intent, 100);
+            startActivityForResult(intent, RequestCodes.SPEECH_INPUT_RC);
         }
         catch (ActivityNotFoundException a)
         {
@@ -127,7 +126,7 @@ public class HomeActivity extends AppCompatActivity
         super.onActivityResult(requestCode, resultCode, data);
 
         // speechToText
-        if(requestCode == 100)
+        if(requestCode == RequestCodes.SPEECH_INPUT_RC)
         {
             if(resultCode == RESULT_OK && null != data)
             {
