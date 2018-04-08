@@ -19,6 +19,7 @@ import com.andlit.settings.SettingsActivity;
 import com.andlit.settings.SettingsDefinedKeys;
 import com.andlit.ui.HandsFreeMode;
 import com.andlit.ui.IntermediateCameraActivity;
+import com.andlit.voice.VoiceGenerator;
 import com.andlit.voice.VoiceToCommand;
 import com.andlit.voice.VoiceToCommandEnglish;
 import java.util.ArrayList;

@@ -2,7 +2,6 @@ package com.andlit.session;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
@@ -36,21 +35,20 @@ import static org.bytedeco.javacpp.opencv_imgcodecs.imread;
 import static org.bytedeco.javacpp.opencv_imgcodecs.imwrite;
 import static org.bytedeco.javacpp.opencv_imgproc.rectangle;
 
-public class Session extends Activity {
+public abstract class Session extends Activity {
     // FLAG CONSTANTS
     private static final int NOT_RUN_YET = -1;
-    private static final int SUCCESFUL = 0;
-    private static final int ERROR = 1;
+    private static final int RESULT_SUCCESFUL = 0;
+    private static final int RESULT_ERROR = 1;
 
-
-
-    // constants
-    private static final String TAG = "VoiceSession";
+    // logging constants
+    // FAILURE
     private static final String PICTURE_UNAVAILABLE = "Session has no picture available!";
-
+    // SUCCESS
     private static final String PICTURE_SUCCESS = "Picture was taken successfully!";
     private static final String ANALYSIS_SUCCESS = "Face detection terminated successfully!";
     private static final String RECOGNITION_SUCCESS = "Face recognition terminated successfully!";
+    // INFO
     private static final String IMG_DESC_START = "Getting image description from the server!";
 
     // session control variables
@@ -62,7 +60,6 @@ public class Session extends Activity {
     private AppDatabase db;
     private FaceRecognizerSingleton frs;
     private VoiceToCommandWrapper vc;
-    //todo: private Camerathingy cam
 
     // calculated in session
     private VisionEndpoint vis;     // has the image file inside
@@ -75,11 +72,18 @@ public class Session extends Activity {
 
 
     // ************************* SESSION ACTIVITY FUNCTIONS ************************ //
-    public void destroySession(){ restartSession(); }
+    public void destroySession(){
+        restartSession();
+        speaker.destroy();
+        AppDatabase.destroyInstance();
+        finish();
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
+        if(getLayoutId() != 0)
+            setContentView(getLayoutId());
         // setting up control variables
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
         saveOnExit = sharedPref.getBoolean(SettingsDefinedKeys.SAVE_UNLABELED_ON_EXIT,false);
@@ -104,6 +108,13 @@ public class Session extends Activity {
         }
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        destroySession();
+    }
+
+    protected abstract int getLayoutId();
 
     // ***************************** ACTION FUNCTIONS *************************** //
     public void getPicture() {
@@ -164,7 +175,7 @@ public class Session extends Activity {
     }
 
     public boolean describePictureAsync() {
-        if(descriptionResult == SUCCESFUL)
+        if(descriptionResult == RESULT_SUCCESFUL)
             return true;
         else if(descriptionResult == NOT_RUN_YET) {
             new DescribeImageAsync().execute();

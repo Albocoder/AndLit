@@ -19,10 +19,10 @@ import java.util.ArrayList;
 import java.util.Locale;
 
 public class HandsFreeMode extends Session {
+
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState, @Nullable PersistableBundle persistentState) {
         super.onCreate(savedInstanceState, persistentState);
-        setContentView(R.layout.hands_free_layout);
         Button b = findViewById(R.id.takeVoiceCommands);
         b.setOnClickListener(new View.OnClickListener(){
             @Override
@@ -51,6 +51,10 @@ public class HandsFreeMode extends Session {
         }
     }
 
+    @Override
+    protected int getLayoutId() {
+        return R.layout.hands_free_layout;
+    }
 
 
     private void promptSpeechInput()

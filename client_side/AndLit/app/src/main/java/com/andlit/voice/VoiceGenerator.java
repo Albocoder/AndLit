@@ -30,8 +30,12 @@ public class VoiceGenerator implements TextToSpeech.OnInitListener
     public VoiceGenerator(Context context) {
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(context);
         String locale = sharedPref.getString(SettingsDefinedKeys.LANGUAGE, "en");
-        if(tts == null || !currentLocale.equals(locale))
+        if(tts == null)
             tts = new TextToSpeech(context, this);
+        if(!locale.equals(currentLocale)) {
+            destroy();
+            tts = new TextToSpeech(context,this);
+        }
         currentLocale = locale;
     }
 

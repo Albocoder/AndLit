@@ -218,6 +218,8 @@ public class IntermediateCameraActivity extends Activity {
         }
         if(imageLocation!= null)
             imageLocation.delete();
+        if(speaker != null)
+            speaker.destroy();
         exitActivity(0);
     }
 
