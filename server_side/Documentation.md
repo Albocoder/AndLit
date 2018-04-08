@@ -4,6 +4,12 @@ This document is to explain andlit api endpoints. Please open an issue for ambig
 ## All the package of offered services in postman: 
 https://github.com/Albocoder/AndLit/blob/master/server_side/ANDLIT_BACKEND.postman_collection.json
 
+## Content:
+1. [User Accounts](#user-accounts)
+2. [Vision](#vision)
+3. [Image Upload](#image-upload)
+4. [File Upload](#file-upload)
+
 ## User Accounts:
 These endpoints are collected under https://andlit.info/users/ url, and are specific to user related actions.
 
@@ -134,7 +140,7 @@ Sample response body on successful request:
 }
 ```
 
-## Image Upload And Retrieval
+## Image Upload
 These api endpoints serve services for storing and retrieving image files on the server. 
 ### Uploading Image
 Each user can upload an image file, either in raw format or in base64 encoded form, to the server for backup purposes. To do so user needs to submit a POST request to https://andlit.info/images/upload/ with an image, its MD5 hash code, and their authorization token. Hash code should be unique for the images that user uploads to the server. Upon successfull POST request, details of the image will be returned to the user.
@@ -183,11 +189,98 @@ Sample response body on successful request:
 ```
 
 ### Retrieving a single image from the server
-Users can retrieve the images they have store in the server in a binary format. In order to do so, they need to submit a GET request to https://andlit.info/images/get/ with the image's md5 hash and their authorization token.
+Users can retrieve the images they have stored in the server in a binary format. In order to do so, they need to submit a GET request to https://andlit.info/images/get/ with the image's md5 hash and their authorization token.
 
-Sample httpie command for getting the list of images stored in the server:
+Sample httpie command for getting a single image file stored in the server:
 ```
 http --form --verify=no GET https://andlit.info/images/get/ 'Authorization: Token 4f7b3a8a64f19b5fe7ede69d28ed26f084d5301c' image_hash='879a176e6d3eeca563e0caabbe000555'
 ``` 
 
 Upon successfull request a binary data will be returned to the user. By default httpie does not show this on the console output. In order to save the data, `--output img.jpg` can be added to the beginning of the httpie command, and binary data will be stored in img.jpg file.
+
+## File Upload
+These api endpoints serve services for storing and retrieving database and classifier files on the server. 
+
+### Uploading DB File
+In order to upload a database file to the server, user needs to submit a POST request to https://andlit.info/files/db/upload/ with a database file in raw format, its MD5 hash code, and their authorization token. Hash code should be unique for the database files that user uploads to the server. Upon successfull POST request, details of the file will be returned to the user.
+
+Sample httpie command for uploading database file in raw format:
+```
+http --form --verify=no POST https://andlit.info/files/db/upload/ 'Authorization: Token 4f7b3a8a64f19b5fe7ede69d28ed26f084d5301c' file_hash='b144427801cff711a265c406e49542c5' uploaded_file@local-andlit-database
+```
+
+Sample response body on successful request:
+```
+{
+    "file_hash": "b144427801cff711a265c406e49542c5",
+    "pk": 1,
+    "uploaded_file": "files/db/2/local-andlit-database"
+}
+```
+### Retrieving a list of DB files owned by the user
+In order to get the list of databse files stored on the server that are owned by the user, user needs to submit a GET request to https://andlit.info/files/db/list/ with their authorization token. Upon successfull GET request, list of database files with their details will be returned to the user.
+
+Sample httpie command for retrieving a list of database files in raw format:
+```
+http --verify=no GET https://andlit.info/files/db/list/ 'Authorization: Token 4f7b3a8a64f19b5fe7ede69d28ed26f084d5301c'
+```
+
+Sample response body on successful request:
+```
+{
+    "file_hash": "b144427801cff711a265c406e49542c5",
+    "pk": 1,
+    "uploaded_file": "files/db/2/local-andlit-database"
+}
+```
+### Retrieving a single database file from the server
+Users can retrieve the db files they have stored in the server in a binary format. In order to do so, they need to submit a GET request to https://andlit.info/files/db/get/ with the file's md5 hash and their authorization token.
+
+Sample httpie command for getting a single database file from the server:
+```
+http --verify=no GET https://andlit.info/files/db/get/ 'Authorization: Token 4f7b3a8a64f19b5fe7ede69d28ed26f084d5301c' file_hash='b144427801cff711a265c406e49542c5'
+``` 
+
+Upon successfull request a binary data will be returned to the user. By default httpie does not show this on the console output. In order to save the data, `--output downloaded_file` can be added to the beginning of the httpie command, and binary data will be stored in downloaded_file file.
+
+### Uploading A Classifier File
+In order to upload a classifier file to the server, user needs to submit a POST request to https://andlit.info/files/cl/upload/ with a classifier file in raw format, its MD5 hash code, and their authorization token. Hash code should be unique for the classifier files that user uploads to the server. Upon successfull POST request, details of the file will be returned to the user.
+
+Sample httpie command for uploading classifier file in binary format:
+```
+http --form --verify=no POST https://andlit.info/files/cl/upload/ 'Authorization: Token 4f7b3a8a64f19b5fe7ede69d28ed26f084d5301c' file_hash='a40e079156f9dfb4562827f6c86fd19a' uploaded_file@lbphClassifier.yml
+```
+
+Sample response body on successful request:
+```
+{
+    "file_hash": "a40e079156f9dfb4562827f6c86fd19a",
+    "pk": 1,
+    "uploaded_file": "files/classifiers/2/lbphClassifier.yml"
+}
+```
+### Retrieving a list of Classifier files owned by the user
+In order to get the list of classifier files stored on the server that are owned by the user, user needs to submit a GET request to https://andlit.info/files/cl/list/ with their authorization token. Upon successfull GET request, list of classifier files with their details will be returned to the user.
+
+Sample httpie command for retrieving a list of classifier files in raw format:
+```
+http --verify=no GET https://andlit.info/files/cl/list/ 'Authorization: Token 4f7b3a8a64f19b5fe7ede69d28ed26f084d5301c'
+```
+
+Sample response body on successful request:
+```
+{
+    "file_hash": "a40e079156f9dfb4562827f6c86fd19a",
+    "pk": 1,
+    "uploaded_file": "files/classifiers/2/lbphClassifier.yml"
+}
+```
+### Retrieving a single classifier file from the server
+Users can retrieve the classifier files they have stored in the server in a binary format. In order to do so, they need to submit a GET request to https://andlit.info/files/cl/get/ with the file's md5 hash and their authorization token.
+
+Sample httpie command for getting a single classifier file from the server:
+```
+http --verify=no GET https://andlit.info/files/cl/get/ 'Authorization: Token 4f7b3a8a64f19b5fe7ede69d28ed26f084d5301c' file_hash='a40e079156f9dfb4562827f6c86fd19a'
+``` 
+
+Upon successfull request a binary data will be returned to the user. By default httpie does not show this on the console output. In order to save the data, `--output downloaded_file` can be added to the beginning of the httpie command, and binary data will be stored in downloaded_file file.
