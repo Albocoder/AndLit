@@ -136,7 +136,7 @@ Sample response body on successful request:
 
 ## Image Upload And Retrieval
 These api endpoints serve services for storing and retrieving image files on the server. 
-### Uploading Imagehttps://git-scm.com/book/en/v2/Git-Basics-Recording-Changes-to-the-Repository
+### Uploading Image
 Each user can upload an image file, either in raw format or in base64 encoded form, to the server for backup purposes. To do so user needs to submit a POST request to https://andlit.info/images/upload/ with an image, its MD5 hash code, and their authorization token. Hash code should be unique for the images that user uploads to the server. Upon successfull POST request, details of the image will be returned to the user.
 
 Sample httpie command for uploading image in raw format:
