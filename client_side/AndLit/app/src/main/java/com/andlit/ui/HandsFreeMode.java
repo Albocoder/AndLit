@@ -29,7 +29,7 @@ public class HandsFreeMode extends Session {
             @Override
             public void onClick(View view) {
 //                promptSpeechInput();
-                getPicture();
+                takePicture();
             }
         });
     }

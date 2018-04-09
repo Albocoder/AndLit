@@ -30,12 +30,8 @@ public class VoiceGenerator implements TextToSpeech.OnInitListener
     public VoiceGenerator(Context context) {
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(context);
         String locale = sharedPref.getString(SettingsDefinedKeys.LANGUAGE, "en");
-        if(tts == null)
-            tts = new TextToSpeech(context, this);
-        if(!locale.equals(currentLocale)) {
-            destroy();
-            tts = new TextToSpeech(context,this);
-        }
+        destroy();
+        tts = new TextToSpeech(context,this);
         currentLocale = locale;
     }
 
@@ -81,6 +77,7 @@ public class VoiceGenerator implements TextToSpeech.OnInitListener
     /*
     method that plays silence for a specified duration.
     Using this method, we can add pauses to the speech to make it sound a little clearer
+    duration is in milliseconds
      */
     public void pause(int duration)
     {

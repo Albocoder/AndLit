@@ -99,7 +99,7 @@ public class IntermediateCameraActivity extends Activity {
         t = null;
         vis = null;
         // instantiating voice generator
-        speaker = new VoiceGenerator(this);
+        speaker = new VoiceGenerator(this.getApplicationContext());
 
         // instantiating database connection
         db = AppDatabase.getDatabase(this);

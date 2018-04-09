@@ -7,6 +7,7 @@ import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.design.widget.Snackbar;
 import android.util.Log;
 
 import com.andlit.RequestCodes;
@@ -21,6 +22,7 @@ import com.andlit.face.FaceOperator;
 import com.andlit.face.FaceRecognizerSingleton;
 import com.andlit.face.RecognizedFace;
 import com.andlit.settings.SettingsDefinedKeys;
+import com.andlit.ui.IntermediateCameraActivity;
 import com.andlit.voice.VoiceGenerator;
 import com.andlit.voice.VoiceToCommandWrapper;
 
@@ -36,7 +38,8 @@ import static org.bytedeco.javacpp.opencv_imgcodecs.imread;
 
 public abstract class Session extends Activity {
     // FLAG CONSTANTS
-    private static final int NOT_RUN_YET = -1;
+    private static final int NOT_RUN_YET = -2;
+    private static final int RUNNING = -1;
     private static final int RESULT_SUCCESFUL = 0;
     private static final int RESULT_ERROR = 1;
 
@@ -45,12 +48,24 @@ public abstract class Session extends Activity {
     // FAILURE
     private static final String PICTURE_UNAVAILABLE = "Session has no picture available!";
     private static final String PICTURE_EXISTS = "Picture already exists. Please restart session!";
+    private static final String NETWORK_ERROR = "No internet access, server is down.";
+    private static final String PICTURE_LARGE = "Picture too large";
+    private static final String TEXT_ERROR_RERUNNING = "Last text recognition job failed. Rerunning.";
+    private static final String DESC_ERROR_RERUNNING = "Last image description job failed. Rerunning.";
     // SUCCESS
     private static final String PICTURE_SUCCESS = "Picture was taken successfully!";
     private static final String ANALYSIS_SUCCESS = "Face detection terminated successfully!";
     private static final String RECOGNITION_SUCCESS = "Face recognition terminated successfully!";
+    private static final String DESC_SUCCESS = "Description obtained successfully";
+    private static final String TEXT_SUCCESS = "Text recognition results obtained successfully";
     // INFO
-    private static final String IMG_DESC_START = "Getting image description from the server!";
+    private static final String IMG_DESC_START = "Getting image description result from the server!";
+    private static final String DESC_STILL_RUNNING = "Image description is still running. Please wait.";
+    private static final String TEXT_START = "Getting text recognition result from the server!";
+    private static final String TEXT_STILL_RUNNING = "Text recognition is still running. Please wait.";
+    private static final String NO_TEXTS_FOUND = "No text blocks found.";
+    private static final String ONE_TEXT_FOUND = "One text block found.";
+    private static final String TEXT_FOUND_PROMPT = " text blocks found.";
 
     // session control variables
     protected boolean isVoiceSession;
@@ -74,11 +89,6 @@ public abstract class Session extends Activity {
 
 
     // ************************* SESSION ACTIVITY FUNCTIONS ************************ //
-    public void destroySession(){
-        restartSession();
-        speaker.destroy();
-    }
-
     @Override
     protected void onCreate(Bundle savedInstanceState){
         super.onCreate(null);
@@ -92,7 +102,6 @@ public abstract class Session extends Activity {
         randPictureName = "capture_"+TAGSERIALNO+".png";
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
         saveOnExit = sharedPref.getBoolean(SettingsDefinedKeys.SAVE_UNLABELED_ON_EXIT,false);
-        isVoiceSession = sharedPref.getBoolean(SettingsDefinedKeys.AUDIO_FEEDBACK,false);
         // start
         restartSession();
     }
@@ -112,7 +121,6 @@ public abstract class Session extends Activity {
                     if(vis != null)
                         vis.destroy();
                     vis = new VisionEndpoint(this,new File(path));
-                    Log.d(TAG,"Picture taken successfully!");
                     audioFeedback(PICTURE_SUCCESS);
                 } catch (IOException ignored) {}
             }
@@ -127,22 +135,40 @@ public abstract class Session extends Activity {
     }
 
     @Override
-    protected void onDestroy() {
+    protected final void onDestroy() {
         super.onDestroy();
         destroySession();
-        //onDestroyChild();
+        onDestroyChild();
     }
 
+    // ************************* SESSION SANITY FUNCTIONS ************************ //
+    public final void destroySession(){ restartSession(); }
+
+    public final void restartSession() {
+        speaker = new VoiceGenerator(this);
+        db = AppDatabase.getDatabase(this);
+        frs = new FaceRecognizerSingleton(this);
+        vc = new VoiceToCommandWrapper(this);
+        if(vis != null)
+            vis.destroy();
+        if(fop != null) {
+            if(saveOnExit)
+                fop.storeAllFaces();
+            fop.destroy();
+        }
+        descriptionResult = NOT_RUN_YET;
+        textResult = NOT_RUN_YET;
+        vis = null; fop = null; d = null; t = null;
+    }
 
     // *************************** OVERRIDABLE FUNCTIONS ************************ //
     protected int getLayoutId(){return 0;}
-//    protected void onActivityResultChild(int requestCode, int resultCode, Intent data){}
-//    protected void onDestroyChild(){}
-//    protected void onCreateChild(){}
-//    protected void onRestartChild(){}
+
+    protected void onDestroyChild(){}
 
     // ***************************** ACTION FUNCTIONS *************************** //
-    public void getPicture() {
+
+    public void takePicture() {
         if(vis != null) {
             audioFeedback(PICTURE_EXISTS);
             return;
@@ -186,45 +212,61 @@ public abstract class Session extends Activity {
         }catch (IndexOutOfBoundsException e){ return null; }
     }
 
-    public boolean describePicture(){
-        if(vis == null)
-            return false;
-        if(vis.getImgFile() == null) {
-            return false;
+    public boolean describePictureAsync(AsyncJobCallback cb) {
+        if(descriptionResult == RESULT_SUCCESFUL) {
+            audioFeedback(d.toString());
+            return true;    // means result already exists
         }
-        if(d == null){
-            try {
-                d = vis.getDescriptionOfImageBinary();
-            } catch (IOException e) {
-                return false;
-            }
+        else if(descriptionResult == NOT_RUN_YET)
+            new DescribeImageAsync(cb).execute();
+        else if(descriptionResult == RUNNING)
+            audioFeedback(DESC_STILL_RUNNING);
+        else {
+            audioFeedback(DESC_ERROR_RERUNNING);
+            new DescribeImageAsync(cb).execute();
         }
-        audioFeedback(d.toString());
-        return true;
+        audioPause(500);
+        return false;   // means result doesn't exist
     }
 
-    public boolean describePictureAsync() {
-        if(descriptionResult == RESULT_SUCCESFUL)
-            return true;
-        else if(descriptionResult == NOT_RUN_YET) {
-            new DescribeImageAsync().execute();
-            return true;
+    public boolean recognizeTextAsync(AsyncJobCallback cb) {
+        if(textResult == RESULT_SUCCESFUL) {
+            if(t.size() == 0)
+                audioFeedback(NO_TEXTS_FOUND);
+            else if(t.size() == 1)
+                audioFeedback(ONE_TEXT_FOUND);
+            else
+                audioFeedback(t.size()+TEXT_FOUND_PROMPT);
+            return true;    // means result already exists
         }
-        else
-            return false;
+        else if(textResult == NOT_RUN_YET)
+            new TextRecognitionAsync(cb).execute();
+        else if(textResult == RUNNING)
+            audioFeedback(TEXT_STILL_RUNNING);
+        else {
+            audioFeedback(TEXT_ERROR_RERUNNING);
+            new TextRecognitionAsync(cb).execute();
+        }
+        audioPause(500);
+        return false;   // means result doesn't exist
     }
 
+    public boolean describePictureAsync(){ return describePictureAsync(null); }
 
-
-//    public void getText
+    public boolean recognizeTextAsync(){ return recognizeTextAsync(null); }
 
     // **************************** ASYNC CLASSES ******************************* //
     @SuppressLint("StaticFieldLeak")
     private class DescribeImageAsync extends AsyncTask<Void,Void,Integer> {
 
+        private AsyncJobCallback cb;
+
+        public DescribeImageAsync(AsyncJobCallback cb){ this.cb = cb; }
+
         @Override
         protected void onPreExecute() {
             audioFeedback(IMG_DESC_START);
+            descriptionResult = RUNNING;
         }
 
         @Override
@@ -243,10 +285,81 @@ public abstract class Session extends Activity {
 
         @Override
         protected void onPostExecute(Integer ret) {
-            descriptionResult = ret;
+            switch (ret) {
+                case(1):
+                    audioFeedback(PICTURE_UNAVAILABLE);
+                    descriptionResult = RESULT_ERROR;
+                    break;
+                case (2):
+                    audioFeedback(NETWORK_ERROR);
+                    descriptionResult = RESULT_ERROR;
+                    break;
+                case(3):
+                    audioFeedback(PICTURE_LARGE);
+                    descriptionResult = RESULT_ERROR;
+                    break;
+                default:
+                    audioFeedback(DESC_SUCCESS);
+                    descriptionResult = RESULT_SUCCESFUL;
+                    break;
+            }
+            if(cb != null)
+                cb.run(ret);
         }
     }
 
+    @SuppressLint("StaticFieldLeak")
+    private class TextRecognitionAsync extends AsyncTask<Void,Void,Integer> {
+
+        private AsyncJobCallback cb;
+
+        public TextRecognitionAsync(AsyncJobCallback cb){ this.cb = cb; }
+
+        @Override
+        protected void onPreExecute() {
+            audioFeedback(TEXT_START);
+            textResult = RUNNING;
+        }
+
+        @Override
+        protected Integer doInBackground(Void... paramsObj) {
+            if (vis == null)
+                return 1;
+            try {
+                t = vis.getTextFromImageBinary();
+                if(t == null)
+                    return 2;
+            } catch (IOException e) {
+                return 3;
+            }
+            return 0;
+        }
+
+        @Override
+        protected void onPostExecute(Integer ret) {
+            switch (ret) {
+                case(1):
+                    audioFeedback(PICTURE_UNAVAILABLE);
+                    textResult = RESULT_ERROR;
+                    break;
+                case (2):
+                    audioFeedback(NETWORK_ERROR);
+                    textResult = RESULT_ERROR;
+                    break;
+                case(3):
+                    audioFeedback(PICTURE_LARGE);
+                    textResult = RESULT_ERROR;
+                    break;
+                default:
+                    audioFeedback(TEXT_SUCCESS);
+                    textResult = RESULT_SUCCESFUL;
+                    break;
+            }
+            if(cb != null)
+                cb.run(ret);
+        }
+
+    }
 
     // ************************* ACCESSORS FUNCTIONS **************************** //
 
@@ -260,25 +373,13 @@ public abstract class Session extends Activity {
 
     public int getTextResult() { return textResult; }
 
-
     // **************************** INNER FUNCTIONS ***************************** //
-    private void restartSession() {
-        speaker = new VoiceGenerator(this);
-        db = AppDatabase.getDatabase(this);
-        frs = new FaceRecognizerSingleton(this);
-        vc = new VoiceToCommandWrapper(this);
-        if(vis != null)
-            vis.destroy();
-        if(fop != null) {
-            if(saveOnExit)
-                fop.storeAllFaces();
-            fop.destroy();
-        }
-        descriptionResult = -1;
-        vis = null; fop = null; d = null; t = null;
-    }
     private void audioFeedback(String msg) {
         if(isVoiceSession)
             speaker.speak(msg);
+    }
+    private void audioPause(int durationInMs) {
+        if(isVoiceSession)
+            speaker.pause(durationInMs);
     }
 }
