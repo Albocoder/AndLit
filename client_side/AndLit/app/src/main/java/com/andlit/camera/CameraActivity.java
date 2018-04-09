@@ -1,5 +1,6 @@
 package com.andlit.camera;
 
+import android.graphics.SurfaceTexture;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.app.Activity;
@@ -25,6 +26,12 @@ public class CameraActivity extends AppCompatActivity
         SurfaceView view = new SurfaceView(this);
         try {
             mCamera.setPreviewDisplay(view.getHolder());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        SurfaceTexture surfaceTexture = new SurfaceTexture(10);
+        try {
+            mCamera.setPreviewTexture(surfaceTexture);
         } catch (IOException e) {
             e.printStackTrace();
         }

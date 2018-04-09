@@ -21,7 +21,8 @@ import java.util.Locale;
 public class HandsFreeMode extends Session {
 
     @Override
-    public void onCreateChild() {
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
         isVoiceSession = true;
         Button b = findViewById(R.id.takeVoiceCommands);
         b.setOnClickListener(new View.OnClickListener(){
@@ -33,9 +34,12 @@ public class HandsFreeMode extends Session {
         });
     }
 
+    @Override
+    protected int getLayoutId() { return R.layout.hands_free_layout; }
+
 
     @Override
-    protected void onActivityResultChild(int requestCode, int resultCode, Intent data)
+    protected void onActivityResult(int requestCode, int resultCode, Intent data)
     {
         super.onActivityResult(requestCode, resultCode, data);
 
@@ -50,9 +54,6 @@ public class HandsFreeMode extends Session {
             }
         }
     }
-
-    @Override
-    protected int getLayoutId() { return R.layout.hands_free_layout; }
 
 
     private void promptSpeechInput()

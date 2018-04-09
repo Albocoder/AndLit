@@ -81,17 +81,18 @@ public abstract class Session extends Activity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState){
-        super.onCreate(savedInstanceState);
+        super.onCreate(null);
         if(getLayoutId() != 0)
             setContentView(getLayoutId());
         // setting up control variables
-        TAG += ""+new Random().nextInt();
-        randPictureName = ""+new Random().nextLong()+".png";
+        int TAGSERIALNO = new Random().nextInt();
+        if(TAGSERIALNO < 0)
+            TAGSERIALNO = -TAGSERIALNO;
+        TAG += ""+TAGSERIALNO;
+        randPictureName = "capture_"+TAGSERIALNO+".png";
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
         saveOnExit = sharedPref.getBoolean(SettingsDefinedKeys.SAVE_UNLABELED_ON_EXIT,false);
         isVoiceSession = sharedPref.getBoolean(SettingsDefinedKeys.AUDIO_FEEDBACK,false);
-        // running arbitrary code from child
-        onCreateChild();
         // start
         restartSession();
     }
@@ -100,7 +101,6 @@ public abstract class Session extends Activity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode,resultCode,data);
         // running arbitrary code from the child
-        onActivityResultChild(requestCode,resultCode,data);
         // proceed with own code
         if(requestCode == RequestCodes.CAMERA_ACTIVITY_RC) {
             if( resultCode == Activity.RESULT_OK){
@@ -123,23 +123,23 @@ public abstract class Session extends Activity {
     protected void onRestart(){
         super.onRestart();
         restartSession();
-        onRestartChild();
+        //onRestartChild();
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
         destroySession();
-        onDestroyChild();
+        //onDestroyChild();
     }
 
 
     // *************************** OVERRIDABLE FUNCTIONS ************************ //
     protected int getLayoutId(){return 0;}
-    protected void onActivityResultChild(int requestCode, int resultCode, Intent data){}
-    protected void onDestroyChild(){}
-    protected void onCreateChild(){}
-    protected void onRestartChild(){}
+//    protected void onActivityResultChild(int requestCode, int resultCode, Intent data){}
+//    protected void onDestroyChild(){}
+//    protected void onCreateChild(){}
+//    protected void onRestartChild(){}
 
     // ***************************** ACTION FUNCTIONS *************************** //
     public void getPicture() {

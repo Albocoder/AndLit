@@ -69,7 +69,7 @@
             android:name=".settings.SettingsActivity"
             android:label="Settings" />
         <activity android:name=".HomeActivity" />
-        <activity android:name=".camera.CameraActivity" />
+        <activity android:name=".camera.CameraActivity" android:launchMode="singleInstance" />
         <activity
             android:name=".ui.HandsFreeMode"
             android:screenOrientation="portrait"

@@ -14,6 +14,7 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 import com.andlit.cloudInterface.Authentication.Authenticator;
+import com.andlit.face.FaceRecognizerSingleton;
 import com.andlit.session.Session;
 import com.andlit.settings.SettingsActivity;
 import com.andlit.settings.SettingsDefinedKeys;
@@ -74,6 +75,14 @@ public class HomeActivity extends AppCompatActivity
             @Override
             public void onClick(View view) {
                 loadHandsFreeMode();
+            }
+        });
+
+        Button trainingButton = findViewById(R.id.training_button);
+        trainingButton.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View view) {
+                new FaceRecognizerSingleton(view.getContext()).trainModel();
             }
         });
 
