@@ -125,10 +125,13 @@ public abstract class Session extends Activity {
                 } catch (IOException ignored) {}
             }
         }
+        else if(requestCode == RequestCodes.AUDIO_FEEDBACK_RC){
+            // todo add google voice recognition callback
+        }
     }
 
     @Override
-    protected void onRestart(){
+    protected void onRestart() {
         super.onRestart();
         restartSession();
         //onRestartChild();
@@ -254,6 +257,47 @@ public abstract class Session extends Activity {
     public boolean describePictureAsync(){ return describePictureAsync(null); }
 
     public boolean recognizeTextAsync(){ return recognizeTextAsync(null); }
+
+    // ***************************** VOICE COMMAND FUNCTIONS *************************** //
+
+
+    // ID: 0 (master)
+    public final void runFunction(int id){
+        switch (id) {
+            case(1):    functionOne();      break;
+            case(2):    functionTwo();      break;
+            case(3):    functionThree();    break;
+            case(4):    functionFour();     break;
+            case(5):    functionFive();     break;
+            case(6):    functionSix();      break;
+            case(7):    functionSeven();    break;
+            case(8):    functionEight();    break;
+            case(9):    functionNine();     break;
+            case(10):   functionTen();      break;
+        }
+    }
+    // ID: 1    ()
+    public void functionOne(){
+
+    }
+    // ID: 2    ()
+    public void functionTwo(){}
+    // ID: 3    ()
+    public void functionThree(){}
+    // ID: 4    ()
+    public void functionFour(){}
+    // ID: 5    ()
+    public void functionFive(){}
+    // ID: 6    ()
+    public void functionSix(){}
+    // ID: 7    ()
+    public void functionSeven(){}
+    // ID: 8    ()
+    public void functionEight(){}
+    // ID: 9    ()
+    public void functionNine(){}
+    // ID: 10   ()
+    public void functionTen(){}
 
     // **************************** ASYNC CLASSES ******************************* //
     @SuppressLint("StaticFieldLeak")

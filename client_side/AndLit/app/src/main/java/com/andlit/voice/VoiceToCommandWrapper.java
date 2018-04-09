@@ -21,7 +21,7 @@ public class VoiceToCommandWrapper {
         }
     }
 
-    public boolean decide(String command) {
+    public int decide(String command) {
         return v.decide(command);
     }
 }

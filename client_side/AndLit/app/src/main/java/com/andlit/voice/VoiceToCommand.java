@@ -19,5 +19,5 @@ public abstract class VoiceToCommand {
     }
 
     // what must be overwritten
-    public abstract boolean decide(String command);
+    public abstract int decide(String command);
 }
