@@ -69,7 +69,7 @@ public class VoiceGenerator implements TextToSpeech.OnInitListener
         {
             HashMap<String, String> hash = new HashMap<>();
             hash.put(TextToSpeech.Engine.KEY_PARAM_STREAM,
-                    String.valueOf(AudioManager.STREAM_NOTIFICATION));
+                    String.valueOf(AudioManager.STREAM_MUSIC));
             tts.speak(text, TextToSpeech.QUEUE_ADD, hash);
         }
     }

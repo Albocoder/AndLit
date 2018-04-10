@@ -230,6 +230,8 @@ public class IntermediateCameraActivity extends Activity {
         if (vis == null)
             return;
         Bitmap result = BitmapFactory.decodeFile(vis.getImgFile().getAbsolutePath());
+        if (result == null)
+            return;
         double widthRatio = (double) SCREEN_WIDTH / (double) result.getWidth();
         double heightRatio = (double) SCREEN_HEIGHT / (double) result.getHeight();
         if(newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
@@ -403,7 +405,7 @@ public class IntermediateCameraActivity extends Activity {
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
             progressDialog.dismiss();
-            //todo y not speaking
+
             if(audioFeedback)
                 speaker.speak("Image was processed and ready to query.");
             Bitmap result = BitmapFactory.decodeFile(imageLocation.getAbsolutePath());

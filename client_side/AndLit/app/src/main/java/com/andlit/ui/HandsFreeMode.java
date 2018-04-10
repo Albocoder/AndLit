@@ -28,47 +28,11 @@ public class HandsFreeMode extends Session {
         b.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View view) {
-//                promptSpeechInput();
-                takePicture();
+                startVoiceCapture();
             }
         });
     }
 
     @Override
     protected int getLayoutId() { return R.layout.hands_free_layout; }
-
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data)
-    {
-        super.onActivityResult(requestCode, resultCode, data);
-
-        // speechToText
-        if(requestCode == RequestCodes.SPEECH_INPUT_RC)
-        {
-            if(resultCode == RESULT_OK && null != data)
-            {
-                ArrayList<String> result = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
-                VoiceToCommand vc;
-                //todo: make this work in the Session
-            }
-        }
-    }
-
-
-    private void promptSpeechInput()
-    {
-        Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
-        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
-        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault());
-        intent.putExtra(RecognizerIntent.EXTRA_PROMPT, "Say Something!");
-        try
-        {
-            startActivityForResult(intent, RequestCodes.SPEECH_INPUT_RC);
-        }
-        catch (ActivityNotFoundException a)
-        {
-            Toast.makeText(getApplicationContext(), "Speech Not Supported!", Toast.LENGTH_SHORT).show();
-        }
-    }
 }

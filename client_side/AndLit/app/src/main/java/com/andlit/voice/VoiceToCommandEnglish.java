@@ -7,12 +7,23 @@ import com.andlit.ui.IntermediateCameraActivity;
 
 import java.util.ArrayList;
 import java.util.StringTokenizer;
+import java.util.regex.Pattern;
 
 public class VoiceToCommandEnglish extends VoiceToCommand {
-    private static final String[] verbsForStarting = {"start","initialize","play","begin","commence","open","do"};
-    private static final String[] questionWords = {"How","Who","What","Where"};
-    private static final String[] operations = {"camera","recognition","recognizer",
-            "detection","detector","synchronization","synchronizer","training","trainer"};
+    private static final Pattern photoVerb = Pattern.compile("get|take|do|capture|snap|shoot");
+    private static final Pattern photoNoun = Pattern.compile("photo|image|photography|picture|snapshot");
+    private static final Pattern startOperationVerb = Pattern.compile("perform|start|run|do|commence|begin|initiate");
+    private static final Pattern operation1Noun = Pattern.compile("camera|image|photo");
+    private static final Pattern operation2Noun = Pattern.compile("detection|face detection|detector");
+    private static final Pattern operation3Noun = Pattern.compile("text|words|content");
+    private static final Pattern operation4Noun = Pattern.compile("description|summary|depiction|explain|explanation|explainer");
+    private static final Pattern operation5Noun = Pattern.compile("synchronization|synch|synchronizer|back up|backup");
+    private static final Pattern operation6Noun = Pattern.compile("training|trainer|train");
+    private static final Pattern operation7Noun = Pattern.compile("recognition|face recognition|recognizer");
+    private static final Pattern opVerbs1 = Pattern.compile("describe|explain|depict|tell|interpret");
+    private static final Pattern opVerbs2 = Pattern.compile("read");
+
+//    private static final String[] questionWords1 = {"How many"};
 
     public VoiceToCommandEnglish(Context c) {
         super(c);
@@ -20,36 +31,50 @@ public class VoiceToCommandEnglish extends VoiceToCommand {
 
     @Override
     public int decide(String command) {
-        StringTokenizer tokenizer = new StringTokenizer(command);
-        ArrayList<String> tokens = new ArrayList<>();
-        while (tokenizer.hasMoreTokens())
-            tokens.add(tokenizer.nextToken());
-        boolean startSomething = false;
-        for (String t:tokens)
-            if(isIn(verbsForStarting,t))
-                startSomething = true;
+//        StringTokenizer tokenizer = new StringTokenizer(command);
+//        ArrayList<String> tokens = new ArrayList<>();
+//        while (tokenizer.hasMoreTokens())
+//            tokens.add(tokenizer.nextToken());
 
-// todo: develop this
-//        if(isIn(verbsForStarting,verb)){
-//            switch (obj){
-//                case ("camera"): case("recognition"):case("recognizer"): case("detection"): case("detector"):
-//                    Intent i = new Intent(c, IntermediateCameraActivity.class);
-//                    c.startActivity(i);
-//                    break;
-//                case("synchronization"): case("synchronizer"):
-//                    // todo: do this
-//                    break;
-//                case("training"): case("trainer"):
-//                    // todo: do this
-//                    break;
-//                default:
-//                    return 0;
-//            }
-//        }
-        // put some else-if's
-        else {
-            return 0;
+        // first do the opVerbs
+        if(opVerbs1.matcher(command).find())
+            return 3;
+
+        else if(opVerbs2.matcher(command).find())
+            return 4;
+
+        // if it is a command for photo (with verb AND noun for fail-proof)
+        else if(photoVerb.matcher(command).find()){
+            if(photoNoun.matcher(command).find())
+                return 1;
+            else
+                return -1;
         }
-        return 0;
+
+        // if it's actually a query
+//        else if()
+
+        // if it's an operation verb
+        else if(startOperationVerb.matcher(command).find()) {
+            if(operation1Noun.matcher(command).find())
+                return 1;
+            else if(operation2Noun.matcher(command).find())
+                return 2;
+            else if(operation3Noun.matcher(command).find())
+                return 4;
+            else if(operation4Noun.matcher(command).find())
+                return 3;
+            else if(operation5Noun.matcher(command).find())
+                return 6;
+            else if(operation6Noun.matcher(command).find())
+                return 5;
+            else if(operation7Noun.matcher(command).find())
+                return 7;
+            else
+                return -1;
+        }
+
+        else
+            return -1;
     }
 }
