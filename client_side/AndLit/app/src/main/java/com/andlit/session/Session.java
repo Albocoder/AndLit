@@ -73,6 +73,7 @@ public abstract class Session extends Activity {
     private static final String RETRAIN = "Training recently finished. Please repeat the same command to retrain.";
     private static final String RECOGNITION_START = "Started face recognition.";
     private static final String ANALYSIS_START = "Started face detection.";
+    private static final String CLEARED_SESSION = "Session is now clear.";
     private static final String NO_TEXTS_FOUND = "No text blocks found.";
     private static final String ONE_TEXT_FOUND = "One text block found.";
     private static final String TEXT_FOUND_PROMPT = " text blocks found.";
@@ -361,7 +362,17 @@ public abstract class Session extends Activity {
         );
     }
     // ID: 4    (text recognition)
-    public void functionFour() { recognizeTextAsync(); }
+    public void functionFour() {
+        recognizeTextAsync(new AsyncJobCallback() {
+            @Override
+            public Object run(Object result) {
+                if((Integer)result == 0) {
+                    recognizeTextAsync();
+                }
+                return null;
+            }
+        });
+    }
     // ID: 5    (train classifier)
     public void functionFive(){ trainClassifierAsync(); }
     // ID: 6    (synchronization)
@@ -369,7 +380,10 @@ public abstract class Session extends Activity {
     // ID: 7    (query ???)
     public void functionSeven(){ recognizeFaces(); }
     // ID: 8    (query ???)
-    public void functionEight(){}
+    public void functionEight(){
+        restartSession();
+        audioFeedback(CLEARED_SESSION);
+    }
     // ID: 9    (query ???)
     public void functionNine(){}
     // ID: 10   (query ???)

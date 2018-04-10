@@ -22,6 +22,7 @@ public class VoiceToCommandEnglish extends VoiceToCommand {
     private static final Pattern operation7Noun = Pattern.compile("recognition|face recognition|recognizer");
     private static final Pattern opVerbs1 = Pattern.compile("describe|explain|depict|tell|interpret");
     private static final Pattern opVerbs2 = Pattern.compile("read");
+    private static final Pattern clearOperationVerb = Pattern.compile("clean|clear|restart|renew|reset|delete");
 
 //    private static final String[] questionWords1 = {"How many"};
 
@@ -70,6 +71,13 @@ public class VoiceToCommandEnglish extends VoiceToCommand {
                 return 5;
             else if(operation7Noun.matcher(command).find())
                 return 7;
+            else
+                return -1;
+        }
+
+        else if(clearOperationVerb.matcher(command).find()) {
+            if(command.contains("session"))
+                return 8;
             else
                 return -1;
         }
