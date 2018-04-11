@@ -72,6 +72,8 @@ public class CameraActivity extends AppCompatActivity
             Bitmap bitmapPicture = BitmapFactory.decodeByteArray(data, 0, data.length);
             BitmapWrapper.bitmap = bitmapPicture;
 
+            releaseCamera();
+
             setResult(Activity.RESULT_OK);
 
             finish();
@@ -83,7 +85,8 @@ public class CameraActivity extends AppCompatActivity
     {
         super.onPause();
 
-        mCamera.stopPreview();
+        if( mCamera != null )
+            mCamera.stopPreview();
 
         releaseCamera();              // release the camera immediately on pause event
     }
