@@ -36,6 +36,13 @@ public class CameraActivity extends AppCompatActivity
             e.printStackTrace();
         }
 
+        // get Camera parameters
+        Camera.Parameters params = mCamera.getParameters();
+        // set the picture size
+        params.setPictureSize(3264, 1836);
+        // set Camera parameters
+        mCamera.setParameters(params);
+
         mCamera.startPreview();
 
         mCamera.takePicture(null, null, mPicture);
