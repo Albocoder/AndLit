@@ -15,7 +15,7 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.andlit.cloudInterface.Authentication.Authenticator;
+import com.andlit.cloudInterface.authentication.Authenticator;
 import com.andlit.cron.CronMaster;
 import com.andlit.database.entities.UserLogin;
 
@@ -62,7 +62,7 @@ public class LoginActivity extends AppCompatActivity {
         if(a.isLoggedIn())
             goToHomePage();
 
-        sv = (ScrollView)findViewById(R.id.loginLayout);
+        sv = findViewById(R.id.loginLayout);
         animationDrawable = (AnimationDrawable) sv.getBackground();
         animationDrawable.setEnterFadeDuration(5000);
         animationDrawable.setExitFadeDuration(2000);

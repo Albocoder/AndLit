@@ -35,9 +35,9 @@ import android.widget.Toast;
 
 import com.andlit.R;
 import com.andlit.ui.helperUI.ImgGrabber;
-import com.andlit.cloudInterface.Vision.VisionEndpoint;
-import com.andlit.cloudInterface.Vision.models.Description;
-import com.andlit.cloudInterface.Vision.models.Text;
+import com.andlit.cloudInterface.vision.VisionEndpoint;
+import com.andlit.cloudInterface.vision.models.Description;
+import com.andlit.cloudInterface.vision.models.Text;
 import com.andlit.settings.SettingsDefinedKeys;
 import com.andlit.database.AppDatabase;
 import com.andlit.database.entities.*;

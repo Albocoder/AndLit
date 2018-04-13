@@ -12,7 +12,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
-import com.andlit.cloudInterface.Authentication.Authenticator;
+import com.andlit.cloudInterface.authentication.Authenticator;
 import com.andlit.face.FaceRecognizerSingleton;
 import com.andlit.settings.SettingsActivity;
 import com.andlit.settings.SettingsDefinedKeys;

@@ -1,4 +1,4 @@
-package com.andlit.cloudInterface.Authentication;
+package com.andlit.cloudInterface.authentication;
 
 import android.content.Context;
 
@@ -115,9 +115,7 @@ public class Authenticator {
         Response<JsonObject> resp = a.changePasswordForUser
                 (o,"Token "+ul.access_token).execute();
         int code = resp.code();
-        if(code >= 200 && code < 300)
-            return true;
-        return false;
+        return code >= 200 && code < 300;
     }
 
     public boolean isLoggedIn() { return db.userLoginDao().getLoginEntry().size() > 0; }

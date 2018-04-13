@@ -1,4 +1,4 @@
-package com.andlit.cloudInterface.Vision.models;
+package com.andlit.cloudInterface.vision.models;
 
 public class Description {
     String []keywords;

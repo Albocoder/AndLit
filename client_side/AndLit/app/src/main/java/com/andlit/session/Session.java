@@ -9,15 +9,15 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.speech.RecognizerIntent;
-import android.support.design.widget.Snackbar;
+import android.util.Log;
 import android.widget.Toast;
 
 import com.andlit.RequestCodes;
 import com.andlit.camera.BitmapWrapper;
 import com.andlit.camera.CameraActivity;
-import com.andlit.cloudInterface.Vision.VisionEndpoint;
-import com.andlit.cloudInterface.Vision.models.Description;
-import com.andlit.cloudInterface.Vision.models.Text;
+import com.andlit.cloudInterface.vision.VisionEndpoint;
+import com.andlit.cloudInterface.vision.models.Description;
+import com.andlit.cloudInterface.vision.models.Text;
 import com.andlit.database.AppDatabase;
 import com.andlit.face.Face;
 import com.andlit.face.FaceOperator;
@@ -82,17 +82,22 @@ public abstract class Session extends Activity {
     private static final String INFO_FUNCTION_2_1 = " faces found in the image.";
     private static final String INFO_FUNCTION_2_2 = "Found one face in the image.";
     private static final String INFO_FUNCTION_2_3 = "Found no faces in the image.";
+    private static final String QUERY_TXT_1 = "Text block ";
+    private static final String QUERY_TXT_2 = " says.";
+    private static final String QUERY_REC_1 = "Face ";
+    private static final String QUERY_REC_2 = " is identified to be of ";
 
     // session control variables
     protected boolean isVoiceSession;
-    private boolean saveOnExit;
+    protected boolean saveOnExit;
     protected String randPictureName;
+    protected boolean debugmode;
 
     // initialized when session starts
-    private VoiceGenerator speaker;
-    private AppDatabase db;
-    private FaceRecognizerSingleton frs;
-    private VoiceToCommandWrapper vc;
+    protected VoiceGenerator speaker;
+    protected AppDatabase db;
+    protected FaceRecognizerSingleton frs;
+    protected VoiceToCommandWrapper vc;
 
     // calculated in session
     private VisionEndpoint vis;     // has the image file inside
@@ -102,8 +107,6 @@ public abstract class Session extends Activity {
     private int descriptionResult;
     private int textResult;
     private int trainResult;
-
-
 
     // ************************* SESSION ACTIVITY FUNCTIONS ************************ //
     @Override
@@ -116,6 +119,7 @@ public abstract class Session extends Activity {
         if(TAGSERIALNO < 0)
             TAGSERIALNO = -TAGSERIALNO;
         TAG += ""+TAGSERIALNO;
+        debugmode = true;
         randPictureName = "capture_"+TAGSERIALNO+".png";
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
         saveOnExit = sharedPref.getBoolean(SettingsDefinedKeys.SAVE_UNLABELED_ON_EXIT,false);
@@ -324,6 +328,7 @@ public abstract class Session extends Activity {
             case(8):    functionEight();    break;
             case(9):    functionNine();     break;
             case(10):   functionTen();      break;
+            case(11):   functionEleven();   break;
             default:    functionNone();     break;
         }
     }
@@ -350,7 +355,7 @@ public abstract class Session extends Activity {
     }
     // ID: 3    (scene description)
     public void functionThree() {
-        describePictureAsync(new AsyncJobCallback(null) {
+        describePictureAsync(new AsyncJobCallback((Object) null) {
             @Override
             public Object run(Object result) {
                 if((Integer)result == 0){
@@ -377,17 +382,43 @@ public abstract class Session extends Activity {
     public void functionFive(){ trainClassifierAsync(); }
     // ID: 6    (synchronization)
     public void functionSix(){ /* todo: write cloud interface for this */ }
-    // ID: 7    (query ???)
+    // ID: 7    (face recognition)
     public void functionSeven(){ recognizeFaces(); }
-    // ID: 8    (query ???)
+    // ID: 8    (restart session)
     public void functionEight(){
         restartSession();
         audioFeedback(CLEARED_SESSION);
     }
-    // ID: 9    (query ???)
-    public void functionNine(){}
-    // ID: 10   (query ???)
-    public void functionTen(){}
+    // ID: 9    (query )
+    public void functionNine(){
+        functionTwo();
+        // todo describe more about location and more analytics
+    }
+    // ID: 10   (query read all text blocks)
+    public void functionTen(){
+        if(!recognizeTextAsync())
+            return;
+        int i = 1;
+        for(Text tmp: t){
+            audioFeedback(QUERY_TXT_1+i+QUERY_TXT_2);
+            audioPause(200);
+            audioFeedback(tmp.getText());
+            i++;
+        }
+    }
+    // ID: 11   (query face identities)
+    public void functionEleven(){
+        if(!recognizeTextAsync())
+            return;
+        RecognizedFace[] faces = fop.recognizeFaces();
+        int i = 1;
+        for (RecognizedFace f : faces) {
+            f.setBestMatch(this);
+            audioFeedback(QUERY_REC_1+i+ QUERY_REC_2+f.getBestMatch().name
+                    +" "+f.getBestMatch().sname);
+            audioPause(200);
+        }
+    }
 
     // **************************** ASYNC CLASSES ******************************* //
     @SuppressLint("StaticFieldLeak")
@@ -540,6 +571,8 @@ public abstract class Session extends Activity {
     private void audioFeedback(String msg) {
         if(isVoiceSession)
             speaker.speak(msg);
+        if(debugmode)
+            Log.d(TAG,msg);
     }
     private void audioPause(int durationInMs) {
         if(isVoiceSession)

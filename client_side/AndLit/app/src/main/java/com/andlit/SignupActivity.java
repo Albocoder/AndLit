@@ -15,7 +15,7 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.andlit.cloudInterface.Authentication.Authenticator;
+import com.andlit.cloudInterface.authentication.Authenticator;
 import com.andlit.database.entities.UserLogin;
 
 import java.io.IOException;
@@ -51,7 +51,7 @@ public class SignupActivity extends AppCompatActivity {
         ButterKnife.bind(this);
         a = new Authenticator(this);
 
-        sv = (ScrollView)findViewById(R.id.signupLayout);
+        sv = findViewById(R.id.signupLayout);
         animationDrawable = (AnimationDrawable) sv.getBackground();
         animationDrawable.setEnterFadeDuration(5000);
         animationDrawable.setExitFadeDuration(2000);

@@ -1,11 +1,11 @@
-package com.andlit.cloudInterface.Vision;
+package com.andlit.cloudInterface.vision;
 
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.util.Log;
 
-import com.andlit.cloudInterface.Vision.models.Description;
-import com.andlit.cloudInterface.Vision.models.Text;
+import com.andlit.cloudInterface.vision.models.Description;
+import com.andlit.cloudInterface.vision.models.Text;
 import com.andlit.database.AppDatabase;
 import com.andlit.database.entities.UserLogin;
 import com.google.gson.JsonArray;

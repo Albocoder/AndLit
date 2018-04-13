@@ -167,8 +167,10 @@ public class FaceOperator {
         Face [] ff = this.getFaces();
         FaceRecognizerSingleton frs = new FaceRecognizerSingleton(context);
         recognizedFaces = new RecognizedFace[ff.length];
-        for(int i = 0; i < recognizedFaces.length; i++)
+        for(int i = 0; i < recognizedFaces.length; i++) {
             recognizedFaces[i] = frs.recognize(ff[i]);
+            recognizedFaces[i].setBestMatch(context);
+        }
         return recognizedFaces;
     }
     public RecognizedFace recognizeFace(int index) {
@@ -178,10 +180,12 @@ public class FaceOperator {
         if(recognizedFaces != null) {
             if(recognizedFaces[index] != null)
                 return recognizedFaces[index];
-        }else
+        }
+        else
             recognizedFaces = new RecognizedFace[ff.length];
         FaceRecognizerSingleton frs = new FaceRecognizerSingleton(context);
         recognizedFaces[index] = frs.recognize(ff[index]);
+        recognizedFaces[index].setBestMatch(context);
         return recognizedFaces[index];
     }
 
@@ -456,9 +460,9 @@ public class FaceOperator {
             } catch (SQLiteConstraintException e) {
                 try{
                     db.detectedFacesDao().updateRowData(detection);
-                    Log.e(TAG, "First Try failed: "+e.getStackTrace().toString());
+                    Log.e(TAG, "First Try failed: "+e.getLocalizedMessage());
                 }catch (RuntimeException e2) {
-                    Log.e(TAG, "Second Try failed: "+e2.getStackTrace().toString());
+                    Log.e(TAG, "Second Try failed: "+e2.getLocalizedMessage());
                     mFileTemp.delete();
                     return null;
                 }
