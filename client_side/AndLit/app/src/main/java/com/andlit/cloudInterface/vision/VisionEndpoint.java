@@ -44,7 +44,6 @@ public class VisionEndpoint {
     private AppDatabase db;
     private String base64OfImage;
     private File imgFile;
-    private Context c;
 
     // WARNING! We assume there is a user logged in when this is instantiated!
     public VisionEndpoint(Context c,Bitmap bm){
@@ -55,7 +54,6 @@ public class VisionEndpoint {
         db = AppDatabase.getDatabase(c);
         ul = db.userLoginDao().getLoginEntry().get(0);
         a = api.create(VisionAPI.class);
-        this.c = c;
         try {
             String path = writePNGToInternalMemory(c,bm,"tmp","tmpFile.png");
             imgFile = new File(path);
@@ -72,7 +70,6 @@ public class VisionEndpoint {
         db = AppDatabase.getDatabase(c);
         ul = db.userLoginDao().getLoginEntry().get(0);
         a = api.create(VisionAPI.class);
-        this.c = c;
         imgFile = f;
     }
 
