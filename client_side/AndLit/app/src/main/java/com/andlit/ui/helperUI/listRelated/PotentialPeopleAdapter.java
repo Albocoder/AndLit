@@ -39,9 +39,9 @@ public class PotentialPeopleAdapter extends ArrayAdapter<KnownPPL> {
         if(convertView==null)
             vi = LayoutInflater.from(getContext()).inflate(R.layout.known_person_list_item,
                     parent, false);
-        TextView name = (TextView) vi.findViewById(R.id.name);
-        TextView desc = (TextView) vi.findViewById(R.id.description);
-        ImageView pic = (ImageView) vi.findViewById(R.id.picture);
+        TextView name = vi.findViewById(R.id.name);
+        TextView desc = vi.findViewById(R.id.description);
+        ImageView pic = vi.findViewById(R.id.picture);
 
         name.setText(format("%s %s", p.name, p.sname));
         desc.setText(format("ID:%d", p.id));
@@ -52,7 +52,6 @@ public class PotentialPeopleAdapter extends ArrayAdapter<KnownPPL> {
             tmp = BitmapFactory.decodeFile(images.get(0).path);
             pic.setImageBitmap(tmp);
         }
-        // todo add actions
         return vi;
     }
 }

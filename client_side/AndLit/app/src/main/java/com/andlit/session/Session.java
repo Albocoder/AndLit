@@ -389,11 +389,8 @@ public abstract class Session extends Activity {
         restartSession();
         audioFeedback(CLEARED_SESSION);
     }
-    // ID: 9    (query )
-    public void functionNine(){
-        functionTwo();
-        // todo describe more about location and more analytics
-    }
+    // ID: 9    (query how many faces)
+    public void functionNine(){ functionTwo(); }
     // ID: 10   (query read all text blocks)
     public void functionTen(){
         if(!recognizeTextAsync())

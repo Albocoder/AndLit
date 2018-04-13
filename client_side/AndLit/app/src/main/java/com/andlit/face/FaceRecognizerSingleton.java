@@ -33,7 +33,7 @@ public class FaceRecognizerSingleton {
     public static final int NEIGHBORS = 8;
     public static final int GRID_X = 8;
     public static final int GRID_Y = 8;
-    public static final double THRESHOLD = 120;// todo: fix this
+    public static final double THRESHOLD = 120;
     public static final int TOP_PREDICTIONS = 1;
     public static final double INSTANCES_DETECTION_RATIO = 3.0;
     public static final double RELATIVE_RATIO = 0.25;
@@ -66,7 +66,6 @@ public class FaceRecognizerSingleton {
             Toast.makeText(c, "No training instances found! Synchronize?", Toast.LENGTH_SHORT).show();
 
         List<Integer> allLabels = db.trainingFaceDao().getAllPossibleRecognitions();
-        // todo: check if this is better than putting the values hardcoded
         trainedModel = createLBPHFaceRecognizer(SEARCH_RADIUS,NEIGHBORS,GRID_X,GRID_Y,THRESHOLD);
 
         Mat labels = new Mat( trainingInstances,1,CV_32SC1 );

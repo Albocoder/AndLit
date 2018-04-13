@@ -6,7 +6,6 @@ import android.content.Intent;
 
 import com.andlit.cron.training.TrainingAlarmReceiver;
 
-// todo: test this
 // WARNING!!!! DON'T USE THIS CLASS! IT'S ONLY FOR AUTORUN!!!
 public class OnBootAutoStart extends BroadcastReceiver {
     // all default alarms that autostart!
@@ -15,7 +14,6 @@ public class OnBootAutoStart extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
         if (intent.getAction().equals(Intent.ACTION_BOOT_COMPLETED)) {
-            //todo: check settings for autostart!
             trainer.setAlarm(context);
         }
     }

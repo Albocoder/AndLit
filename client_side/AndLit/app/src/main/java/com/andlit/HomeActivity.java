@@ -159,10 +159,6 @@ public class HomeActivity extends AppCompatActivity
 
                 // result.get(0) holds the voice input in string form
                 txtSpeechInput.setText(result.get(0));  // testing the input by displaying on a text view
-                VoiceToCommand vc;
-                //todo if langauge settings are english
-                vc = new VoiceToCommandEnglish(this);
-                vc.decide(result.get(0));
             }
         }
 

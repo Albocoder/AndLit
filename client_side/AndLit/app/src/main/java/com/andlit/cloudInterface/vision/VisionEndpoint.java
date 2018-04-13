@@ -173,7 +173,6 @@ public class VisionEndpoint {
             ArrayList<Text> textBlocks = new ArrayList<>(blocks.size());
             for(String s:blocks) {
                 JsonObject block = reply.getAsJsonObject(s);
-                //todo fix this after server response is fixed
                 String blockBound = block.getAsJsonPrimitive("block_boundary").getAsString();
                 JsonParser p = new JsonParser();
                 JsonObject blockBoundary = p.parse(blockBound).getAsJsonObject();
