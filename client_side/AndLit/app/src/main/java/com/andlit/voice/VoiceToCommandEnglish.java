@@ -48,7 +48,7 @@ public class VoiceToCommandEnglish extends VoiceToCommand {
         // if it is a command for photo (with verb AND noun for fail-proof)
         else if(photoVerb.matcher(command).find()){
             if(photoNoun.matcher(command).find())
-                return 7;
+                return 1;
             else
                 return -1;
         }
