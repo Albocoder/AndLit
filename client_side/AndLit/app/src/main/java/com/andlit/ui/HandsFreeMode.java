@@ -1,24 +1,20 @@
 package com.andlit.ui;
 
-import android.content.ActivityNotFoundException;
-import android.content.Intent;
+import android.Manifest;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.os.PersistableBundle;
-import android.speech.RecognizerIntent;
-import android.support.annotation.Nullable;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.view.View;
 import android.widget.Button;
-import android.widget.Toast;
-
 import com.andlit.R;
 import com.andlit.RequestCodes;
 import com.andlit.session.Session;
-import com.andlit.voice.VoiceToCommand;
-
-import java.util.ArrayList;
-import java.util.Locale;
 
 public class HandsFreeMode extends Session {
+
+    // logs
+    private static final String PERMISSION_REQUEST = "Please allow me to use the camera for your needs.";
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -28,11 +24,22 @@ public class HandsFreeMode extends Session {
         b.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View view) {
-                startVoiceCapture();
+                performTasks();
             }
         });
     }
 
     @Override
     protected int getLayoutId() { return R.layout.hands_free_layout; }
+
+    private void performTasks(){
+        if(ContextCompat.checkSelfPermission(this,
+                Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+            audioFeedback(PERMISSION_REQUEST);
+            ActivityCompat.requestPermissions(this,
+                    new String[] {Manifest.permission.CAMERA}, RequestCodes.CAMERA_PERMISSION_RC);
+        }else {
+            startVoiceCapture();
+        }
+    }
 }

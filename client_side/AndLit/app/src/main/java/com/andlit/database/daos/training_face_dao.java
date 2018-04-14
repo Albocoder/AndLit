@@ -23,6 +23,9 @@ public interface training_face_dao {
     @Query("select * from training_faces")
     List<training_face> getAllRecords();
 
+    @Query("select * from training_faces where hash = :h")
+    List<training_face> getTrainingFaceWithHash(String h);
+
     @Query("select * from training_faces where label= :l")
     List<training_face> getInstancesOfLabel(int l);
 

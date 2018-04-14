@@ -424,7 +424,7 @@ public class IntermediateCameraActivity extends Activity {
     }
 
     // ********************************** UI related functions ***********************************//
-    public void startCameraActivity(){
+    public void startCameraActivity() {
         if(ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this,new String[] {Manifest.permission.CAMERA}, 1337);
         }

@@ -8,4 +8,6 @@ public final class RequestCodes
     public static final int SPEECH_INPUT_RC = 222;
 
     public static final int AUDIO_FEEDBACK_RC = 333;
+
+    public static final int CAMERA_PERMISSION_RC = 1337;
 }

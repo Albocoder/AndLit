@@ -92,7 +92,10 @@ public class VoiceGenerator implements TextToSpeech.OnInitListener
     {
         if(tts != null)
         {
-            tts.shutdown();
+            try{
+                tts.shutdown();
+            }catch (Exception ignored){}
+            tts = null;
         }
     }
 

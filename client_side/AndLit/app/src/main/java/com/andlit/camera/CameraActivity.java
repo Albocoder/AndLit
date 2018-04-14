@@ -1,6 +1,5 @@
 package com.andlit.camera;
 
-import android.content.res.Configuration;
 import android.graphics.SurfaceTexture;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -32,33 +31,28 @@ public class CameraActivity extends AppCompatActivity
         SurfaceTexture surfaceTexture = new SurfaceTexture(10);
         try {
             mCamera.setPreviewTexture(surfaceTexture);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        } catch (IOException e) { e.printStackTrace(); }
 
         // get Camera parameters
         Camera.Parameters params = mCamera.getParameters();
 
         // set the picture size
-        params.setPictureSize(3264, 1836);
+        params.setPictureSize(3264,1836);
+
         // set Camera parameters
         mCamera.setParameters(params);
 
         mCamera.startPreview();
 
-        mCamera.takePicture(null, null, mPicture);
-    }
+        Camera.AutoFocusCallback autoFocusCallBack = new Camera.AutoFocusCallback() {
+            @Override
+            public void onAutoFocus(boolean b, Camera camera) {
+                mCamera.takePicture(null, null,mPicture);
+            }
+        };
 
-    @Override
-    public void onConfigurationChanged(Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
-        Camera.Parameters params = mCamera.getParameters();
-        if(newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
-            params.setPictureSize(1836, 3264);
-        }
-        else
-            params.setPictureSize(3264,1836);
-        mCamera.setParameters(params);
+        mCamera.startPreview();
+        mCamera.autoFocus(autoFocusCallBack);
     }
 
     /** A safe way to get an instance of the Camera object. */

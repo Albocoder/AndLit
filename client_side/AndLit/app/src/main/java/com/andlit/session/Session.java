@@ -5,6 +5,8 @@ import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.Configuration;
+import android.graphics.drawable.GradientDrawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -37,7 +39,10 @@ import java.util.Locale;
 import java.util.Random;
 
 import static com.andlit.utils.StorageHelper.writePNGToInternalMemory;
+import static org.bytedeco.javacpp.opencv_core.ROTATE_90_CLOCKWISE;
+import static org.bytedeco.javacpp.opencv_core.rotate;
 import static org.bytedeco.javacpp.opencv_imgcodecs.imread;
+import static org.bytedeco.javacpp.opencv_imgcodecs.imwrite;
 
 public abstract class Session extends Activity {
     // FLAG CONSTANTS
@@ -58,6 +63,7 @@ public abstract class Session extends Activity {
     private static final String NOT_SUPPORTED = "Action not supported.";
     // SUCCESS
     private static final String PICTURE_SUCCESS = "Picture was taken successfully!";
+    private static final String PICTURE_STORED_SUCCESS = "Picture was stored and ready to query";
     private static final String ANALYSIS_SUCCESS = "Face detection terminated successfully!";
     private static final String RECOGNITION_SUCCESS = "Face recognition terminated successfully!";
     private static final String DESC_SUCCESS = "Description obtained successfully";
@@ -78,7 +84,7 @@ public abstract class Session extends Activity {
     private static final String ONE_TEXT_FOUND = "One text block found.";
     private static final String TEXT_FOUND_PROMPT = " text blocks found.";
     private static final String INFO_FUNCTION_NONE = "Sorry. I didn't understand that.";
-    private static final String INFO_FUNCTION_1_1 = "Taking a picture.";
+    private static final String INFO_FUNCTION_1_1 = "Taking a picture. Please stay still.";
     private static final String INFO_FUNCTION_2_1 = " faces found in the image.";
     private static final String INFO_FUNCTION_2_2 = "Found one face in the image.";
     private static final String INFO_FUNCTION_2_3 = "Found no faces in the image.";
@@ -91,7 +97,7 @@ public abstract class Session extends Activity {
     protected boolean isVoiceSession;
     protected boolean saveOnExit;
     protected String randPictureName;
-    protected boolean debugmode;
+    protected boolean debugMode;
 
     // initialized when session starts
     protected VoiceGenerator speaker;
@@ -119,7 +125,7 @@ public abstract class Session extends Activity {
         if(TAGSERIALNO < 0)
             TAGSERIALNO = -TAGSERIALNO;
         TAG += ""+TAGSERIALNO;
-        debugmode = true;
+        debugMode = true;
         randPictureName = "capture_"+TAGSERIALNO+".png";
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
         saveOnExit = sharedPref.getBoolean(SettingsDefinedKeys.SAVE_UNLABELED_ON_EXIT,false);
@@ -130,19 +136,28 @@ public abstract class Session extends Activity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode,resultCode,data);
-        // running arbitrary code from the child
-        // proceed with own code
+
         if(requestCode == RequestCodes.CAMERA_ACTIVITY_RC) {
             if( resultCode == Activity.RESULT_OK){
                 try {
-                    if(randPictureName == null)
+                    if(randPictureName == null) {
                         randPictureName = ""+new Random().nextLong()+".png";
+                    }
+                    audioFeedback(PICTURE_SUCCESS);
 
                     String path = writePNGToInternalMemory(this,BitmapWrapper.bitmap,"tmp",randPictureName);
+                    if(getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
+                        opencv_core.Mat res = imread(path);
+                        opencv_core.Mat newMat = new opencv_core.Mat();
+                        rotate(res,newMat,ROTATE_90_CLOCKWISE);
+                        imwrite(path,newMat);
+                        newMat.release(); res.release();
+                    }
+
                     if(vis != null)
                         vis.destroy();
                     vis = new VisionEndpoint(this,new File(path));
-                    audioFeedback(PICTURE_SUCCESS);
+                    audioFeedback(PICTURE_STORED_SUCCESS);
                 } catch (IOException ignored) {}
             }
         }
@@ -151,13 +166,6 @@ public abstract class Session extends Activity {
             Toast.makeText(this,result.get(0),Toast.LENGTH_SHORT).show();
             runFunction(vc.decide(result.get(0)));
         }
-    }
-
-    @Override
-    protected void onRestart() {
-        super.onRestart();
-        restartSession();
-        //onRestartChild();
     }
 
     @Override
@@ -200,6 +208,7 @@ public abstract class Session extends Activity {
             audioFeedback(PICTURE_EXISTS);
             return;
         }
+        audioFeedback(INFO_FUNCTION_1_1);
         Intent i = new Intent(this, CameraActivity.class);
         startActivityForResult(i,RequestCodes.CAMERA_ACTIVITY_RC);
     }
@@ -333,14 +342,9 @@ public abstract class Session extends Activity {
         }
     }
     // ID: -1
-    public void functionNone(){
-        audioFeedback(INFO_FUNCTION_NONE);
-    }
+    public void functionNone(){ audioFeedback(INFO_FUNCTION_NONE); }
     // ID: 1    (take a picture)
-    public void functionOne() {
-        audioFeedback(INFO_FUNCTION_1_1);
-        takePicture();
-    }
+    public void functionOne() { takePicture(); }
     // ID: 2    (face detection)
     public void functionTwo() {
         if(!detectFaces())
@@ -419,7 +423,7 @@ public abstract class Session extends Activity {
 
     // **************************** ASYNC CLASSES ******************************* //
     @SuppressLint("StaticFieldLeak")
-    private class DescribeImageAsync extends AsyncTask<Void,Void,Integer> {
+    public class DescribeImageAsync extends AsyncTask<Void,Void,Integer> {
 
         private AsyncJobCallback cb;
 
@@ -471,7 +475,7 @@ public abstract class Session extends Activity {
     }
 
     @SuppressLint("StaticFieldLeak")
-    private class TextRecognitionAsync extends AsyncTask<Void,Void,Integer> {
+    public class TextRecognitionAsync extends AsyncTask<Void,Void,Integer> {
 
         private AsyncJobCallback cb;
 
@@ -524,7 +528,7 @@ public abstract class Session extends Activity {
     }
 
     @SuppressLint("StaticFieldLeak")
-    private class TrainerAsync extends AsyncTask<Void,Void,Integer> {
+    public class TrainerAsync extends AsyncTask<Void,Void,Integer> {
 
         private AsyncJobCallback cb;
 
@@ -565,13 +569,13 @@ public abstract class Session extends Activity {
     public int getTextResult() { return textResult; }
 
     // **************************** INNER FUNCTIONS ***************************** //
-    private void audioFeedback(String msg) {
+    public final void audioFeedback(String msg) {
         if(isVoiceSession)
             speaker.speak(msg);
-        if(debugmode)
+        if(debugMode)
             Log.d(TAG,msg);
     }
-    private void audioPause(int durationInMs) {
+    public final void audioPause(int durationInMs) {
         if(isVoiceSession)
             speaker.pause(durationInMs);
     }

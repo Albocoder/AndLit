@@ -20,6 +20,9 @@ public interface detected_faces_dao {
     @Query("select * from detected_faces")
     List<detected_face> getAllRecords();
 
+    @Query("select * from detected_faces where hash = :h")
+    List<detected_face> getDetectionWithHash(String h);
+
     @Query("select distinct `id` from detected_faces")
     List<Integer> getAllIDsDetectedSoFar();
 
