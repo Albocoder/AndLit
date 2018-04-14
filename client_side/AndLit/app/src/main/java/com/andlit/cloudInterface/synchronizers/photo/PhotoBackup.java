@@ -83,8 +83,11 @@ public class PhotoBackup {
         RequestBody hash =
                 RequestBody.create( okhttp3.MultipartBody.FORM, tf.hash);
         Call<JsonObject> call = a.savePhoto("Token "+ul.access_token,fileBody,hash);
-        try { call.execute(); } catch (IOException e){ return false; }
-        return true;
+        try {
+            Response resp = call.execute();
+            int code = resp.code();
+            return code >= 200 && code < 300;
+        } catch (IOException e){ return false; }
     }
 
     public boolean saveSingleDetectedFace(detected_face df) {
@@ -97,8 +100,11 @@ public class PhotoBackup {
         RequestBody hash =
                 RequestBody.create( okhttp3.MultipartBody.FORM, df.hash);
         Call<JsonObject> call = a.savePhoto("Token "+ul.access_token,fileBody,hash);
-        try { call.execute(); } catch (IOException e){ return false; }
-        return true;
+        try {
+            Response resp = call.execute();
+            int code = resp.code();
+            return code >= 200 && code < 300;
+        } catch (IOException e){ return false; }
     }
 
     public List<SinglePhotoResponse> listAllPhotos() throws IOException {

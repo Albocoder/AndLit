@@ -3,24 +3,34 @@ package com.andlit;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.AsyncTask;
 import android.speech.RecognizerIntent;
 import android.speech.tts.TextToSpeech;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.preference.PreferenceManager;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 import com.andlit.cloudInterface.authentication.Authenticator;
+import com.andlit.cloudInterface.synchronizers.photo.PhotoBackup;
+import com.andlit.cloudInterface.synchronizers.photo.model.SinglePhotoResponse;
+import com.andlit.database.AppDatabase;
+import com.andlit.database.entities.training_face;
 import com.andlit.face.FaceRecognizerSingleton;
 import com.andlit.settings.SettingsActivity;
 import com.andlit.settings.SettingsDefinedKeys;
 import com.andlit.ui.HandsFreeMode;
 import com.andlit.ui.IntermediateCameraActivity;
+import com.andlit.utils.StorageHelper;
 import com.andlit.voice.VoiceToCommand;
 import com.andlit.voice.VoiceToCommandEnglish;
+
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 
 public class HomeActivity extends AppCompatActivity
@@ -29,6 +39,7 @@ public class HomeActivity extends AppCompatActivity
 
     // View related Properties
     private TextView txtSpeechInput;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState)

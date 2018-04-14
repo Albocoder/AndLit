@@ -160,8 +160,8 @@ public class LoginActivity extends AppCompatActivity {
         String username = _emailText.getText().toString();
         String password = _passwordText.getText().toString();
 
-        if (username.isEmpty() || username.length() < 8 || username.length() > 30) {
-            _emailText.setError("between 8 to 30 characters");
+        if (username.isEmpty() || username.length() < 5 || username.length() > 30) {
+            _emailText.setError("between 5 to 30 characters");
             valid = false;
         }
         else if (!username.matches("[A-Za-z0-9_]+")) {

@@ -127,8 +127,8 @@ public class SignupActivity extends AppCompatActivity {
         String password = _passwordText.getText().toString();
         String reEnterPassword = _reEnterPasswordText.getText().toString();
 
-        if (name.isEmpty() || name.length() < 8 || name.length() > 30) {
-            _nameText.setError("between 8 and 30 characters");
+        if (name.isEmpty() || name.length() < 5 || name.length() > 30) {
+            _nameText.setError("between 5 and 30 characters");
             valid = false;
         } else if(!name.matches("[A-Za-z0-9_]+")) {
             _nameText.setError("only use english letters, numbers and underscore");
