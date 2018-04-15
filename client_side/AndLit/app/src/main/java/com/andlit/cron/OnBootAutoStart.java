@@ -4,8 +4,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 
-import com.andlit.cron.training.TrainingAlarmReceiver;
-
 // WARNING!!!! DON'T USE THIS CLASS! IT'S ONLY FOR AUTORUN!!!
 public class OnBootAutoStart extends BroadcastReceiver {
     // all default alarms that autostart!

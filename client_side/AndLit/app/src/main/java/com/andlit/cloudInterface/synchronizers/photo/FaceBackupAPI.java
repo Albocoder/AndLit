@@ -25,9 +25,15 @@ interface FaceBackupAPI {
     @POST("images/upload/")
     Call<JsonObject> savePhoto(@Header("Authorization") String auth,
                                @Part MultipartBody.Part file,
-                               @Part("image_hash") RequestBody hash);
+                               @Part("image_hash") RequestBody hash,
+                               @Part("image_label") RequestBody isTrain);
 
     @POST("images/get/")
     @Headers( "Content-Type: application/json" )
     Call<ResponseBody> loadPhoto(@Header("Authorization") String auth, @Body JsonObject body);
+
+    @Multipart
+    @POST("images/getdetail/")
+    Call<JsonObject> getImageStats(@Header("Authorization") String auth,
+                                     @Part("image_hash") String hash);
 }

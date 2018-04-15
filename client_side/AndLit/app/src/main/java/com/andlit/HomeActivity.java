@@ -1,6 +1,7 @@
 package com.andlit;
 
 import android.content.ActivityNotFoundException;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
@@ -18,6 +19,7 @@ import com.andlit.cloudInterface.authentication.Authenticator;
 import com.andlit.cloudInterface.synchronizers.photo.PhotoBackup;
 import com.andlit.cloudInterface.synchronizers.photo.model.SinglePhotoResponse;
 import com.andlit.database.AppDatabase;
+import com.andlit.database.entities.detected_face;
 import com.andlit.database.entities.training_face;
 import com.andlit.face.FaceRecognizerSingleton;
 import com.andlit.settings.SettingsActivity;
@@ -39,7 +41,6 @@ public class HomeActivity extends AppCompatActivity
 
     // View related Properties
     private TextView txtSpeechInput;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState)

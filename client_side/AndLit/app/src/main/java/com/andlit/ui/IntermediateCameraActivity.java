@@ -11,7 +11,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
@@ -36,8 +35,8 @@ import android.widget.Toast;
 import com.andlit.R;
 import com.andlit.ui.helperUI.ImgGrabber;
 import com.andlit.cloudInterface.vision.VisionEndpoint;
-import com.andlit.cloudInterface.vision.models.Description;
-import com.andlit.cloudInterface.vision.models.Text;
+import com.andlit.cloudInterface.vision.model.Description;
+import com.andlit.cloudInterface.vision.model.Text;
 import com.andlit.settings.SettingsDefinedKeys;
 import com.andlit.database.AppDatabase;
 import com.andlit.database.entities.*;
@@ -223,36 +222,38 @@ public class IntermediateCameraActivity extends Activity {
         exitActivity(0);
     }
 
-    // TODO: FIX THIS!!!
-    @Override
-    public void onConfigurationChanged(Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
-        if (vis == null)
-            return;
-        Bitmap result = BitmapFactory.decodeFile(vis.getImgFile().getAbsolutePath());
-        if (result == null)
-            return;
-        double widthRatio = (double) SCREEN_WIDTH / (double) result.getWidth();
-        double heightRatio = (double) SCREEN_HEIGHT / (double) result.getHeight();
-        if(newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
-            double tmp = heightRatio;
-            heightRatio = widthRatio;
-            widthRatio = tmp;
-        }
-        analyzed.setImageBitmap(result);
-
-        if(fop == null)
-            return;
-        Face[] faces = fop.getFaces();
-        if (faces == null)
-            return;
-        for (Face aFacesArray : faces)
-            aFacesArray.getBoundingBoxWithRatio(widthRatio, heightRatio);
-        if(t == null)
-            return;
-        for (Text t1:t)
-            t1.getRatioedLoc(widthRatio,heightRatio);
-    }
+//    // TODO: FIX THIS!!!
+//    @Override
+//    public void onConfigurationChanged(Configuration newConfig) {
+//        super.onConfigurationChanged(newConfig);
+//        if (vis == null)
+//            return;
+//        Bitmap result = BitmapFactory.decodeFile(vis.getImgFile().getAbsolutePath());
+//        if (result == null)
+//            return;
+//        double widthRatio; double heightRatio;
+//        if(newConfig.orientation == Configuration.ORIENTATION_PORTRAIT) {
+//            widthRatio = (double) SCREEN_WIDTH / (double) result.getWidth();
+//            heightRatio = (double) SCREEN_HEIGHT / (double) result.getHeight();
+//        }
+//        else {
+//            widthRatio = (double) SCREEN_WIDTH / (double) result.getHeight();
+//            heightRatio = (double) SCREEN_HEIGHT / (double) result.getWidth();
+//        }
+//        analyzed.setImageBitmap(result);
+//
+//        if(fop == null)
+//            return;
+//        Face[] faces = fop.getFaces();
+//        if (faces == null)
+//            return;
+//        for (Face aFacesArray : faces)
+//            aFacesArray.getBoundingBoxWithRatio(widthRatio, heightRatio);
+//        if(t == null)
+//            return;
+//        for (Text t1:t)
+//            t1.getRatioedLoc(widthRatio,heightRatio);
+//    }
 
     // helper function to cleanly exit the activity
     private void exitActivity(int code){
@@ -580,7 +581,7 @@ public class IntermediateCameraActivity extends Activity {
                     long id = db.knownPplDao().insertEntry(newPerson);
                     rf.getFace().setID((int)id);
                     try {
-                        training_face f = FaceOperator.saveTrainingFaceToDatabase(view.getContext(),rf); // check this
+                        training_face f = FaceOperator.saveTrainingFaceToDatabase(view.getContext(),rf);
                         if( f == null )
                             Snackbar.make(view,"Couldn't save instance to database!",Snackbar.LENGTH_SHORT);
                         else
@@ -686,7 +687,7 @@ public class IntermediateCameraActivity extends Activity {
         List<String> filePaths = db.trainingFaceDao().getPathsOfLabel(id);
         String filePath = null;
         if(filePaths.size() > 0)
-            filePath = filePaths.get(0);
+            filePath = FaceOperator.getAbsolutePath(this,filePaths.get(0),true) ;
         else
             try {
                 filePath = StorageHelper.getFilePathFromAssets

@@ -1,4 +1,4 @@
-package com.andlit.cloudInterface.vision.models;
+package com.andlit.cloudInterface.vision.model;
 
 import org.bytedeco.javacpp.opencv_core;
 

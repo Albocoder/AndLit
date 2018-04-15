@@ -1,4 +1,4 @@
-package com.andlit.cloudInterface.synchronizers.classifier;
+package com.andlit.cloudInterface.synchronizers.database;
 
 import com.google.gson.JsonObject;
 
@@ -11,15 +11,17 @@ import retrofit2.http.Multipart;
 import retrofit2.http.POST;
 import retrofit2.http.Part;
 
-interface ClassifierBackupAPI {
+public interface DatabaseBackupAPI {
+
     @Multipart
-    @POST("files/cl/upload/")
-    Call<JsonObject> uploadClassifier(@Header("Authorization") String auth,
+    @POST("files/db/upload/")
+    Call<JsonObject> uploadDatabase(@Header("Authorization") String auth,
                                       @Part MultipartBody.Part file);
 
     @GET("files/cl/list/")
-    Call<JsonObject> showClassifierStats(@Header("Authorization") String auth);
+    Call<JsonObject> showDatabaseStats(@Header("Authorization") String auth);
 
     @GET("files/cl/get/")
-    Call<ResponseBody> downloadClassifier(@Header("Authorization") String auth);
+    Call<ResponseBody> downloadDatabase(@Header("Authorization") String auth);
+
 }

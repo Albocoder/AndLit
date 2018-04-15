@@ -21,22 +21,20 @@ import java.nio.IntBuffer;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
 
-
-
 import static org.bytedeco.javacpp.opencv_core.CV_32SC1;
 import static org.bytedeco.javacpp.opencv_face.createLBPHFaceRecognizer;
 
 public class FaceRecognizerSingleton {
 
     // constants
-    public static final int SEARCH_RADIUS = 1;
-    public static final int NEIGHBORS = 8;
-    public static final int GRID_X = 8;
-    public static final int GRID_Y = 8;
-    public static final double THRESHOLD = 120;
-    public static final int TOP_PREDICTIONS = 1;
-    public static final double INSTANCES_DETECTION_RATIO = 3.0;
-    public static final double RELATIVE_RATIO = 0.25;
+    private static final int SEARCH_RADIUS = 1;
+    private static final int NEIGHBORS = 8;
+    private static final int GRID_X = 8;
+    private static final int GRID_Y = 8;
+    private static final double THRESHOLD = 120;
+    private static final int TOP_PREDICTIONS = 1;
+    private static final double INSTANCES_DETECTION_RATIO = 3.0;
+    private static final double RELATIVE_RATIO = 0.25;
     private static final String TAG = "FaceRecognizerSingleton";
     private static final String CLASSIFIER_NAME = "lbphClassifier.yml"; // Default path for the classifier if it doesn't exist
 
@@ -53,9 +51,7 @@ public class FaceRecognizerSingleton {
         if (classifierMetadata == null)
             classifierMetadata = AppDatabase.getDatabase(c).classifierDao().getClassifier();
 
-        if (trainedModel != null)
-            return;
-        else
+        if (trainedModel == null)
             loadTrainedModel();
     }
 
@@ -75,7 +71,7 @@ public class FaceRecognizerSingleton {
         for (int i: allLabels) {
             List<training_face> facesOfLabel = db.trainingFaceDao().getInstancesOfLabel(i);
             for (training_face tf: facesOfLabel) {
-                Face tmp = FaceOperator.loadFaceFromDatabase(tf);
+                Face tmp = FaceOperator.loadFaceFromDatabase(c,tf);
                 facePhotos.put(index,tmp.getgscaleContent());
                 labelsBuffer.put(index,i);
                 index++;
@@ -123,23 +119,20 @@ public class FaceRecognizerSingleton {
 
         if (newDetections == 0){
             // if same number of detections but new average instances haven't increased enough
-            if (((double)numberOfInstancesPossible/(double)numberOfPossibleDetections) <
-                    ((double)numberOfInstancesUsed/(double)numberOfCurrentDetections + RELATIVE_RATIO))
-                return false;
+            return !(((double) numberOfInstancesPossible / (double) numberOfPossibleDetections) <
+                    ((double) numberOfInstancesUsed / (double) numberOfCurrentDetections + RELATIVE_RATIO));
         }
         else {
             // if in average there is less than 3 photos per detection don't train
-            if ( ((double)newInstances/(double)newDetections) < INSTANCES_DETECTION_RATIO )
-                return false;
+            return !(((double) newInstances / (double) newDetections) < INSTANCES_DETECTION_RATIO);
         }
 
         // else train
-        return true;
     }
     private synchronized void loadTrainedModel() {
         File classifierFile = null;
         if (classifierMetadata != null)
-            classifierFile = new File(classifierMetadata.path);
+            classifierFile = new File(c.getFilesDir(),classifierMetadata.path);
         if(classifierFile==null)
             classifierFile = new File(c.getFilesDir(),CLASSIFIER_NAME);
         if (classifierFile.exists()) {
@@ -152,17 +145,19 @@ public class FaceRecognizerSingleton {
     private synchronized void saveTrainedModel(int numberOfDetections, int numInstTrained){
         File classifierFile;
         if (classifierMetadata != null)
-            classifierFile = new File(classifierMetadata.path);
+            classifierFile = new File(c.getFilesDir(),classifierMetadata.path);
         else
             classifierFile = new File(c.getFilesDir(),CLASSIFIER_NAME);
         trainedModel.save(classifierFile.getAbsolutePath());
         try {
             String md5 = StorageHelper.MD5toHexString(StorageHelper.getMD5OfFile(classifierFile.getAbsolutePath()));
             Long tsLong = System.currentTimeMillis()/1000;
-            classifierMetadata = new Classifier(classifierFile.getAbsolutePath(),md5,
+            classifierMetadata = new Classifier(classifierFile.getName(),md5,
                 tsLong,numberOfDetections,numInstTrained,THRESHOLD);
             AppDatabase.getDatabase(c).classifierDao().deleteClassifier();
             AppDatabase.getDatabase(c).classifierDao().insertClassifier(classifierMetadata);
-        } catch (IOException|NoSuchAlgorithmException e) {}
+        } catch (IOException|NoSuchAlgorithmException ignored) {}
     }
+
+    public synchronized void destroyInstance() { trainedModel = null; }
 }

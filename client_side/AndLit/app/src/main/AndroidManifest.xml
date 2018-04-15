@@ -43,6 +43,7 @@
         </activity>
         <activity
             android:name=".ui.IntermediateCameraActivity"
+            android:screenOrientation="landscape"
             android:configChanges="orientation|screenSize|keyboardHidden" />
         <activity
             android:name=".ui.helperUI.ImgGrabber"
@@ -63,7 +64,7 @@
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
         </receiver>
-        <receiver  android:name=".cron.training.TrainingAlarmReceiver" android:process=":remote" />
+        <receiver  android:name=".cron.TrainingAlarmReceiver" android:process=":remote" />
     </application>
 
 </manifest>

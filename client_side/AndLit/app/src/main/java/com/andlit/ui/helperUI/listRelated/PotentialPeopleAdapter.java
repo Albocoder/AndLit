@@ -16,6 +16,7 @@ import com.andlit.R;
 import com.andlit.database.AppDatabase;
 import com.andlit.database.entities.KnownPPL;
 import com.andlit.database.entities.training_face;
+import com.andlit.face.FaceOperator;
 
 import java.util.List;
 
@@ -49,7 +50,7 @@ public class PotentialPeopleAdapter extends ArrayAdapter<KnownPPL> {
         List<training_face> images = db.trainingFaceDao().getInstancesOfLabel(p.id);
         Bitmap tmp;
         if (images.size() != 0) {
-            tmp = BitmapFactory.decodeFile(images.get(0).path);
+            tmp = BitmapFactory.decodeFile(FaceOperator.getAbsolutePath(this.getContext(),images.get(0)));
             pic.setImageBitmap(tmp);
         }
         return vi;

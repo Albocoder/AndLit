@@ -39,7 +39,6 @@ public abstract class AppDatabase extends RoomDatabase {
     public abstract user_login_dao userLoginDao();
     public abstract training_face_dao trainingFaceDao();
 
-    @VisibleForTesting
     public static final String DATABASE_NAME = "local-andlit-database";
 
     public static AppDatabase getDatabase(Context context) {

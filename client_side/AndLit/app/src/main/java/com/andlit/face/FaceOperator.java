@@ -88,7 +88,7 @@ public class FaceOperator {
 
         RectVector facesVector = new RectVector();
         if (frontDetector != null)
-            frontDetector.detectMultiScale(mGray, facesVector, 1.1, 5, 0| CASCADE_SCALE_IMAGE,
+            frontDetector.detectMultiScale(mGray, facesVector, 1.1, 5, CASCADE_SCALE_IMAGE,
                     new Size(mAbsoluteFaceSize, mAbsoluteFaceSize), new Size());
         Face[] facesArray = new Face[(int) facesVector.size()];
         for (int i = 0; i < facesVector.size();i++) {
@@ -255,7 +255,7 @@ public class FaceOperator {
             // get MD5 of the file we just wrote
             String md5 = StorageHelper.MD5toHexString(StorageHelper.getMD5OfFile(imageFile.getAbsolutePath()));
 
-            detection = new detected_face(f.getFace().getID(), imageFile.getAbsolutePath()
+            detection = new detected_face(f.getFace().getID(), "EXTERNAL@"+filename
                     , md5, timeInMillis,f.getLabels()[0]);
             // insert and return new entry
             AppDatabase db = AppDatabase.getDatabase(c);
@@ -335,7 +335,7 @@ public class FaceOperator {
             String md5 = StorageHelper.MD5toHexString(StorageHelper.getMD5OfFile(imageFile.getAbsolutePath()));
 
             trainingInstance = new training_face(f.getFace().getID(),
-                    imageFile.getAbsolutePath(), md5);
+                    "EXTERNAL@"+filename, md5);
 
             // insert and return new entry
             AppDatabase db = AppDatabase.getDatabase(c);
@@ -367,7 +367,7 @@ public class FaceOperator {
 
             // create new entry
             trainingInstance = new training_face(f.getFace().getID(),
-                    mFileTemp.getAbsolutePath(), md5);
+                    "INTERNAL@"+filename, md5);
 
             // insert and return new entry
             AppDatabase db = AppDatabase.getDatabase(c);
@@ -386,7 +386,6 @@ public class FaceOperator {
         }
         return trainingInstance;
     }
-
     public static detected_face saveDetectedFaceToDatabase(Context c, Face f) throws IOException, NoSuchAlgorithmException {
         return saveDetectedFaceToDatabase(c,f,true);
     }
@@ -419,7 +418,7 @@ public class FaceOperator {
             // get MD5 of the file we just wrote
             String md5 = StorageHelper.MD5toHexString(StorageHelper.getMD5OfFile(imageFile.getAbsolutePath()));
 
-            detection = new detected_face(f.getID(), imageFile.getAbsolutePath()
+            detection = new detected_face(f.getID(), "EXTERNAL@"+filename
                     , md5, timeInMillis,-1);
             // insert and return new entry
             AppDatabase db = AppDatabase.getDatabase(c);
@@ -450,7 +449,7 @@ public class FaceOperator {
             String md5 = StorageHelper.MD5toHexString(StorageHelper.getMD5OfFile(mFileTemp.getAbsolutePath()));
 
             // create new entry
-            detection = new detected_face(f.getID(), mFileTemp.getAbsolutePath()
+            detection = new detected_face(f.getID(), "INTERNAL@"+filename
                     , md5, timeInMillis,-1);
 
             // insert and return new entry
@@ -498,8 +497,7 @@ public class FaceOperator {
             // get MD5 of the file we just wrote
             String md5 = StorageHelper.MD5toHexString(StorageHelper.getMD5OfFile(imageFile.getAbsolutePath()));
 
-            trainingInstance = new training_face(f.getID(),
-                    imageFile.getAbsolutePath(), md5);
+            trainingInstance = new training_face(f.getID(),"EXTERNAL@"+filename, md5);
 
             // insert and return new entry
             AppDatabase db = AppDatabase.getDatabase(c);
@@ -531,7 +529,7 @@ public class FaceOperator {
 
             // create new entry
             trainingInstance = new training_face(f.getID(),
-                    mFileTemp.getAbsolutePath(), md5);
+                    "INTERNAL@"+filename, md5);
 
             // insert and return new entry
             AppDatabase db = AppDatabase.getDatabase(c);
@@ -552,7 +550,7 @@ public class FaceOperator {
     }
 
     public static boolean deleteDetectionInstance(Context c, detected_face d){
-        File toDelete = new File(d.path);
+        File toDelete = new File(getAbsolutePath(c,d));
         AppDatabase db = AppDatabase.getDatabase(c);
         try{
             db.detectedFacesDao().deleteDetectionForFace(d);
@@ -564,7 +562,7 @@ public class FaceOperator {
         return true;
     }
     public static boolean deleteTrainingInstance(Context c, training_face t){
-        File toDelete = new File(t.path);
+        File toDelete = new File(getAbsolutePath(c,t));
         AppDatabase db = AppDatabase.getDatabase(c);
         try{
             db.trainingFaceDao().deleteEntry(t);
@@ -580,13 +578,13 @@ public class FaceOperator {
         // if id != -1 (just to make less accesses to database)
         if (d.id == -1)
             return null;
-        File faceImg = new File(d.path);
+        File faceImg = new File(getAbsolutePath(c,d));
         // if face exists
         if(!faceImg.exists())
             return null;
 
         // read matrix from image
-        Face tmp = loadFaceFromDatabase(d);
+        Face tmp = loadFaceFromDatabase(c,d);
         if (tmp == null)
             return null;
         tmp.setID(d.id);
@@ -607,34 +605,49 @@ public class FaceOperator {
             return null;
         }
     }
-    public static Face loadFaceFromDatabase(detected_face f) {
+    public static Face loadFaceFromDatabase(Context c,detected_face f) {
         if( f == null)
             return null;
-        Mat image = imread(f.path);
+        Mat image = imread(getAbsolutePath(c,f));
         if(image == null)
             return null;
         Face toReturn = new Face(image);
         toReturn.setID(f.id);
         return  toReturn;
     }
-    public static Face loadFaceFromDatabase(training_face f) {
+    public static Face loadFaceFromDatabase(Context c,training_face f) {
         if( f == null)
             return null;
-        Mat image = imread(f.path);
+        Mat image = imread(getAbsolutePath(c,f));
         if(image == null)
             return null;
         Face toReturn = new Face(image);
         toReturn.setID(f.label);
         return toReturn;
     }
-    public static RecognizedFace loadRecognizedFaceFromDatabase(detected_face f) {
+    public static RecognizedFace loadRecognizedFaceFromDatabase(Context c,detected_face f) {
         if( f == null)
             return null;
-        Mat image = imread(f.path);
+        Mat image = imread(getAbsolutePath(c,f));
         if(image == null)
             return null;
         RecognizedFace toReturn = new RecognizedFace(new Face(image),new int[]{f.predictedlabel},new double[]{-1.0});
         toReturn.getFace().setID(f.id);
         return  toReturn;
+    }
+    public static String getAbsolutePath(Context c,String path,boolean isTraining) {
+        String storagePlace = path.substring(0,path.indexOf("@"));
+        String filename = path.substring(path.indexOf("@")+1);
+        String folder = isTraining?TRAINING_PATH:DETECTIONS_PATH;
+        if(storagePlace.equals("EXTERNAL"))
+            return new File(Environment.getExternalStorageDirectory(),
+                    folder + "/" + filename).getAbsolutePath();
+        return new File(c.getFilesDir() + File.separator + folder, filename).getAbsolutePath();
+    }
+    public static String getAbsolutePath(Context c,training_face tf) {
+        return getAbsolutePath(c,tf.path,true);
+    }
+    public static String getAbsolutePath(Context c,detected_face df) {
+        return getAbsolutePath(c,df.path,false);
     }
 }
