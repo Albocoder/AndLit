@@ -2,29 +2,32 @@ package com.andlit.cron;
 
 import android.app.Notification;
 import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Build;
 import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
 
 import com.andlit.R;
+import com.andlit.cron.jobs.BackupJob;
+import com.andlit.cron.jobs.TrainingJob;
+import com.evernote.android.job.JobRequest;
+
+import java.util.concurrent.TimeUnit;
 
 public class CronMaster {
-    static final int TRAINING_CODE = 0;
-    static final int SYNC_CODE = 1;
+    public static final int TRAINING_CODE = 0;
+    public static final int SYNC_CODE = 1;
 
 
-    public static boolean fireAllCrons(Context c) {
-        boolean fired = fireTrainingAlarm(c);
-         fired &= fireSyncAlarm(c);
-        return fired;
+    public static void fireAllCrons(Context c) {
+        scheduleBackupJob(c);
     }
 
-    /** *********************************** Static functions *********************************** **/
-    static void notifyUserOnCron(Context context, String title, String msg, int id) {
+    /************************************ Static functions ************************************/
+    public static void notifyUserOnCron(Context context, String title, String msg, int id) {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
         // todo: get user preference of notifications on cron
 //        if(user doesnt want to be notified)
@@ -56,18 +59,37 @@ public class CronMaster {
             notificationManager.notify(id, notification);
     }
 
-    /* ************************ Alarm firing routines ****************************/
-    public static boolean fireTrainingAlarm(Context c) {
-        boolean alarmUp = (PendingIntent.getBroadcast(c, TRAINING_CODE,
-                new Intent(c, TrainingAlarmReceiver.class),
-                PendingIntent.FLAG_NO_CREATE) != null);
-        return alarmUp || new TrainingAlarmReceiver().setAlarm(c);
+    public static boolean isNetworkAvailable(Context context) {
+        ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        if(cm == null)
+            return false;
+        NetworkInfo networkInfo = cm.getActiveNetworkInfo();
+        return networkInfo != null && networkInfo.isConnected();
     }
 
-    public static boolean fireSyncAlarm(Context c) {
-        boolean alarmUp = (PendingIntent.getBroadcast(c, SYNC_CODE,
-                new Intent(c, DataBackupAlarmReceiver.class),
-                PendingIntent.FLAG_NO_CREATE) != null);
-        return alarmUp || new DataBackupAlarmReceiver().setAlarm(c);
+    /************************* Alarm firing routines ****************************/
+    public static void scheduleBackupJob(Context c) {
+        // todo: add sharedpreferences to check settings about frequency
+        // currently is only for 1 day with flex of 4 hours (can run up to 20 hours after last run)
+        new JobRequest.Builder(BackupJob.TAG)
+                .setRequiresDeviceIdle(false)
+                .setRequiredNetworkType(JobRequest.NetworkType.CONNECTED)
+                .setRequiresBatteryNotLow(true)
+                .setRequirementsEnforced(true)
+                .setPeriodic(TimeUnit.DAYS.toMillis(1),TimeUnit.HOURS.toMillis(4))
+                .setUpdateCurrent(false)
+                .build()
+                .schedule();
+    }
+
+    public static void scheduleTrainingJob(Context c) {
+        new JobRequest.Builder(TrainingJob.TAG)
+                .setRequiresDeviceIdle(false)
+                .setRequiresBatteryNotLow(true)
+                .setRequirementsEnforced(true)
+                .setPeriodic(TimeUnit.DAYS.toMillis(1),TimeUnit.HOURS.toMillis(4))
+                .setUpdateCurrent(false)
+                .build()
+                .schedule();
     }
 }

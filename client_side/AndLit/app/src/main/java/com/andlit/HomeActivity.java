@@ -115,7 +115,7 @@ public class HomeActivity extends AppCompatActivity
             }
         });
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this.getApplicationContext());
-        Boolean voiceControl = sharedPref.getBoolean(SettingsDefinedKeys.VOICE_CONTROL, false);
+        Boolean voiceControl = sharedPref.getBoolean(SettingsDefinedKeys.VOICE_CONTROL, true);
         if(voiceControl)
             voiceButton.setVisibility(View.VISIBLE);
         else
