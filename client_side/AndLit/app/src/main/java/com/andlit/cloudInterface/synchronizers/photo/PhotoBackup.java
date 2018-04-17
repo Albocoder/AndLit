@@ -53,6 +53,29 @@ public class PhotoBackup {
         ul = db.userLoginDao().getLoginEntry().get(0);
     }
 
+    public List<SinglePhotoResponse> listAllPhotos() throws IOException {
+        ArrayList<SinglePhotoResponse> toReturn = new ArrayList<>();
+        Call<JsonArray> call = a.listPhotos("Token "+ul.access_token);
+        Response<JsonArray> resp = call.execute();
+        int code = resp.code();
+        if ( code >= 200 && code < 300) {
+            JsonArray body = resp.body();
+            if(body == null)
+                return null;
+            for(JsonElement e:body) {
+                JsonObject tmp = (JsonObject) e;
+                String tmpHash = tmp.get("image_hash").getAsString();
+                boolean isTraining = !tmp.get("image_label").getAsString().equalsIgnoreCase("-1");
+                int size = tmp.get("image_size").getAsInt();
+                SinglePhotoResponse tmpResp = new SinglePhotoResponse(tmpHash,isTraining,size);
+                toReturn.add(tmpResp);
+            }
+        }
+        else
+            return  null;
+        return toReturn;
+    }
+
     public boolean saveAllTrainingData() throws IOException {
         List<training_face> tfs = db.trainingFaceDao().getAllRecords();
 
@@ -82,12 +105,20 @@ public class PhotoBackup {
                 MultipartBody.Part.createFormData("image", f.getName(), file);
         RequestBody hash =
                 RequestBody.create( okhttp3.MultipartBody.FORM, tf.hash);
-        RequestBody isTraining =
+        RequestBody trainingLabel =
                 RequestBody.create( okhttp3.MultipartBody.FORM, ""+tf.label);
-        Call<JsonObject> call = a.savePhoto("Token "+ul.access_token,fileBody,hash,isTraining);
+        Call<JsonObject> call = a.savePhoto("Token "+ul.access_token,fileBody,hash,trainingLabel);
         Response resp = call.execute();
         int code = resp.code();
         return code >= 200 && code < 300;
+    }
+
+    public boolean saveSingleTrainingFaceFromHash(String hash) throws IOException {
+        List<training_face> tf = db.trainingFaceDao().getTrainingFaceWithHash(hash);
+        if(tf.size() != 1)
+            return false;
+        else
+            return saveSingleTrainingFace(tf.get(0));
     }
 
     public boolean saveSingleDetectedFace(detected_face df) throws IOException {
@@ -107,27 +138,12 @@ public class PhotoBackup {
         return code >= 200 && code < 300;
     }
 
-    public List<SinglePhotoResponse> listAllPhotos() throws IOException {
-        ArrayList<SinglePhotoResponse> toReturn = new ArrayList<>();
-        Call<JsonArray> call = a.listPhotos("Token "+ul.access_token);
-        Response<JsonArray> resp = call.execute();
-        int code = resp.code();
-        if ( code >= 200 && code < 300) {
-            JsonArray body = resp.body();
-            if(body == null)
-                return null;
-            for(JsonElement e:body) {
-                JsonObject tmp = (JsonObject) e;
-                String tmpHash = tmp.get("image_hash").getAsString();
-                boolean isTraining = !tmp.get("image_label").getAsString().equalsIgnoreCase("-1");
-                int size = tmp.get("image_size").getAsInt();
-                SinglePhotoResponse tmpResp = new SinglePhotoResponse(tmpHash,isTraining,size);
-                toReturn.add(tmpResp);
-            }
-        }
+    public boolean saveSingleDetectedFaceFromHash(String hash) throws IOException {
+        List<detected_face> df = db.detectedFacesDao().getDetectionWithHash(hash);
+        if(df.size() != 1)
+            return false;
         else
-            return  null;
-        return toReturn;
+            return saveSingleDetectedFace(df.get(0));
     }
 
     public SinglePhotoResponse getImageFromHash(String hash) throws IOException {
@@ -205,5 +221,85 @@ public class PhotoBackup {
         Bitmap bmp = r.getBmp();
         bmp.compress(Bitmap.CompressFormat.PNG,100, fos);
         return true;
+    }
+
+    public boolean backupDetections( List<SinglePhotoResponse> inCloud ) throws IOException {
+        List<detected_face> dfs = db.detectedFacesDao().getAllRecords();
+        if (dfs == null)
+            return true;
+        if (inCloud == null)
+            return saveAllDetections();
+        for (SinglePhotoResponse s : inCloud) {
+            for (detected_face d : dfs) {
+                if (s.getHash().equals(d.hash)){
+                    dfs.remove(d);
+                    break;
+                }
+            }
+        }
+        boolean saved = true;
+        for(detected_face d:dfs)
+            saved &= saveSingleDetectedFace(d);
+        return saved;
+    }
+
+    public boolean backupTrainings( List<SinglePhotoResponse> inCloud ) throws IOException {
+        List<training_face> tfs = db.trainingFaceDao().getAllRecords();
+        if (tfs == null)
+            return true;
+        if (inCloud == null)
+            return saveAllTrainingData();
+        for (SinglePhotoResponse s : inCloud) {
+            for (training_face t : tfs) {
+                if (s.getHash().equals(t.hash)){
+                    tfs.remove(t);
+                    break;
+                }
+            }
+        }
+        boolean saved = true;
+        for(training_face t:tfs)
+            saved &= saveSingleTrainingFace(t);
+        return saved;
+    }
+
+    public boolean backupBoth( List<SinglePhotoResponse> inCloud ) throws IOException {
+        if(inCloud == null)
+            return saveAllDetections() && saveAllTrainingData();
+        List<training_face> tfs = db.trainingFaceDao().getAllRecords();
+        List<detected_face> dfs = db.detectedFacesDao().getAllRecords();
+        if (tfs == null && dfs == null)
+            return true;
+        if (tfs == null)
+            tfs = new ArrayList<>();
+        if (dfs == null)
+            dfs = new ArrayList<>();
+        boolean found = false;
+        for(SinglePhotoResponse tmps:inCloud) {
+            for(detected_face tmpd:dfs){
+                if(tmpd.hash.equals(tmps.getHash())) {
+                    dfs.remove(tmpd);
+                    found = true;
+                    break;
+                }
+            }
+            if(found){
+                found = false;
+                continue;
+            }
+            for (training_face tmpt : tfs) {
+                if(tmpt.hash.equals(tmps.getHash())) {
+                    tfs.remove(tmpt);
+                    break;
+                }
+            }
+            found = false;
+        }
+        boolean saved = true;
+        for(training_face tmp:tfs)
+            saved &= saveSingleTrainingFace(tmp);
+        for(detected_face tmp:dfs)
+            saved &= saveSingleDetectedFace(tmp);
+        return saved;
     }
 }

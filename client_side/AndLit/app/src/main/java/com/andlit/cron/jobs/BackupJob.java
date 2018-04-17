@@ -7,9 +7,11 @@ import android.support.annotation.NonNull;
 import com.andlit.cloudInterface.synchronizers.classifier.ClassifierBackup;
 import com.andlit.cloudInterface.synchronizers.database.DatabaseBackup;
 import com.andlit.cloudInterface.synchronizers.photo.PhotoBackup;
+import com.andlit.cloudInterface.synchronizers.photo.model.SinglePhotoResponse;
 import com.evernote.android.job.Job;
 
 import java.io.IOException;
+import java.util.List;
 
 import static com.andlit.cron.CronMaster.SYNC_CODE;
 import static com.andlit.cron.CronMaster.isNetworkAvailable;
@@ -38,39 +40,35 @@ public class BackupJob extends Job {
             notifyUserOnCron(context, "AndLit backup failed", "No internet connection", SYNC_CODE);
             return false;
         }
-
-        boolean savedDetections = false,savedTraining = false,savedDB = false, savedCls = false;
+        wl.acquire(3*60*60*1000L); // 3 hour top for the backup, even with bad internet
+        boolean savedDetectionsAndRecognitions = false,savedDB = false, savedCls = false;
         PhotoBackup pb = new PhotoBackup(context);
-        wl.acquire(30*60*1000L);
-        try {
-            savedDetections = pb.saveAllDetections();
-        } catch (IOException ignored){}
-        wl.release();
+        List<SinglePhotoResponse> allPhotos = null;
 
-        wl.acquire(30*60*1000L);
-        try {
-            savedTraining = pb.saveAllTrainingData();
-        } catch (IOException ignored){}
-        wl.release();
+        try { allPhotos = pb.listAllPhotos(); } catch (IOException ignored) {}
 
-        DatabaseBackup dbb = new DatabaseBackup(context);
-        wl.acquire(30*60*1000L);
         try {
-            savedDB = dbb.saveDatabase();
+            if(allPhotos != null)
+                savedDetectionsAndRecognitions = pb.backupBoth(allPhotos);
+        } catch (IOException ignored){}
+
+        try {
+            DatabaseBackup dbb = new DatabaseBackup(context);
+            savedDB = dbb.backupDatabase(dbb.getInfoAboutUploadedDB());
         } catch (Throwable ignored) { }
-        wl.release();
 
-        ClassifierBackup cb = new ClassifierBackup(context);
-        wl.acquire(30*60*1000L);
+
         try {
-            savedCls = cb.saveClassifier();
-        } catch (IOException ignored){}
-        wl.release();
+            ClassifierBackup cb = new ClassifierBackup(context);
+            savedCls = cb.backupClassifier(cb.getInfoAboutUploadedCls());
+        } catch (Exception ignored){}
 
-        if( savedCls && savedDB && savedDetections && savedTraining )
+
+        if( savedCls && savedDB && savedDetectionsAndRecognitions )
             notifyUserOnCron(context,"AndLit backup success","Backup finished successfully",SYNC_CODE);
-        else if( !savedCls && !savedDB && !savedDetections && !savedTraining ) {
+        else if( !savedCls && !savedDB && !savedDetectionsAndRecognitions ) {
             notifyUserOnCron(context,"AndLit backup failed","No internet connection or server down",SYNC_CODE);
+            wl.release();
             return false;
         }
         else {
@@ -78,11 +76,10 @@ public class BackupJob extends Job {
                 notifyUserOnCron(context,"AndLit backup","Failed to backup classifier!",1111);
             if( !savedDB )
                 notifyUserOnCron(context,"AndLit backup.","Failed to backup database!",2222);
-            if( !savedDetections )
-                notifyUserOnCron(context,"AndLit backup.","Failed to backup detected faces!",3333);
-            if( !savedTraining )
-                notifyUserOnCron(context,"AndLit backup.","Failed to backup training faces!",4444);
+            if( !savedDetectionsAndRecognitions )
+                notifyUserOnCron(context,"AndLit backup.","Failed to backup detected and training faces!",3333);
         }
+        wl.release();
         return true;
     }
 }

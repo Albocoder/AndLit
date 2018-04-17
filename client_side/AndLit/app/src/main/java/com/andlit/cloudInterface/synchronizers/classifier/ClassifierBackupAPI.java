@@ -1,5 +1,6 @@
 package com.andlit.cloudInterface.synchronizers.classifier;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
 import okhttp3.MultipartBody;
@@ -18,7 +19,7 @@ interface ClassifierBackupAPI {
                                       @Part MultipartBody.Part file);
 
     @GET("files/cl/list/")
-    Call<JsonObject> showClassifierStats(@Header("Authorization") String auth);
+    Call<JsonArray> showClassifierStats(@Header("Authorization") String auth);
 
     @GET("files/cl/get/")
     Call<ResponseBody> downloadClassifier(@Header("Authorization") String auth);

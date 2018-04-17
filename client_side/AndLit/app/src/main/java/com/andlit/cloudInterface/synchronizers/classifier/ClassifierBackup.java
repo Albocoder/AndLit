@@ -1,12 +1,13 @@
 package com.andlit.cloudInterface.synchronizers.classifier;
 
+import android.accounts.NetworkErrorException;
 import android.content.Context;
 
 import com.andlit.cloudInterface.synchronizers.classifier.model.ClassifierStats;
 import com.andlit.database.AppDatabase;
 import com.andlit.database.entities.Classifier;
 import com.andlit.database.entities.UserLogin;
-import com.andlit.face.FaceRecognizerSingleton;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
 import java.io.File;
@@ -33,18 +34,21 @@ public class ClassifierBackup {
     private ClassifierBackupAPI a;
     private UserLogin ul;
     private File classifierFile;
-    private Context c;
 
-    public ClassifierBackup(Context c) {
+    public ClassifierBackup(Context c) throws IOException, NetworkErrorException {
         Retrofit api = new Retrofit.Builder().baseUrl("https://andlit.info")
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
         a = api.create(ClassifierBackupAPI.class);
-        this.c = c;
         AppDatabase db = AppDatabase.getDatabase(c);
         ul = db.userLoginDao().getLoginEntry().get(0);
         Classifier cls = db.classifierDao().getClassifier();
         classifierFile = new File(c.getFilesDir(),cls.path);
+        if(!classifierFile.exists()) {
+            classifierFile.createNewFile();
+            if (!loadClassifier())
+                throw new NetworkErrorException("No internet connection!");
+        }
     }
 
     public boolean saveClassifier() throws IOException {
@@ -59,11 +63,14 @@ public class ClassifierBackup {
     }
 
     public ClassifierStats getInfoAboutUploadedCls() throws IOException {
-        Call<JsonObject> call = a.showClassifierStats("Token "+ul.access_token);
-        Response<JsonObject> resp = call.execute();
+        Call<JsonArray> call = a.showClassifierStats("Token "+ul.access_token);
+        Response<JsonArray> resp = call.execute();
         int code = resp.code();
         if (code >= 200 && code < 300) {
-            JsonObject o = resp.body();
+            JsonArray arr = resp.body();
+            if(arr == null || arr.size() == 0)
+                return null;
+            JsonObject o = arr.get(0).getAsJsonObject();
             if (o == null)
                 return null;
             // can be extended here if the API gives more info
@@ -73,14 +80,9 @@ public class ClassifierBackup {
         return null;
     }
 
-    public boolean loadClassifier()  {
+    public boolean loadClassifier() throws IOException {
         Call<ResponseBody> call = a.downloadClassifier("Token "+ul.access_token);
-        Response<ResponseBody> resp = null;
-        try {
-            resp = call.execute();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        Response<ResponseBody> resp = call.execute();
         if(resp == null)
             return false;
         int code = resp.code();
@@ -124,4 +126,19 @@ public class ClassifierBackup {
         return false;
     }
 
+    public boolean backupClassifier( ClassifierStats inCloud ) throws IOException {
+        long localSize = classifierFile.length();
+        long remoteSize = inCloud.getSize();
+        if( localSize != remoteSize )
+            return saveClassifier();
+        return false;
+    }
+
+    public boolean restoreClassifier( ClassifierStats inCloud ) throws IOException {
+        long localSize = classifierFile.length();
+        long remoteSize = inCloud.getSize();
+        if( localSize != remoteSize )
+            return loadClassifier();
+        return false;
+    }
 }

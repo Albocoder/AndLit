@@ -53,10 +53,6 @@ public class LoginActivity extends AppCompatActivity {
         ButterKnife.bind(this);
         a = new Authenticator(this);
 
-        // *********************** perform all the on-start operations *********************** //
-
-        CronMaster.fireAllCrons(this);
-
         // *********************************************************************************** //
 
         if(a.isLoggedIn())

@@ -5,9 +5,11 @@ import android.content.Context;
 import com.andlit.cloudInterface.synchronizers.database.model.DatabaseStats;
 import com.andlit.database.AppDatabase;
 import com.andlit.database.entities.UserLogin;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -33,15 +35,17 @@ public class DatabaseBackup {
     private File dbFile;
     private Context c;
 
-    public DatabaseBackup(Context c) {
+    public DatabaseBackup(Context c) throws Exception {
         Retrofit api = new Retrofit.Builder().baseUrl("https://andlit.info")
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
         this.c = c;
         a = api.create(DatabaseBackupAPI.class);
+        dbFile = c.getDatabasePath(AppDatabase.DATABASE_NAME);
+        if(!dbFile.exists())
+            throw new Exception("Database doesn't exist!");
         AppDatabase db = AppDatabase.getDatabase(c);
         ul = db.userLoginDao().getLoginEntry().get(0);
-        dbFile = c.getDatabasePath(AppDatabase.DATABASE_NAME);
     }
 
     public boolean saveDatabase() throws Throwable {
@@ -63,13 +67,14 @@ public class DatabaseBackup {
     }
 
     public DatabaseStats getInfoAboutUploadedDB() throws IOException {
-        Call<JsonObject> call = a.showDatabaseStats("Token "+ul.access_token);
-        Response<JsonObject> resp = call.execute();
+        Call<JsonArray> call = a.showDatabaseStats("Token "+ul.access_token);
+        Response<JsonArray> resp = call.execute();
         int code = resp.code();
         if (code >= 200 && code < 300) {
-            JsonObject o = resp.body();
-            if (o == null)
+            JsonArray arr = resp.body();
+            if(arr == null || arr.size() == 0)
                 return null;
+            JsonObject o = arr.get(0).getAsJsonObject();
             // can be extended here if the API gives more info
             long fileSize = o.get("file_size").getAsLong();
             return new DatabaseStats(fileSize);
@@ -80,6 +85,8 @@ public class DatabaseBackup {
     public boolean loadDatabase() throws IOException {
         Call<ResponseBody> call = a.downloadDatabase("Token "+ul.access_token);
         Response<ResponseBody> resp = call.execute();
+        if(resp == null)
+            return false;
         int code = resp.code();
         if (code >= 200 && code < 300) {
             ResponseBody body = resp.body();
@@ -88,22 +95,52 @@ public class DatabaseBackup {
             InputStream is = body.byteStream();
             if(is == null)
                 return false;
-            AppDatabase.destroyInstance();
+            FileOutputStream fos;
+            try {
+                fos = new FileOutputStream(dbFile,false);
+            } catch (FileNotFoundException ignored) { return false; }
 
-            FileOutputStream fos = new FileOutputStream(dbFile,false);
             byte [] buffer = new byte[1024];
             while (true) {
-                int read = is.read(buffer);
+                int read = 0;
+
+                try {
+                    read = is.read(buffer);
+                } catch (IOException ignored){}
+
                 if (read == -1)
                     break;
-                fos.write(buffer, 0, read);
+
+                try {
+                    fos.write(buffer, 0, read);
+                } catch (IOException ignored){}
             }
-            fos.flush();
-            fos.close();
-            is.close();
-            AppDatabase.getDatabase(c);
+
+            try {
+                fos.flush();
+            } catch (IOException ignored) { return false; }
+            try {
+                fos.close();
+                is.close();
+            } catch (IOException ignored) { }
             return true;
         }
+        return false;
+    }
+
+    public boolean backupDatabase( DatabaseStats inCloud ) throws Throwable {
+        long localSize = dbFile.length();
+        long remoteSize = inCloud.getSize();
+        if( localSize != remoteSize )
+            return saveDatabase();
+        return false;
+    }
+
+    public boolean restoreDatabase( DatabaseStats inCloud ) throws IOException {
+        long localSize = dbFile.length();
+        long remoteSize = inCloud.getSize();
+        if( localSize != remoteSize )
+            return loadDatabase();
         return false;
     }
 }

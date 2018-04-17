@@ -1,5 +1,6 @@
 package com.andlit.cloudInterface.synchronizers.database;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
 import okhttp3.MultipartBody;
@@ -18,10 +19,10 @@ public interface DatabaseBackupAPI {
     Call<JsonObject> uploadDatabase(@Header("Authorization") String auth,
                                       @Part MultipartBody.Part file);
 
-    @GET("files/cl/list/")
-    Call<JsonObject> showDatabaseStats(@Header("Authorization") String auth);
+    @GET("files/db/list/")
+    Call<JsonArray> showDatabaseStats(@Header("Authorization") String auth);
 
-    @GET("files/cl/get/")
+    @GET("files/db/get/")
     Call<ResponseBody> downloadDatabase(@Header("Authorization") String auth);
 
 }
