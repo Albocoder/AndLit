@@ -25,6 +25,7 @@ public class CronMaster {
 
     public static void fireAllCrons(Context c) {
         scheduleBackupJob(c);
+        scheduleTrainingJob(c);
     }
 
     /************************************ Static functions ************************************/
@@ -70,7 +71,7 @@ public class CronMaster {
 
     /************************* Alarm firing routines ****************************/
     public static void scheduleBackupJob(Context c) {
-        JobManager.create(c);
+        JobManager.create(c).addJobCreator(new CronJobCreator());
         // todo: add sharedpreferences to check settings about frequency
         // currently is only for 1 day with flex of 4 hours (can run up to 20 hours after last run)
         new JobRequest.Builder(BackupJob.TAG)
@@ -78,14 +79,14 @@ public class CronMaster {
                 .setRequiredNetworkType(JobRequest.NetworkType.CONNECTED)
                 .setRequiresBatteryNotLow(true)
                 .setRequirementsEnforced(true)
-                .setPeriodic(TimeUnit.DAYS.toMillis(1),TimeUnit.HOURS.toMillis(4))
+                .setPeriodic(TimeUnit.MINUTES.toMillis(16))
                 .setUpdateCurrent(false)
                 .build()
                 .schedule();
     }
 
     public static void scheduleTrainingJob(Context c) {
-        JobManager.create(c);
+        JobManager.create(c).addJobCreator(new CronJobCreator());
         new JobRequest.Builder(TrainingJob.TAG)
                 .setRequiresDeviceIdle(false)
                 .setRequiresBatteryNotLow(true)

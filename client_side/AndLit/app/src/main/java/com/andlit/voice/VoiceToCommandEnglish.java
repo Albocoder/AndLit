@@ -24,12 +24,14 @@ public class VoiceToCommandEnglish extends VoiceToCommand {
     private static final Pattern opVerbs2 = Pattern.compile("read");
     private static final Pattern opVerbs3 = Pattern.compile("detect|show|analyze|get");
     private static final Pattern opVerbs4 = Pattern.compile("recognize|find|name");
+    private static final Pattern opVerbs5 = Pattern.compile("insert|add|put");
+    private static final Pattern opName5 = Pattern.compile("face|person|instance|recognition");
     private static final Pattern operation2_3Nouns = Pattern.compile("faces|face|people|humans|person|human");
     private static final Pattern clearOperationVerb = Pattern.compile("clean|clear|restart|renew|reset|delete");
 
     private static final Pattern questionWords1 = Pattern.compile("how many|How many");
     private static final Pattern questionWords2 = Pattern.compile("who|Who");
-    //private static final Pattern questionWords3 = Pattern.compile("What|what");
+
 
     public VoiceToCommandEnglish(Context c) {
         super(c);
@@ -44,6 +46,22 @@ public class VoiceToCommandEnglish extends VoiceToCommand {
 
         else if(opVerbs2.matcher(command).find())
             return 4;
+
+        else if(opVerbs5.matcher(command).find()){
+            if(opName5.matcher(command).find()){
+                int nameIndex = command.indexOf("name");
+                nameIndex += 4;
+                if(command.indexOf("of",nameIndex) > 0)
+                    nameIndex = command.indexOf("of",nameIndex) + 2;
+                String nameExtract = command.substring(nameIndex);
+                StringTokenizer nameRetriever = new StringTokenizer(nameExtract);
+                name = nameRetriever.nextToken();
+                last = nameRetriever.nextToken();
+                return 12;
+            }
+            else
+                return -1;
+        }
 
         // if it is a command for photo (with verb AND noun for fail-proof)
         else if(photoVerb.matcher(command).find()){

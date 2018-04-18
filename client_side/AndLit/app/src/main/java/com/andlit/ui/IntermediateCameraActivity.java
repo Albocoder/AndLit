@@ -33,6 +33,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.andlit.R;
+import com.andlit.shareEntryPoint.ShareActivityReceiver;
 import com.andlit.ui.helperUI.ImgGrabber;
 import com.andlit.cloudInterface.vision.VisionEndpoint;
 import com.andlit.cloudInterface.vision.model.Description;
@@ -114,9 +115,6 @@ public class IntermediateCameraActivity extends Activity {
         // todo remove train() and just // instantiate FaceRecognizerSingleton
         train(); frs = new FaceRecognizerSingleton(this);
 
-        // setting up file that holds the image from camera
-        setupImageHoldingFile();
-
         // setting up settings to operate on
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
         audioFeedback = sharedPref.getBoolean(SettingsDefinedKeys.AUDIO_FEEDBACK, false);
@@ -186,6 +184,22 @@ public class IntermediateCameraActivity extends Activity {
                     new RecognizeTextAsync().execute();
             }
         });
+
+        // setting up file that holds the image from camera
+        if(this.getIntent().hasExtra("filepath")) {
+            String filelocation = this.getIntent().getStringExtra("filepath");
+            imageLocation = new File(filelocation);
+            if(vis != null)
+                vis.destroy();
+            if(fop != null) {
+                if(saveOnExit)
+                    fop.storeUnlabeledFaces();
+                fop.destroy();
+            }
+            new ProcessInputAsync().execute(imageLocation,analyzed,this.getApplicationContext());
+        }
+        else
+            setupImageHoldingFile();
     }
 
     @Override
@@ -386,7 +400,7 @@ public class IntermediateCameraActivity extends Activity {
             progressDialog.setInverseBackgroundForced(false);
             progressDialog.setIndeterminate(true);
             progressDialog.setCancelable(false);
-            progressDialog.show();
+//            progressDialog.show();
         }
 
         @Override
@@ -394,8 +408,11 @@ public class IntermediateCameraActivity extends Activity {
             imageLocation = (File) args[0];
             analyzed = (ImageView) args[1];
             Context c = (Context) args[2];
-            process();
             Bitmap result = BitmapFactory.decodeFile(imageLocation.getAbsolutePath());
+            Log.d(TAG,"2->"+imageLocation);
+            Log.d(TAG,"2->"+imageLocation.length());
+            Log.d(TAG,"3->"+result);
+            process();
             vis = new VisionEndpoint(c,result);
             d = null;
             t = null;
@@ -404,7 +421,7 @@ public class IntermediateCameraActivity extends Activity {
 
         @Override
         protected void onPostExecute(Void aVoid) {
-            super.onPostExecute(aVoid);
+//            super.onPostExecute(aVoid);
             progressDialog.dismiss();
 
             if(audioFeedback)
@@ -734,8 +751,11 @@ public class IntermediateCameraActivity extends Activity {
     public void process() {
         if(audioFeedback)
             speaker.speak("Processing image.");
+        Log.d(TAG,"4");
         opencv_core.Mat toAnalyze = imread(imageLocation.getAbsolutePath());
+        Log.d(TAG,"4->"+toAnalyze);
         Bitmap result = BitmapFactory.decodeFile(imageLocation.getAbsolutePath());
+        Log.d(TAG,"4->"+result);
         double widthRatio = (double) SCREEN_WIDTH / (double) result.getWidth();
         double heightRatio = (double) SCREEN_HEIGHT / (double) result.getHeight();
         fop = new FaceOperator(this,toAnalyze);

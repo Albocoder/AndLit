@@ -25,7 +25,6 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
-// todo: test this
 public class ClassifierBackup {
     // constants
     private static final String TAG = "ClassifierBackup";
@@ -139,6 +138,6 @@ public class ClassifierBackup {
         long remoteSize = inCloud.getSize();
         if( localSize != remoteSize )
             return loadClassifier();
-        return false;
+        return true;
     }
 }

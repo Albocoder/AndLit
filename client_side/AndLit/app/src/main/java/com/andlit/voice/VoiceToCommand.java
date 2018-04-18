@@ -4,6 +4,7 @@ import android.content.Context;
 
 public abstract class VoiceToCommand {
     protected Context c;
+    public String name = null, last = null;
 
     protected VoiceToCommand(Context c){
         this.c = c;

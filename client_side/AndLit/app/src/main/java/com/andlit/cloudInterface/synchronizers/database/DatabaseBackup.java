@@ -23,7 +23,6 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
-//todo: test this
 public class DatabaseBackup {
 
     // constants
@@ -133,7 +132,7 @@ public class DatabaseBackup {
         long remoteSize = inCloud.getSize();
         if( localSize != remoteSize )
             return saveDatabase();
-        return false;
+        return true;
     }
 
     public boolean restoreDatabase( DatabaseStats inCloud ) throws IOException {
@@ -141,6 +140,6 @@ public class DatabaseBackup {
         long remoteSize = inCloud.getSize();
         if( localSize != remoteSize )
             return loadDatabase();
-        return false;
+        return true;
     }
 }

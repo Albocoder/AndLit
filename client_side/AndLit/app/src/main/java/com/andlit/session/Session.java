@@ -1,30 +1,44 @@
 package com.andlit.session;
 
+import android.accounts.NetworkErrorException;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.speech.RecognizerIntent;
+import android.support.design.widget.Snackbar;
 import android.util.Log;
+import android.view.View;
+import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import com.andlit.R;
 import com.andlit.RequestCodes;
 import com.andlit.camera.BitmapWrapper;
 import com.andlit.camera.CameraActivity;
+import com.andlit.cloudInterface.synchronizers.classifier.ClassifierBackup;
+import com.andlit.cloudInterface.synchronizers.database.DatabaseBackup;
+import com.andlit.cloudInterface.synchronizers.photo.PhotoBackup;
 import com.andlit.cloudInterface.vision.VisionEndpoint;
 import com.andlit.cloudInterface.vision.model.Description;
 import com.andlit.cloudInterface.vision.model.Text;
 import com.andlit.database.AppDatabase;
+import com.andlit.database.entities.KnownPPL;
+import com.andlit.database.entities.training_face;
 import com.andlit.face.Face;
 import com.andlit.face.FaceOperator;
 import com.andlit.face.FaceRecognizerSingleton;
 import com.andlit.face.RecognizedFace;
 import com.andlit.settings.SettingsDefinedKeys;
+import com.andlit.utils.StorageHelper;
 import com.andlit.voice.VoiceGenerator;
 import com.andlit.voice.VoiceToCommandWrapper;
 
@@ -32,6 +46,7 @@ import org.bytedeco.javacpp.opencv_core;
 
 import java.io.File;
 import java.io.IOException;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -60,6 +75,10 @@ public abstract class Session extends Activity {
     private static final String TEXT_ERROR_RERUNNING = "Last text recognition job failed. Rerunning.";
     private static final String DESC_ERROR_RERUNNING = "Last image description job failed. Rerunning.";
     private static final String NOT_SUPPORTED = "Action not supported.";
+    private static final String CLASSIFIER_FILE_CANT_CREATE = "Your classifier doesn't exist.";
+    private static final String CROWDED_IMAGE = "Too many faces in the image!";
+    private static final String DB_SAVE_ERROR = "Couldn't save new person to database!";
+    private static final String FILE_SAVE_ERROR = "Couldn't save the face for the new person!";
     // SUCCESS
     private static final String PICTURE_SUCCESS = "Picture was taken successfully!";
     private static final String PICTURE_STORED_SUCCESS = "Picture was stored and ready to query";
@@ -161,9 +180,10 @@ public abstract class Session extends Activity {
             }
         }
         else if(requestCode == RequestCodes.SPEECH_INPUT_RC){
-            ArrayList<String> result = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
-            Toast.makeText(this,result.get(0),Toast.LENGTH_SHORT).show();
-            runFunction(vc.decide(result.get(0)));
+            try {
+                ArrayList<String> result = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
+                runFunction(vc.decide(result.get(0)));
+            }catch (NullPointerException ignored){}
         }
     }
 
@@ -228,6 +248,7 @@ public abstract class Session extends Activity {
         }
         fop.getFaces();
         audioFeedback(ANALYSIS_SUCCESS);
+
         return true;
     }
 
@@ -237,6 +258,15 @@ public abstract class Session extends Activity {
         audioFeedback(RECOGNITION_START);
         fop.recognizeFaces();
         audioFeedback(RECOGNITION_SUCCESS);
+        RecognizedFace[] faces = fop.recognizeFaces();
+        int i = 1;
+        for (RecognizedFace f : faces) {
+            f.setBestMatch(this);
+            audioFeedback(QUERY_REC_1+i+ QUERY_REC_2+f.getBestMatch().name
+                    +" "+f.getBestMatch().sname);
+            audioPause(200);
+            i++;
+        }
         return true;
     }
 
@@ -308,6 +338,35 @@ public abstract class Session extends Activity {
 
     public boolean trainClassifierAsync() { return trainClassifierAsync(null); }
 
+    public boolean addNewFace(String name, String last) {
+        if(!detectFaces())
+            return false;
+        if(fop.getFaces().length != 1) {
+            audioFeedback(CROWDED_IMAGE);
+            return false;
+        }
+        try {
+            String tmp = StorageHelper.writeMat(this,fop.getFaces()[0].getBGRContent());
+            Bitmap tmpb = BitmapFactory.decodeFile(tmp);
+            new File(tmp).delete();
+        } catch (IOException ignored) {}
+        KnownPPL newPerson = new KnownPPL(-1,name,last,0,0,"");
+        AppDatabase db = AppDatabase.getDatabase(this);
+        long id = db.knownPplDao().insertEntry(newPerson);
+        fop.getFaces()[0].setID((int)id);
+        try {
+            training_face f = FaceOperator.saveTrainingFaceToDatabase(this,fop.getFaces()[0]);
+            if( f == null ) {
+                audioFeedback(DB_SAVE_ERROR);
+                return false;
+            }
+        } catch (IOException|NoSuchAlgorithmException e) {
+            audioFeedback(FILE_SAVE_ERROR);
+            return false;
+        }
+        return true;
+    }
+
     // ***************************** VOICE COMMAND FUNCTIONS *************************** //
 
     public void startVoiceCapture() {
@@ -319,7 +378,7 @@ public abstract class Session extends Activity {
         }
         catch (ActivityNotFoundException a) {
             audioFeedback(NOT_SUPPORTED);
-            Toast.makeText(getApplicationContext(),NOT_SUPPORTED, Toast.LENGTH_SHORT).show();
+//            Toast.makeText(getApplicationContext(),NOT_SUPPORTED, Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -337,6 +396,7 @@ public abstract class Session extends Activity {
             case(9):    functionNine();     break;
             case(10):   functionTen();      break;
             case(11):   functionEleven();   break;
+            case(12):   functionTwelve();   break;
             default:    functionNone();     break;
         }
     }
@@ -374,9 +434,8 @@ public abstract class Session extends Activity {
         recognizeTextAsync(new AsyncJobCallback() {
             @Override
             public Object run(Object result) {
-                if((Integer)result == 0) {
-                    recognizeTextAsync();
-                }
+                if((Integer)result == 0)
+                    functionTen();
                 return null;
             }
         });
@@ -384,18 +443,33 @@ public abstract class Session extends Activity {
     // ID: 5    (train classifier)
     public void functionFive(){ trainClassifierAsync(); }
     // ID: 6    (synchronization)
-    public void functionSix(){ /* todo: write cloud interface for this */ }
+    public void functionSix() {
+        try {
+            ClassifierBackup cb = new ClassifierBackup(this);
+            cb.backupClassifier(cb.getInfoAboutUploadedCls());
+        } catch (IOException e) {
+            audioFeedback(CLASSIFIER_FILE_CANT_CREATE);
+        } catch (NetworkErrorException e) {}
+        try {
+            DatabaseBackup dbb = new DatabaseBackup(this);
+            dbb.backupDatabase(dbb.getInfoAboutUploadedDB());
+        } catch (Throwable e) {}
+        PhotoBackup pb = new PhotoBackup(this);
+        try {
+            pb.backupBoth(pb.listAllPhotos());
+        } catch (IOException e) { audioFeedback(NETWORK_ERROR); }
+    }
     // ID: 7    (face recognition)
-    public void functionSeven(){ recognizeFaces(); }
+    public void functionSeven() { recognizeFaces(); }
     // ID: 8    (restart session)
-    public void functionEight(){
+    public void functionEight() {
         restartSession();
         audioFeedback(CLEARED_SESSION);
     }
     // ID: 9    (query how many faces)
-    public void functionNine(){ functionTwo(); }
+    public void functionNine() { functionTwo(); }
     // ID: 10   (query read all text blocks)
-    public void functionTen(){
+    public void functionTen() {
         if(!recognizeTextAsync())
             return;
         int i = 1;
@@ -407,17 +481,12 @@ public abstract class Session extends Activity {
         }
     }
     // ID: 11   (query face identities)
-    public void functionEleven(){
-        if(!recognizeTextAsync())
-            return;
-        RecognizedFace[] faces = fop.recognizeFaces();
-        int i = 1;
-        for (RecognizedFace f : faces) {
-            f.setBestMatch(this);
-            audioFeedback(QUERY_REC_1+i+ QUERY_REC_2+f.getBestMatch().name
-                    +" "+f.getBestMatch().sname);
-            audioPause(200);
-        }
+    public void functionEleven() { recognizeFaces(); }
+    // ID: 12   (add new face)
+    public void functionTwelve() {
+        String name = vc.v.name;
+        String last = vc.v.last;
+        addNewFace(name,last);
     }
 
     // **************************** ASYNC CLASSES ******************************* //

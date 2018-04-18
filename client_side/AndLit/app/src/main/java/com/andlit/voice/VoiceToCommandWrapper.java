@@ -8,7 +8,7 @@ import com.andlit.settings.SettingsDefinedKeys;
 
 public class VoiceToCommandWrapper {
 
-    private VoiceToCommand v;
+    public VoiceToCommand v;
 
     public VoiceToCommandWrapper(Context c) {
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(c);
