@@ -10,6 +10,7 @@ import com.andlit.cron.CronMaster;
 import android.support.v7.preference.PreferenceFragmentCompat;
 import android.widget.Toast;
 
+import static com.andlit.settings.SettingsDefinedKeys.BACKUP_FREQUENCY;
 import static com.andlit.settings.SettingsDefinedKeys.TRAINING_FREQUENCY;
 
 public class SettingsFragment extends PreferenceFragmentCompat implements SharedPreferences.OnSharedPreferenceChangeListener
@@ -28,6 +29,26 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Shared
             // Do something when training frequency is changed
             Context context = this.getActivity().getApplicationContext();
             CharSequence text = "Training Frequency Changed!";
+            int duration = Toast.LENGTH_SHORT;
+            Toast toast = Toast.makeText(context, text, duration);
+            toast.show();
+        }
+
+        if( key.equals(BACKUP_FREQUENCY) )
+        {
+            // Do something when training frequency is changed
+            Context context = this.getActivity().getApplicationContext();
+            CharSequence text = "Backup Frequency Changed!";
+            int duration = Toast.LENGTH_SHORT;
+            Toast toast = Toast.makeText(context, text, duration);
+            toast.show();
+        }
+
+        if( key.equals(BACKUP_FREQUENCY) )
+        {
+            // Do something when training frequency is changed
+            Context context = this.getActivity().getApplicationContext();
+            CharSequence text = "Language Changed!";
             int duration = Toast.LENGTH_SHORT;
             Toast toast = Toast.makeText(context, text, duration);
             toast.show();

@@ -17,4 +17,8 @@ public final class SettingsDefinedKeys {
     public static final String AUDIO_FEEDBACK = "audio_feedback";
 
     public static final String LANGUAGE = "language";
+
+    public static final String NOTIFY_SCHEDULED_TASKS = "notify_scheduled_tasks";
+
+    public static final String BACKUP_FREQUENCY = "backup_frequency";
 }

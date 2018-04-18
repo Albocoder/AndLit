@@ -19,13 +19,28 @@
         android:summary="Turn on to receive audio feedback from the device"
         android:title="Audio Feedback" />
 
+    <android.support.v7.preference.SwitchPreferenceCompat
+        android:defaultValue="false"
+        android:key="notify_scheduled_tasks"
+        android:summary="Turn on to receive a notification whenever a scheduled task is executed"
+        android:title="Scheduled Tasks Notifications" />
+
     <android.support.v7.preference.ListPreference
-        android:summary="Choose the frequency at which you would like your device to train"
+        android:summary="Choose the frequency at which you would like your device to automatically train"
         android:key="training_frequency"
         android:title="Training Frequency"
         android:dialogTitle="Choose Training Frequency"
         android:entries="@array/TrainingFrequencyEntries"
         android:entryValues="@array/TrainingFrequencyValues"
+        android:defaultValue="Daily" />
+
+    <android.support.v7.preference.ListPreference
+        android:summary="Choose the interval at which you would like your data to automatically backup"
+        android:key="backup_frequency"
+        android:title="Backup Frequency"
+        android:dialogTitle="Choose Backup Frequency"
+        android:entries="@array/BackupFrequencyEntries"
+        android:entryValues="@array/BackupFrequencyValues"
         android:defaultValue="Daily" />
 
     <android.support.v7.preference.ListPreference
