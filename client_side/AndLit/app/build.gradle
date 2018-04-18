@@ -76,7 +76,7 @@ dependencies {
     implementation 'com.squareup.retrofit2:converter-gson:2.3.0'
 
     // for the machine testing
-    testImplementation 'org.bytedeco.javacpp-presets:opencv:3.4.0-1.4:linux-x86_64'
+    testImplementation 'org.bytedeco.javacpp-presets:opencv:3.2.0-1.4:linux-x86_64'
     testImplementation 'junit:junit:4.12'
 
     // for settings screen

@@ -13,6 +13,7 @@ import android.support.v4.app.NotificationCompat;
 import com.andlit.R;
 import com.andlit.cron.jobs.BackupJob;
 import com.andlit.cron.jobs.TrainingJob;
+import com.andlit.settings.SettingsDefinedKeys;
 import com.evernote.android.job.JobManager;
 import com.evernote.android.job.JobRequest;
 
@@ -22,10 +23,9 @@ public class CronMaster {
     public static final int TRAINING_CODE = 0;
     public static final int SYNC_CODE = 1;
 
-
     public static void fireAllCrons(Context c) {
-        scheduleBackupJob(c);
-        scheduleTrainingJob(c);
+        scheduleJob(c,BackupJob.TAG);
+        scheduleJob(c,TrainingJob.TAG);
     }
 
     /************************************ Static functions ************************************/
@@ -70,35 +70,65 @@ public class CronMaster {
     }
 
     /************************* Alarm firing routines ****************************/
-    public static void scheduleBackupJob(Context c) {
-        JobManager.create(c).addJobCreator(new CronJobCreator());
-        // todo: add sharedpreferences to check settings about frequency
-        // currently is only for 1 day with flex of 4 hours (can run up to 20 hours after last run)
-        if(JobManager.instance().getAllJobRequestsForTag(BackupJob.TAG).size() <= 0) {
-            new JobRequest.Builder(BackupJob.TAG)
-                    .setRequiresDeviceIdle(false)
-                    .setRequiredNetworkType(JobRequest.NetworkType.CONNECTED)
-                    .setRequiresBatteryNotLow(true)
-                    .setRequirementsEnforced(true)
-                    .setPeriodic(TimeUnit.MINUTES.toMillis(16))
-                    .setUpdateCurrent(false)
-                    .build()
-                    .schedule();
-        }
+
+    public static void scheduleJob(Context c,String tag) {
+        if(JobManager.instance().getAllJobRequestsForTag(TrainingJob.TAG).size() <= 0)
+            rescheduleJob(c,tag);
     }
 
-    public static void scheduleTrainingJob(Context c) {
-        JobManager.create(c).addJobCreator(new CronJobCreator());
-        if(JobManager.instance().getAllJobRequestsForTag(TrainingJob.TAG).size() <= 0) {
-            new JobRequest.Builder(TrainingJob.TAG)
-                    .setRequiresDeviceIdle(false)
-                    .setRequiresBatteryNotLow(true)
-                    .setRequirementsEnforced(true)
-                    .setPeriodic(TimeUnit.DAYS.toMillis(1), TimeUnit.HOURS.toMillis(4))
-                    .setUpdateCurrent(true)
-
-                    .build()
-                    .schedule();
+    public static void rescheduleJob(Context c,String tag) {
+        if(JobManager.instance() == null)
+            JobManager.create(c).addJobCreator(new CronJobCreator());
+        long period,flex;
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(c);
+        switch (tag){
+            case(TrainingJob.TAG):
+                String trainingFreq = sharedPreferences.getString(SettingsDefinedKeys.TRAINING_FREQUENCY
+                        , "Never");
+                if(trainingFreq.equalsIgnoreCase("Daily")) {
+                    period = TimeUnit.DAYS.toMillis(1);
+                    flex = TimeUnit.HOURS.toMillis(4);
+                }
+                else if(trainingFreq.equalsIgnoreCase("Weekly")){
+                    period = TimeUnit.DAYS.toMillis(7);
+                    flex = TimeUnit.HOURS.toMillis(12);
+                }
+                else if(trainingFreq.equalsIgnoreCase("Monthly")){
+                    period = TimeUnit.DAYS.toMillis(30);
+                    flex = TimeUnit.DAYS.toMillis(1);
+                }
+                else {
+                    JobManager.instance().cancelAllForTag(TrainingJob.TAG);
+                    return;
+                }
+                break;
+            case (BackupJob.TAG):
+                String backupFreq = sharedPreferences.getString(SettingsDefinedKeys.BACKUP_FREQUENCY
+                        , "Daily");
+                if(backupFreq.equalsIgnoreCase("Weekly")){
+                    period = TimeUnit.DAYS.toMillis(7);
+                    flex = TimeUnit.HOURS.toMillis(12);
+                }
+                else if(backupFreq.equalsIgnoreCase("Monthly")){
+                    period = TimeUnit.DAYS.toMillis(30);
+                    flex = TimeUnit.DAYS.toMillis(1);
+                }
+                else{
+                    period = TimeUnit.DAYS.toMillis(1);
+                    flex = TimeUnit.HOURS.toMillis(4);
+                }
+                break;
+            /* ADD NEW LABELS HERE IF NEEDED TO SET UP THEIR PERIOD AND FLEX */
+            default:
+                return;
         }
+        new JobRequest.Builder(tag)
+                .setRequiresDeviceIdle(false)
+                .setRequiresBatteryNotLow(true)
+                .setRequirementsEnforced(true)
+                .setPeriodic(period, flex)
+                .setUpdateCurrent(true)
+                .build()
+                .schedule();
     }
 }

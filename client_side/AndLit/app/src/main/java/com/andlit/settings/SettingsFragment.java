@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import com.andlit.R;
-import com.andlit.cron.CronMaster;
 
 import android.support.v7.preference.PreferenceFragmentCompat;
 import android.widget.Toast;
