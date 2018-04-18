@@ -11,6 +11,7 @@ import android.support.v7.preference.PreferenceFragmentCompat;
 import android.widget.Toast;
 
 import static com.andlit.settings.SettingsDefinedKeys.BACKUP_FREQUENCY;
+import static com.andlit.settings.SettingsDefinedKeys.LANGUAGE;
 import static com.andlit.settings.SettingsDefinedKeys.TRAINING_FREQUENCY;
 
 public class SettingsFragment extends PreferenceFragmentCompat implements SharedPreferences.OnSharedPreferenceChangeListener
@@ -44,7 +45,7 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Shared
             toast.show();
         }
 
-        if( key.equals(BACKUP_FREQUENCY) )
+        if( key.equals(LANGUAGE) )
         {
             // Do something when training frequency is changed
             Context context = this.getActivity().getApplicationContext();
