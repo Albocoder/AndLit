@@ -35,7 +35,7 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Shared
             int duration = Toast.LENGTH_SHORT;
             Toast toast = Toast.makeText(context, text, duration);
             toast.show();
-            CronMaster.rescheduleJob(this.getContext(), TrainingJob.TAG);
+            CronMaster.rescheduleJob(this.getContext(), TrainingJob.TAG,true);
         }
 
         if( key.equals(BACKUP_FREQUENCY) )
@@ -45,7 +45,7 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Shared
             CharSequence text = "Backup Frequency Changed!";
             int duration = Toast.LENGTH_SHORT;
             Toast toast = Toast.makeText(context, text, duration);
-            CronMaster.rescheduleJob(this.getContext(), BackupJob.TAG);
+            CronMaster.rescheduleJob(this.getContext(), BackupJob.TAG,true);
             toast.show();
         }
 

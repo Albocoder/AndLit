@@ -24,8 +24,8 @@ public class CronMaster {
     public static final int SYNC_CODE = 1;
 
     public static void fireAllCrons(Context c) {
-        scheduleJob(c,BackupJob.TAG);
-        scheduleJob(c,TrainingJob.TAG);
+        scheduleJob(c,BackupJob.TAG,false);
+        scheduleJob(c,TrainingJob.TAG,false);
     }
 
     /************************************ Static functions ************************************/
@@ -71,12 +71,12 @@ public class CronMaster {
 
     /************************* Alarm firing routines ****************************/
 
-    public static void scheduleJob(Context c,String tag) {
+    public static void scheduleJob(Context c,String tag,boolean runnow) {
         if(JobManager.instance().getAllJobRequestsForTag(TrainingJob.TAG).size() <= 0)
-            rescheduleJob(c,tag);
+            rescheduleJob(c,tag,false);
     }
 
-    public static void rescheduleJob(Context c,String tag) {
+    public static void rescheduleJob(Context c,String tag,boolean runnow) {
         if(JobManager.instance() == null)
             JobManager.create(c).addJobCreator(new CronJobCreator());
         long period,flex;
@@ -122,13 +122,24 @@ public class CronMaster {
             default:
                 return;
         }
-        new JobRequest.Builder(tag)
+        if(runnow)
+            new JobRequest.Builder(tag)
                 .setRequiresDeviceIdle(false)
                 .setRequiresBatteryNotLow(true)
                 .setRequirementsEnforced(true)
                 .setPeriodic(period, flex)
                 .setUpdateCurrent(true)
+                .startNow()
                 .build()
                 .schedule();
+        else
+            new JobRequest.Builder(tag)
+                    .setRequiresDeviceIdle(false)
+                    .setRequiresBatteryNotLow(true)
+                    .setRequirementsEnforced(true)
+                    .setPeriodic(period, flex)
+                    .setUpdateCurrent(true)
+                    .build()
+                    .schedule();
     }
 }
