@@ -347,7 +347,6 @@ public abstract class Session extends Activity {
         }
         try {
             String tmp = StorageHelper.writeMat(this,fop.getFaces()[0].getBGRContent());
-            Bitmap tmpb = BitmapFactory.decodeFile(tmp);
             new File(tmp).delete();
         } catch (IOException ignored) {}
         KnownPPL newPerson = new KnownPPL(-1,name,last,0,0,"");
@@ -378,7 +377,6 @@ public abstract class Session extends Activity {
         }
         catch (ActivityNotFoundException a) {
             audioFeedback(NOT_SUPPORTED);
-//            Toast.makeText(getApplicationContext(),NOT_SUPPORTED, Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -483,6 +481,7 @@ public abstract class Session extends Activity {
     // ID: 11   (query face identities)
     public void functionEleven() { recognizeFaces(); }
     // ID: 12   (add new face)
+    //todo: test this
     public void functionTwelve() {
         String name = vc.v.name;
         String last = vc.v.last;

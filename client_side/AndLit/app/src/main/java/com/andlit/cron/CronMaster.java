@@ -74,26 +74,31 @@ public class CronMaster {
         JobManager.create(c).addJobCreator(new CronJobCreator());
         // todo: add sharedpreferences to check settings about frequency
         // currently is only for 1 day with flex of 4 hours (can run up to 20 hours after last run)
-        new JobRequest.Builder(BackupJob.TAG)
-                .setRequiresDeviceIdle(false)
-                .setRequiredNetworkType(JobRequest.NetworkType.CONNECTED)
-                .setRequiresBatteryNotLow(true)
-                .setRequirementsEnforced(true)
-                .setPeriodic(TimeUnit.MINUTES.toMillis(16))
-                .setUpdateCurrent(false)
-                .build()
-                .schedule();
+        if(JobManager.instance().getAllJobRequestsForTag(BackupJob.TAG).size() <= 0) {
+            new JobRequest.Builder(BackupJob.TAG)
+                    .setRequiresDeviceIdle(false)
+                    .setRequiredNetworkType(JobRequest.NetworkType.CONNECTED)
+                    .setRequiresBatteryNotLow(true)
+                    .setRequirementsEnforced(true)
+                    .setPeriodic(TimeUnit.MINUTES.toMillis(16))
+                    .setUpdateCurrent(false)
+                    .build()
+                    .schedule();
+        }
     }
 
     public static void scheduleTrainingJob(Context c) {
         JobManager.create(c).addJobCreator(new CronJobCreator());
-        new JobRequest.Builder(TrainingJob.TAG)
-                .setRequiresDeviceIdle(false)
-                .setRequiresBatteryNotLow(true)
-                .setRequirementsEnforced(true)
-                .setPeriodic(TimeUnit.DAYS.toMillis(1),TimeUnit.HOURS.toMillis(4))
-                .setUpdateCurrent(false)
-                .build()
-                .schedule();
+        if(JobManager.instance().getAllJobRequestsForTag(TrainingJob.TAG).size() <= 0) {
+            new JobRequest.Builder(TrainingJob.TAG)
+                    .setRequiresDeviceIdle(false)
+                    .setRequiresBatteryNotLow(true)
+                    .setRequirementsEnforced(true)
+                    .setPeriodic(TimeUnit.DAYS.toMillis(1), TimeUnit.HOURS.toMillis(4))
+                    .setUpdateCurrent(true)
+
+                    .build()
+                    .schedule();
+        }
     }
 }

@@ -1,11 +1,6 @@
 package com.andlit.voice;
 
 import android.content.Context;
-import android.content.Intent;
-
-import com.andlit.ui.IntermediateCameraActivity;
-
-import java.util.ArrayList;
 import java.util.StringTokenizer;
 import java.util.regex.Pattern;
 
@@ -33,7 +28,7 @@ public class VoiceToCommandEnglish extends VoiceToCommand {
     private static final Pattern questionWords2 = Pattern.compile("who|Who");
 
 
-    public VoiceToCommandEnglish(Context c) {
+    VoiceToCommandEnglish(Context c) {
         super(c);
     }
 

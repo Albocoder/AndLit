@@ -130,7 +130,7 @@ public class ClassifierBackup {
         long remoteSize = inCloud.getSize();
         if( localSize != remoteSize )
             return saveClassifier();
-        return false;
+        return true;
     }
 
     public boolean restoreClassifier( ClassifierStats inCloud ) throws IOException {

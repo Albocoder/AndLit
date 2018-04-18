@@ -400,7 +400,7 @@ public class IntermediateCameraActivity extends Activity {
             progressDialog.setInverseBackgroundForced(false);
             progressDialog.setIndeterminate(true);
             progressDialog.setCancelable(false);
-//            progressDialog.show();
+            progressDialog.show();
         }
 
         @Override
@@ -409,9 +409,6 @@ public class IntermediateCameraActivity extends Activity {
             analyzed = (ImageView) args[1];
             Context c = (Context) args[2];
             Bitmap result = BitmapFactory.decodeFile(imageLocation.getAbsolutePath());
-            Log.d(TAG,"2->"+imageLocation);
-            Log.d(TAG,"2->"+imageLocation.length());
-            Log.d(TAG,"3->"+result);
             process();
             vis = new VisionEndpoint(c,result);
             d = null;
@@ -421,7 +418,7 @@ public class IntermediateCameraActivity extends Activity {
 
         @Override
         protected void onPostExecute(Void aVoid) {
-//            super.onPostExecute(aVoid);
+            super.onPostExecute(aVoid);
             progressDialog.dismiss();
 
             if(audioFeedback)
@@ -751,11 +748,8 @@ public class IntermediateCameraActivity extends Activity {
     public void process() {
         if(audioFeedback)
             speaker.speak("Processing image.");
-        Log.d(TAG,"4");
         opencv_core.Mat toAnalyze = imread(imageLocation.getAbsolutePath());
-        Log.d(TAG,"4->"+toAnalyze);
         Bitmap result = BitmapFactory.decodeFile(imageLocation.getAbsolutePath());
-        Log.d(TAG,"4->"+result);
         double widthRatio = (double) SCREEN_WIDTH / (double) result.getWidth();
         double heightRatio = (double) SCREEN_HEIGHT / (double) result.getHeight();
         fop = new FaceOperator(this,toAnalyze);
