@@ -77,8 +77,7 @@ public class CronMaster {
     }
 
     public static void rescheduleJob(Context c,String tag,boolean runnow) {
-        if(JobManager.instance() == null)
-            JobManager.create(c).addJobCreator(new CronJobCreator());
+        JobManager.create(c).addJobCreator(new CronJobCreator());
         long period,flex;
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(c);
         switch (tag){
