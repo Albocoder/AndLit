@@ -1,40 +1,44 @@
 package com.andlit;
 
-import android.content.ActivityNotFoundException;
+import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.speech.RecognizerIntent;
 import android.speech.tts.TextToSpeech;
+import android.support.design.widget.NavigationView;
+import android.support.v4.view.GravityCompat;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.preference.PreferenceManager;
+import android.support.v7.widget.Toolbar;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
-import android.widget.TextView;
-import android.widget.Toast;
 import com.andlit.cloudInterface.authentication.Authenticator;
 import com.andlit.cron.CronMaster;
 import com.andlit.face.FaceRecognizerSingleton;
 import com.andlit.settings.SettingsActivity;
-import com.andlit.settings.SettingsDefinedKeys;
 import com.andlit.ui.HandsFreeMode;
 import com.andlit.ui.IntermediateCameraActivity;
 
-import java.util.ArrayList;
-import java.util.Locale;
 
 public class HomeActivity extends AppCompatActivity
 {
     private static final String TAG = "HomeActivity";
 
     // View related Properties
-    private TextView txtSpeechInput;
+    private DrawerLayout mDrawerLayout;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
+
+        navigationDrawerInit();
+
+        checkTTS();
+
         // Camera button init
         Button cameraButton = findViewById(R.id.camera_button);
         cameraButton.setOnClickListener(new View.OnClickListener()
@@ -42,28 +46,6 @@ public class HomeActivity extends AppCompatActivity
             @Override
             public void onClick(View v) {
                 loadCameraScreen();
-            }
-        });
-
-        // Settings Button init
-        Button settingsButton = findViewById(R.id.settings_button);
-        settingsButton.setOnClickListener(new View.OnClickListener()
-        {
-            @Override
-            public void onClick(View v)
-            {
-                loadSettingsScreen();
-            }
-        });
-
-        Button logoutButton = findViewById(R.id.logoutButton);
-        logoutButton.setOnClickListener(new View.OnClickListener(){
-            @Override
-            public void onClick(View view) {
-                new Authenticator(view.getContext()).logout();
-                Intent i = new Intent(view.getContext(),LoginActivity.class);
-                startActivity(i);
-                finish();
             }
         });
 
@@ -83,36 +65,69 @@ public class HomeActivity extends AppCompatActivity
             }
         });
 
-        // Voice Button init
-        voiceButtonInit();
-
         // *********************** perform all the on-start operations *********************** //
 
         CronMaster.fireAllCrons(this);
-
-
-        // Text view for testing text to speech
-        txtSpeechInput = findViewById(R.id.txtSpeechInput);
-        txtSpeechInput.setText("Voice Input Should Display Here!");
     }
 
-    public void voiceButtonInit()
+    public void navigationDrawerInit()
     {
-        Button voiceButton = findViewById(R.id.voice_button);
-        voiceButton.setOnClickListener(new View.OnClickListener()
-        {
-            @Override
-            public void onClick(View v)
-            {
-                promptSpeechInput();
-            }
-        });
-        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this.getApplicationContext());
-        Boolean voiceControl = sharedPref.getBoolean(SettingsDefinedKeys.VOICE_CONTROL, true);
-        if(voiceControl)
-            voiceButton.setVisibility(View.VISIBLE);
-        else
-            voiceButton.setVisibility(View.INVISIBLE);
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        ActionBar actionbar = getSupportActionBar();
+        actionbar.setDisplayHomeAsUpEnabled(true);
+        actionbar.setHomeAsUpIndicator(R.drawable.ic_menu_black);
+
+        mDrawerLayout = findViewById(R.id.drawer_layout);
+
+        final NavigationView navigationView = findViewById(R.id.nav_view);
+        navigationView.setNavigationItemSelectedListener(
+                new NavigationView.OnNavigationItemSelectedListener() {
+                    @Override
+                    public boolean onNavigationItemSelected(MenuItem menuItem) {
+                        // set item as selected to persist highlight
+                        menuItem.setChecked(true);
+                        // close drawer when item is tapped
+                        mDrawerLayout.closeDrawers();
+
+                        // Add code here to update the UI based on the item selected
+                        // For example, swap UI fragments here
+                        int id = menuItem.getItemId();
+                        Context context = navigationView.getContext();
+
+                        if (id == R.id.nav_logout)
+                        {
+                            // Handle Logout
+                            new Authenticator(context).logout();
+                            Intent i = new Intent(context,LoginActivity.class);
+                            startActivity(i);
+                            finish();
+                        }
+                        else if (id == R.id.nav_settings)
+                        {
+                            // Handle Settings
+                            loadSettingsScreen();
+                        }
+                        else if (id == R.id.nav_lock)
+                        {
+                            // Handle Lock
+
+                        }
+
+                        return true;
+                    }
+                });
+    }
+
+    // NavBar button init
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                mDrawerLayout.openDrawer(GravityCompat.START);
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     private void loadHandsFreeMode(){
@@ -131,41 +146,10 @@ public class HomeActivity extends AppCompatActivity
         startActivity(i);
     }
 
-    /**
-     * Showing google speech input dialog
-     * */
-    private void promptSpeechInput()
-    {
-        Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
-        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
-        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault());
-        intent.putExtra(RecognizerIntent.EXTRA_PROMPT, "Say Something!");
-        try
-        {
-            startActivityForResult(intent, RequestCodes.SPEECH_INPUT_RC);
-        }
-        catch (ActivityNotFoundException a)
-        {
-            Toast.makeText(getApplicationContext(), "Speech Not Supported!", Toast.LENGTH_SHORT).show();
-        }
-    }
-
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data)
     {
         super.onActivityResult(requestCode, resultCode, data);
-
-        // speechToText
-        if(requestCode == RequestCodes.SPEECH_INPUT_RC)
-        {
-            if(resultCode == RESULT_OK && null != data)
-            {
-                ArrayList<String> result = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
-
-                // result.get(0) holds the voice input in string form
-                txtSpeechInput.setText(result.get(0));  // testing the input by displaying on a text view
-            }
-        }
 
         // Audio Feedback
         if(requestCode == RequestCodes.AUDIO_FEEDBACK_RC)
@@ -188,13 +172,5 @@ public class HomeActivity extends AppCompatActivity
         Intent check = new Intent();
         check.setAction(TextToSpeech.Engine.ACTION_CHECK_TTS_DATA);
         startActivityForResult(check, RequestCodes.AUDIO_FEEDBACK_RC);
-    }
-
-    @Override
-    protected void onResume()
-    {
-        super.onResume();
-
-        voiceButtonInit();
     }
 }
