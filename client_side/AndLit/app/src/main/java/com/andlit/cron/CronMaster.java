@@ -72,6 +72,7 @@ public class CronMaster {
     /************************* Alarm firing routines ****************************/
 
     public static void scheduleJob(Context c,String tag,boolean runnow) {
+        JobManager.create(c).addJobCreator(new CronJobCreator());
         if(JobManager.instance().getAllJobRequestsForTag(TrainingJob.TAG).size() <= 0)
             rescheduleJob(c,tag,false);
     }
