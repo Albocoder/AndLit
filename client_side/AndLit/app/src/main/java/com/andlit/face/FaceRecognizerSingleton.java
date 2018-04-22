@@ -58,9 +58,10 @@ public class FaceRecognizerSingleton {
     public synchronized void trainModel() {
         AppDatabase db = AppDatabase.getDatabase(c);
         int trainingInstances = db.trainingFaceDao().getNumberOfTrainingInstances();
-        if(trainingInstances == 0)
-            Toast.makeText(c, "No training instances found! Synchronize?", Toast.LENGTH_SHORT).show();
-
+        if(trainingInstances == 0) {
+            Toast.makeText(c, "No training instances found! Synchronize or add faces.", Toast.LENGTH_SHORT).show();
+            return;
+        }
         List<Integer> allLabels = db.trainingFaceDao().getAllPossibleRecognitions();
         trainedModel = createLBPHFaceRecognizer(SEARCH_RADIUS,NEIGHBORS,GRID_X,GRID_Y,THRESHOLD);
 

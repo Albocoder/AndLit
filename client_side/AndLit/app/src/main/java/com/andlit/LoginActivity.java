@@ -16,7 +16,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.andlit.cloudInterface.authentication.Authenticator;
-import com.andlit.cron.CronMaster;
 import com.andlit.database.entities.UserLogin;
 
 import java.io.IOException;
@@ -57,33 +56,52 @@ public class LoginActivity extends AppCompatActivity {
 
         if(a.isLoggedIn())
             goToHomePage();
+        else if(a.isLocked()){
+            _signupLink.setText("Logout");
+            _loginButton.setText("Unlock");
+            _loginButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    unlock();
+                }
+            });
+            _emailText.setText("Logged in as \"" + a.getUserData().username+"\"");
+            _emailText.setHint("");
+            _emailText.setSelected(false);
+            _emailText.setEnabled(false);
+            _signupLink.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    new LogoutTask().execute();
+                }
+            });
+        }
+        else{
+            sv = findViewById(R.id.loginLayout);
+            animationDrawable = (AnimationDrawable) sv.getBackground();
+            animationDrawable.setEnterFadeDuration(5000);
+            animationDrawable.setExitFadeDuration(2000);
 
-        sv = findViewById(R.id.loginLayout);
-        animationDrawable = (AnimationDrawable) sv.getBackground();
-        animationDrawable.setEnterFadeDuration(5000);
-        animationDrawable.setExitFadeDuration(2000);
+            _loginButton.setOnClickListener(new View.OnClickListener() {
 
+                @Override
+                public void onClick(View v) {
+                    login();
+                }
+            });
 
+            _signupLink.setOnClickListener(new View.OnClickListener() {
 
-        _loginButton.setOnClickListener(new View.OnClickListener() {
-
-            @Override
-            public void onClick(View v) {
-                login();
-            }
-        });
-
-        _signupLink.setOnClickListener(new View.OnClickListener() {
-
-            @Override
-            public void onClick(View v) {
-                // Start the Signup activity
-                Intent intent = new Intent(getApplicationContext(), SignupActivity.class);
-                startActivityForResult(intent, REQUEST_SIGNUP);
-                finish();
-                overridePendingTransition(R.anim.push_left_in, R.anim.push_left_out);
-            }
-        });
+                @Override
+                public void onClick(View v) {
+                    // Start the Signup activity
+                    Intent intent = new Intent(getApplicationContext(), SignupActivity.class);
+                    startActivityForResult(intent, REQUEST_SIGNUP);
+                    finish();
+                    overridePendingTransition(R.anim.push_left_in, R.anim.push_left_out);
+                }
+            });
+        }
     }
 
     @Override
@@ -134,6 +152,12 @@ public class LoginActivity extends AppCompatActivity {
         new LoginTask().execute(username,password);
     }
 
+    public void unlock() {
+        _loginButton.setEnabled(false);
+        final String password = _passwordText.getText().toString();
+        new LoginTask().execute(password);
+    }
+
     private void goToHomePage() {
         Intent i = new Intent(this,HomeActivity.class);
         startActivity(i);
@@ -178,6 +202,41 @@ public class LoginActivity extends AppCompatActivity {
         return valid;
     }
 
+    public void switchToLoggedOutMode() {
+        sv = findViewById(R.id.loginLayout);
+        animationDrawable = (AnimationDrawable) sv.getBackground();
+        animationDrawable.setEnterFadeDuration(5000);
+        animationDrawable.setExitFadeDuration(2000);
+
+        _signupLink.setText("No account yet? Create one");
+        _loginButton.setText("Login");
+
+        _emailText.setText("");
+        _emailText.setSelected(false);
+        _emailText.setEnabled(true);
+
+        _loginButton.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                login();
+            }
+        });
+
+        _signupLink.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                // Start the Signup activity
+                Intent intent = new Intent(getApplicationContext(), SignupActivity.class);
+                startActivityForResult(intent, REQUEST_SIGNUP);
+                finish();
+                overridePendingTransition(R.anim.push_left_in, R.anim.push_left_out);
+            }
+        });
+    }
+
+    //************************* A **************************//
     @SuppressLint("StaticFieldLeak")
     private class LoginTask extends AsyncTask<String, Void, Integer> {
 
@@ -198,6 +257,12 @@ public class LoginActivity extends AppCompatActivity {
         @Override
         protected Integer doInBackground(String... paramsObj) {
             try {
+                if(paramsObj.length == 1){
+                    UserLogin ul = a.unlock(paramsObj[0]);
+                    if ( ul == null )
+                        return 1;
+                    return 0;
+                }
                 UserLogin ul = a.login(paramsObj[0],paramsObj[1]);
                 if ( ul == null )
                     return 1;
@@ -221,6 +286,36 @@ public class LoginActivity extends AppCompatActivity {
                     onLoginSuccess();
                     break;
             }
+        }
+    }
+
+    @SuppressLint("StaticFieldLeak")
+    private class LogoutTask extends AsyncTask<String, Void, Integer> {
+
+        private ProgressDialog progressDialog =
+                new ProgressDialog(LoginActivity.this,R.style.AppTheme_Dark_Dialog);
+
+        @Override
+        protected void onPreExecute() {
+            // Display the loading spinner
+            progressDialog.setMessage("Logging out...");
+            progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+            progressDialog.setInverseBackgroundForced(false);
+            progressDialog.setIndeterminate(true);
+            progressDialog.setCancelable(false);
+            progressDialog.show();
+        }
+
+        @Override
+        protected Integer doInBackground(String... paramsObj) {
+            a.logout();
+            return 0;
+        }
+
+        @Override
+        protected void onPostExecute(Integer ret) {
+            switchToLoggedOutMode();
+            progressDialog.dismiss();
         }
     }
 }

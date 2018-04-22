@@ -3,6 +3,7 @@
 
     <string name="not_the_real_person">Manually label the face!</string>
     <string name="profile_picture">Profile picture</string>
+    <string name="server_url" translatable="false">https://andlit.info</string>
 
 
 </resources>

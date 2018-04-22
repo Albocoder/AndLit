@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.util.Log;
 
+import com.andlit.R;
 import com.andlit.cloudInterface.vision.model.Description;
 import com.andlit.cloudInterface.vision.model.Text;
 import com.andlit.database.AppDatabase;
@@ -47,7 +48,7 @@ public class VisionEndpoint {
 
     // WARNING! We assume there is a user logged in when this is instantiated!
     public VisionEndpoint(Context c,Bitmap bm){
-        Retrofit api = new Retrofit.Builder().baseUrl("https://andlit.info")
+        Retrofit api = new Retrofit.Builder().baseUrl(c.getString(R.string.server_url))
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
 

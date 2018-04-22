@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 
+import com.andlit.R;
 import com.andlit.cloudInterface.synchronizers.photo.model.SinglePhotoResponse;
 import com.andlit.database.AppDatabase;
 import com.andlit.database.entities.UserLogin;
@@ -44,7 +45,7 @@ public class PhotoBackup {
 
     // WARNING! We assume there is a user logged in when this is instantiated!
     public PhotoBackup(Context c) {
-        Retrofit api = new Retrofit.Builder().baseUrl("https://andlit.info")
+        Retrofit api = new Retrofit.Builder().baseUrl(c.getString(R.string.server_url))
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
         this.c = c;
@@ -301,5 +302,13 @@ public class PhotoBackup {
         for(detected_face tmp:dfs)
             saved &= saveSingleDetectedFace(tmp);
         return saved;
+    }
+
+    public void deleteAllData() {
+        try {
+            backupBoth(listAllPhotos());
+        } catch (IOException ignored) {}
+        db.trainingFaceDao().purgeData();
+        db.detectedFacesDao().purgeData();
     }
 }

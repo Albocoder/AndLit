@@ -2,6 +2,7 @@ package com.andlit.cloudInterface.synchronizers.database;
 
 import android.content.Context;
 
+import com.andlit.R;
 import com.andlit.cloudInterface.synchronizers.database.model.DatabaseStats;
 import com.andlit.database.AppDatabase;
 import com.andlit.database.entities.UserLogin;
@@ -35,7 +36,7 @@ public class DatabaseBackup {
     private Context c;
 
     public DatabaseBackup(Context c) throws Exception {
-        Retrofit api = new Retrofit.Builder().baseUrl("https://andlit.info")
+        Retrofit api = new Retrofit.Builder().baseUrl(c.getString(R.string.server_url))
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
         this.c = c;
@@ -141,5 +142,15 @@ public class DatabaseBackup {
         if( localSize != remoteSize )
             return loadDatabase();
         return true;
+    }
+
+    public void deleteAllData() {
+        try {
+            backupDatabase(getInfoAboutUploadedDB());
+        } catch (Throwable ignored) {}
+        AppDatabase db = AppDatabase.getDatabase(c);
+        db.clearAllTables();
+        AppDatabase.destroyInstance();
+        dbFile.delete();
     }
 }

@@ -23,22 +23,19 @@ public class CronMaster {
     public static final int TRAINING_CODE = 0;
     public static final int SYNC_CODE = 1;
 
-    public static void fireAllCrons(Context c) {
-        scheduleJob(c,BackupJob.TAG,false);
-        scheduleJob(c,TrainingJob.TAG,false);
-    }
-
-    /************************************ Static functions ************************************/
+    /* *********************************** Static functions *********************************** */
     public static void notifyUserOnCron(Context context, String title, String msg, int id) {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-        // todo: get user preference of notifications on cron
-//        if(user doesnt want to be notified)
-//            return;
+        if(sharedPreferences.getBoolean(SettingsDefinedKeys.NOTIFY_SCHEDULED_TASKS,false))
+            return;
         NotificationCompat.Builder mBuilder = new
                 NotificationCompat.Builder(context)
                 .setContentTitle(title)
                 .setContentText(msg)
                 .setAutoCancel(true)
+                .setDefaults(Notification.DEFAULT_LIGHTS | Notification.DEFAULT_SOUND)
+                .setVibrate(new long[]{0L})
+                .setDefaults(Notification.DEFAULT_ALL)
                 .setSmallIcon(R.mipmap.icon);
 
         NotificationManager notificationManager = (NotificationManager)
@@ -51,11 +48,8 @@ public class CronMaster {
             notification = mBuilder.build();
         else
             notification = mBuilder.getNotification();
-        notification.defaults |= Notification.DEFAULT_LIGHTS;
-        notification.defaults |= Notification.DEFAULT_SOUND;
-        notification.defaults |= Notification.FLAG_AUTO_CANCEL;
-        notification.flags = Notification.DEFAULT_LIGHTS
-                | Notification.FLAG_AUTO_CANCEL;
+        notification.defaults = Notification.DEFAULT_ALL;
+        notification.flags = Notification.FLAG_AUTO_CANCEL;
 
         if(notificationManager != null)
             notificationManager.notify(id, notification);
@@ -69,7 +63,12 @@ public class CronMaster {
         return networkInfo != null && networkInfo.isConnected();
     }
 
-    /************************* Alarm firing routines ****************************/
+    /* ************************ Alarm firing routines *************************** */
+
+    public static void fireAllCrons(Context c) {
+        scheduleJob(c,BackupJob.TAG,false);
+        scheduleJob(c,TrainingJob.TAG,false);
+    }
 
     public static void scheduleJob(Context c,String tag,boolean runnow) {
         JobManager.create(c).addJobCreator(new CronJobCreator());
@@ -141,5 +140,17 @@ public class CronMaster {
                     .setUpdateCurrent(true)
                     .build()
                     .schedule();
+    }
+
+    /* ************************ Alarm canceling routines *************************** */
+
+    public static void cancelJob(Context c, String tag) {
+        JobManager.create(c).addJobCreator(new CronJobCreator());
+        JobManager.instance().cancelAllForTag(tag);
+    }
+
+    public static void cancelAllJobs(Context c) {
+        JobManager.create(c).addJobCreator(new CronJobCreator());
+        JobManager.instance().cancelAll();
     }
 }

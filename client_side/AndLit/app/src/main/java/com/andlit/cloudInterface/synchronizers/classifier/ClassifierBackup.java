@@ -3,6 +3,7 @@ package com.andlit.cloudInterface.synchronizers.classifier;
 import android.accounts.NetworkErrorException;
 import android.content.Context;
 
+import com.andlit.R;
 import com.andlit.cloudInterface.synchronizers.classifier.model.ClassifierStats;
 import com.andlit.database.AppDatabase;
 import com.andlit.database.entities.Classifier;
@@ -33,13 +34,15 @@ public class ClassifierBackup {
     private ClassifierBackupAPI a;
     private UserLogin ul;
     private File classifierFile;
+    private Context c;
 
     public ClassifierBackup(Context c) throws IOException, NetworkErrorException {
-        Retrofit api = new Retrofit.Builder().baseUrl("https://andlit.info")
+        Retrofit api = new Retrofit.Builder().baseUrl(c.getString(R.string.server_url))
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
         a = api.create(ClassifierBackupAPI.class);
         AppDatabase db = AppDatabase.getDatabase(c);
+        this.c = c;
         ul = db.userLoginDao().getLoginEntry().get(0);
         Classifier cls = db.classifierDao().getClassifier();
         classifierFile = new File(c.getFilesDir(),cls.path);
@@ -139,5 +142,14 @@ public class ClassifierBackup {
         if( localSize != remoteSize )
             return loadClassifier();
         return true;
+    }
+
+    public void deleteAllData() {
+        try {
+            backupClassifier(getInfoAboutUploadedCls());
+        } catch (IOException ignored) {}
+        classifierFile.delete();
+        AppDatabase db = AppDatabase.getDatabase(c);
+        db.classifierDao().deleteClassifier();
     }
 }

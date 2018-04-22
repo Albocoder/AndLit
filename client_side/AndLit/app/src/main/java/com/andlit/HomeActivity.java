@@ -1,7 +1,12 @@
 package com.andlit;
 
+import android.annotation.SuppressLint;
+import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.speech.tts.TextToSpeech;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -10,6 +15,7 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
+import android.text.Html;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
@@ -97,11 +103,19 @@ public class HomeActivity extends AppCompatActivity
 
                         if (id == R.id.nav_logout)
                         {
-                            // Handle Logout
-                            new Authenticator(context).logout();
-                            Intent i = new Intent(context,LoginActivity.class);
-                            startActivity(i);
-                            finish();
+                            // handle logout and try to backup if not than no prob
+                            new AlertDialog.Builder(HomeActivity.this)
+                                .setTitle("Do you really want to logout?")
+                                .setMessage(Html.fromHtml("Logging out will delete all your data. " +
+                                        "When logging in you have to wait for all to come back. <br>" +
+                                        "<b>Tip:</b> Use lock to protect your data."))
+                                .setIcon(android.R.drawable.ic_dialog_alert)
+                                .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int whichButton) {
+                                        new LogoutTask().execute();
+                                    }
+                                })
+                                .setNegativeButton(android.R.string.no, null).show();
                         }
                         else if (id == R.id.nav_settings)
                         {
@@ -111,7 +125,8 @@ public class HomeActivity extends AppCompatActivity
                         else if (id == R.id.nav_lock)
                         {
                             // Handle Lock
-
+                            if(new Authenticator(context).lock())
+                                goToLoginScreen();
                         }
 
                         return true;
@@ -172,5 +187,44 @@ public class HomeActivity extends AppCompatActivity
         Intent check = new Intent();
         check.setAction(TextToSpeech.Engine.ACTION_CHECK_TTS_DATA);
         startActivityForResult(check, RequestCodes.AUDIO_FEEDBACK_RC);
+    }
+
+    private void goToLoginScreen(){
+        Intent i = new Intent(this,LoginActivity.class);
+        startActivity(i);
+        finish();
+    }
+
+
+    // ************************ ASYNC TASKS ****************************//
+    @SuppressLint("StaticFieldLeak")
+    private class LogoutTask extends AsyncTask<String, Void, Integer> {
+
+        private ProgressDialog progressDialog =
+                new ProgressDialog(HomeActivity.this,R.style.AppTheme_Dark_Dialog);
+
+        @Override
+        protected void onPreExecute() {
+            // Display the loading spinner
+            progressDialog.setTitle("Logging out...");
+            progressDialog.setMessage("Please wait while we delete all the data.");
+            progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+            progressDialog.setInverseBackgroundForced(false);
+            progressDialog.setIndeterminate(true);
+            progressDialog.setCancelable(false);
+            progressDialog.show();
+        }
+
+        @Override
+        protected Integer doInBackground(String... paramsObj) {
+            new Authenticator(HomeActivity.this).logout();
+            return 0;
+        }
+
+        @Override
+        protected void onPostExecute(Integer ret) {
+            progressDialog.dismiss();
+            goToLoginScreen();
+        }
     }
 }

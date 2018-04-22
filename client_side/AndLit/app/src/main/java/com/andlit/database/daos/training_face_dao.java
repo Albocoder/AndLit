@@ -47,6 +47,9 @@ public interface training_face_dao {
     @Query("select count(*) from training_faces")
     Integer getNumberOfTrainingInstances();
 
+    @Query("delete from training_faces")
+    void purgeData();
+
     @Delete
     void deleteEntry(training_face toDelete);
 
