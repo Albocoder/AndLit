@@ -44,10 +44,7 @@ public class VoiceToCommandEnglish extends VoiceToCommand {
 
         else if(opVerbs5.matcher(command).find()){
             if(opName5.matcher(command).find()){
-                int nameIndex = command.indexOf("name");
-                nameIndex += 4;
-                if(command.indexOf("of",nameIndex) > 0)
-                    nameIndex = command.indexOf("of",nameIndex) + 2;
+                int nameIndex = command.indexOf("name")+4;
                 String nameExtract = command.substring(nameIndex);
                 StringTokenizer nameRetriever = new StringTokenizer(nameExtract);
                 name = nameRetriever.nextToken();

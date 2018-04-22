@@ -33,7 +33,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.andlit.R;
-import com.andlit.shareEntryPoint.ShareActivityReceiver;
 import com.andlit.ui.helperUI.ImgGrabber;
 import com.andlit.cloudInterface.vision.VisionEndpoint;
 import com.andlit.cloudInterface.vision.model.Description;
@@ -791,7 +790,6 @@ public class IntermediateCameraActivity extends Activity {
                 .setNegativeButton(android.R.string.no, null).show();
     }
 
-
     // this is called from onCreate to set up the file which will hold the image taken from camera
     private void setupImageHoldingFile() {
         File root = new File(getFilesDir(), ImgGrabber.CAPTURED_DIR);
@@ -830,8 +828,6 @@ public class IntermediateCameraActivity extends Activity {
         recs =  db.trainingFaceDao().getAllRecords();
         if(recs.size() != 0)
             return;
-//        for (training_face tf : recs)
-//            FaceOperator.deleteTrainingInstance(this,tf);
 
         List<Integer> erinIndex  = new ArrayList<>();
         erinIndex.add(1);erinIndex.add(2);erinIndex.add(3);erinIndex.add(4);erinIndex.add(5);
@@ -839,8 +835,6 @@ public class IntermediateCameraActivity extends Activity {
         obamaIndex.add(6);obamaIndex.add(7);obamaIndex.add(8);obamaIndex.add(9);obamaIndex.add(10);obamaIndex.add(11);
         List<Integer> argertIndex  = new ArrayList<>();
         argertIndex.add(13);argertIndex.add(14);argertIndex.add(16);
-        List<Integer> testing = new ArrayList<>();
-        testing.add(15);testing.add(12);
         Face detected;
         for(int i = 1; i < 17; i++) {
             String filepath;
