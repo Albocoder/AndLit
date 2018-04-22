@@ -57,15 +57,15 @@ public class LoginActivity extends AppCompatActivity {
         if(a.isLoggedIn())
             goToHomePage();
         else if(a.isLocked()){
-            _signupLink.setText("Logout");
-            _loginButton.setText("Unlock");
+            _signupLink.setText(R.string.logout);
+            _loginButton.setText(R.string.unlock);
             _loginButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     unlock();
                 }
             });
-            _emailText.setText("Logged in as \"" + a.getUserData().username+"\"");
+            _emailText.setText( getString(R.string.logged_in_prompt, a.getUserData().username) );
             _emailText.setHint("");
             _emailText.setSelected(false);
             _emailText.setEnabled(false);
@@ -208,8 +208,8 @@ public class LoginActivity extends AppCompatActivity {
         animationDrawable.setEnterFadeDuration(5000);
         animationDrawable.setExitFadeDuration(2000);
 
-        _signupLink.setText("No account yet? Create one");
-        _loginButton.setText("Login");
+        _signupLink.setText(R.string.create_account_prompt);
+        _loginButton.setText(R.string.login);
 
         _emailText.setText("");
         _emailText.setSelected(false);

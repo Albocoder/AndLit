@@ -4,6 +4,10 @@
     <string name="not_the_real_person">Manually label the face!</string>
     <string name="profile_picture">Profile picture</string>
     <string name="server_url" translatable="false">https://andlit.info</string>
-
+    <string name="logout">Logout</string>
+    <string name="unlock">Unlock</string>
+    <string name="logged_in_prompt">Logged in as "%1$s"</string>
+    <string name="create_account_prompt">No account yet? Create one</string>
+    <string name="login">Login</string>
 
 </resources>
