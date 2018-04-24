@@ -5,15 +5,16 @@ import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import com.andlit.R;
-import com.andlit.trainingView.Person;
+import com.andlit.database.AppDatabase;
+import com.andlit.database.entities.detected_face;
 import com.andlit.trainingView.TrainingViewRVAdapter;
-import java.util.ArrayList;
+
 import java.util.List;
 
 public class UnverifiedViewActivity extends Activity
 {
-    private List<Person> persons;
     private RecyclerView rv;
+    private List<detected_face> faces;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -35,16 +36,13 @@ public class UnverifiedViewActivity extends Activity
     private void initializeData()
     {
         // To Do: initialize persons using actual data
-
-        persons = new ArrayList<>();
-        persons.add(new Person("Hamza Wilson", "23 years old", R.drawable.default_profile));
-        persons.add(new Person("Lavery Maiss", "25 years old", R.drawable.default_profile));
-        persons.add(new Person("Lillie Watts", "35 years old", R.drawable.default_profile));
+        AppDatabase db = AppDatabase.getDatabase(this);
+        faces = db.detectedFacesDao().getAllRecords();
     }
 
     private void initializeAdapter()
     {
-        TrainingViewRVAdapter adapter = new UnverifiedViewRVAdapter(persons);
+        TrainingViewRVAdapter adapter = new UnverifiedViewRVAdapter(faces);
         rv.setAdapter(adapter);
     }
 }

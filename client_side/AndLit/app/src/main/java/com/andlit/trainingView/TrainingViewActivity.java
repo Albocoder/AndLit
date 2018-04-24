@@ -6,14 +6,13 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import com.andlit.R;
 import com.andlit.database.AppDatabase;
-
-import java.util.ArrayList;
+import com.andlit.database.entities.training_face;
 import java.util.List;
 
 public class TrainingViewActivity extends Activity
 {
-    private List<Person> persons;
     private RecyclerView rv;
+    private List<training_face> faces;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -34,17 +33,14 @@ public class TrainingViewActivity extends Activity
 
     private void initializeData()
     {
-        // To Do: initialize persons using actual data
-
-        persons = new ArrayList<>();
-        persons.add(new Person("Emma Wilson", "23 years old", R.drawable.default_profile));
-        persons.add(new Person("Lavery Maiss", "25 years old", R.drawable.default_profile));
-        persons.add(new Person("Lillie Watts", "35 years old", R.drawable.default_profile));
+        // initialize persons using actual data
+        AppDatabase db = AppDatabase.getDatabase(this);
+        faces = db.trainingFaceDao().getAllRecords();
     }
 
     private void initializeAdapter()
     {
-        TrainingViewRVAdapter adapter = new TrainingViewRVAdapter(persons);
+        TrainingViewRVAdapter adapter = new TrainingViewRVAdapter(faces);
         rv.setAdapter(adapter);
     }
 }

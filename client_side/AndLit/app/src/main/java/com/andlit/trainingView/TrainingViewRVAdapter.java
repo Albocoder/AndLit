@@ -1,5 +1,8 @@
 package com.andlit.trainingView;
 
+import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -9,13 +12,18 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 import com.andlit.R;
+import com.andlit.database.AppDatabase;
+import com.andlit.database.entities.KnownPPL;
+import com.andlit.database.entities.training_face;
+import com.andlit.face.FaceOperator;
+import java.io.File;
 import java.util.List;
 
 public class TrainingViewRVAdapter extends RecyclerView.Adapter<TrainingViewRVAdapter.PersonViewHolder>
 {
-    public List<Person> persons;
+    public List<training_face> persons;
 
-    public TrainingViewRVAdapter(List<Person> persons)
+    public TrainingViewRVAdapter(List<training_face> persons)
     {
         this.persons = persons;
     }
@@ -61,9 +69,28 @@ public class TrainingViewRVAdapter extends RecyclerView.Adapter<TrainingViewRVAd
     @Override
     public void onBindViewHolder(PersonViewHolder personViewHolder, final int position)
     {
-        personViewHolder.personName.setText(persons.get(position).name);
-        personViewHolder.personAge.setText(persons.get(position).age);
-        personViewHolder.personPhoto.setImageResource(persons.get(position).photoId);
+        Integer label = persons.get(position).label;
+        final Context context = personViewHolder.itemView.getContext();
+        final AppDatabase db = AppDatabase.getDatabase(context);
+        if(label == -1)
+        {
+            personViewHolder.personName.setText("Unknown Person");
+            personViewHolder.personAge.setText("Not Available");
+        }
+        else
+        {
+            db.knownPplDao().getEntryWithID(label);
+            KnownPPL person = db.knownPplDao().getEntryWithID(label);
+            personViewHolder.personName.setText(person.name + " " + person.sname);
+            personViewHolder.personAge.setText(person.age + " years old");
+        }
+
+        File imgFile = new  File(FaceOperator.getAbsolutePath(context, persons.get(position)));
+        if(imgFile.exists())
+        {
+            Bitmap myBitmap = BitmapFactory.decodeFile(imgFile.getAbsolutePath());
+            personViewHolder.personPhoto.setImageBitmap(myBitmap);
+        }
 
         // Set a click listener for item remove button
         personViewHolder.removeButton.setOnClickListener(new View.OnClickListener()
@@ -71,13 +98,13 @@ public class TrainingViewRVAdapter extends RecyclerView.Adapter<TrainingViewRVAd
             @Override
             public void onClick(View view)
             {
+                // Remove from database as well
+                FaceOperator.deleteTrainingInstance(context, persons.get(position));
+
                 // Remove the item on remove button click
                 persons.remove(position);
                 notifyItemRemoved(position);
-                notifyItemRangeChanged(position,persons.size());
-
-                // To Do: Remove from database as well
-
+                notifyItemRangeChanged(position, persons.size());
             }
         });
     }
