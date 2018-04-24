@@ -24,6 +24,7 @@ import android.widget.Button;
 import com.andlit.cloudInterface.authentication.Authenticator;
 import com.andlit.cron.CronMaster;
 import com.andlit.face.FaceRecognizerSingleton;
+import com.andlit.groupView.GroupViewActivity;
 import com.andlit.settings.SettingsActivity;
 import com.andlit.trainingView.TrainingViewActivity;
 import com.andlit.ui.HandsFreeMode;
@@ -109,46 +110,54 @@ public class HomeActivity extends AppCompatActivity
                         int id = menuItem.getItemId();
                         Context context = navigationView.getContext();
 
-                        if( id == R.id.nav_logout )
+                        switch( id )
                         {
-                            // handle logout and try to backup if not than no prob
-                            new AlertDialog.Builder(HomeActivity.this)
-                                .setTitle("Do you really want to logout?")
-                                .setMessage(Html.fromHtml("Logging out will delete all your data. " +
-                                        "When logging in you have to wait for all to come back. <br>" +
-                                        "<b>Tip:</b> Use lock to protect your data."))
-                                .setIcon(android.R.drawable.ic_dialog_alert)
-                                .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
-                                    public void onClick(DialogInterface dialog, int whichButton) {
-                                        new LogoutTask().execute();
-                                    }
-                                })
-                                .setNegativeButton(android.R.string.no, null).show();
-                        }
-                        else if( id == R.id.nav_settings )
-                        {
-                            // Handle Settings
-                            loadSettingsScreen();
-                        }
-                        else if( id == R.id.nav_lock )
-                        {
-                            // Handle Lock
-                            if(new Authenticator(context).lock())
-                                goToLoginScreen();
-                            else
-                                Log.d(TAG,"Locking didn't work for some reason");
-                        }
-                        else if( id == R.id.nav_training_view )
-                        {
-                            // Handle Training View
-                            Intent intent = new Intent(context, TrainingViewActivity.class);
-                            startActivity(intent);
-                        }
-                        else if( id == R.id.nav_unverified_view)
-                        {
-                            // Handle Unverified View
-                            Intent intent = new Intent(context, UnverifiedViewActivity.class);
-                            startActivity(intent);
+                            case R.id.nav_logout:
+                                // handle logout and try to backup if not than no prob
+                                new AlertDialog.Builder(HomeActivity.this)
+                                        .setTitle("Do you really want to logout?")
+                                        .setMessage(Html.fromHtml("Logging out will delete all your data. " +
+                                                "When logging in you have to wait for all to come back. <br>" +
+                                                "<b>Tip:</b> Use lock to protect your data."))
+                                        .setIcon(android.R.drawable.ic_dialog_alert)
+                                        .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                                            public void onClick(DialogInterface dialog, int whichButton) {
+                                                new LogoutTask().execute();
+                                            }
+                                        })
+                                        .setNegativeButton(android.R.string.no, null).show();
+                                break;
+
+                            case R.id.nav_settings:
+                                // Handle Settings
+                                loadSettingsScreen();
+                                break;
+
+                            case R.id.nav_lock:
+                                // Handle Lock
+                                if (new Authenticator(context).lock())
+                                    goToLoginScreen();
+                                else
+                                    Log.d(TAG, "Locking didn't work for some reason");
+                                break;
+
+                            case R.id.nav_training_view:
+                                // Handle Training View
+                                Intent intent = new Intent(context, TrainingViewActivity.class);
+                                startActivity(intent);
+                                break;
+
+                            case R.id.nav_unverified_view:
+                                // Handle Unverified View
+                                intent = new Intent(context, UnverifiedViewActivity.class);
+                                startActivity(intent);
+                                break;
+
+                            case R.id.nav_group_view:
+                                // Handle Unverified View
+                                intent = new Intent(context, GroupViewActivity.class);
+                                startActivity(intent);
+                                break;
                         }
 
                         return true;
