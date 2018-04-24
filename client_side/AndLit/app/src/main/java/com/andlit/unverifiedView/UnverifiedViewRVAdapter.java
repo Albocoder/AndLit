@@ -64,7 +64,7 @@ public class UnverifiedViewRVAdapter extends TrainingViewRVAdapter
                 // Remove the item on remove button click
                 persons.remove(position);
                 notifyItemRemoved(position);
-                notifyItemRangeChanged(position,persons.size());
+                notifyItemRangeChanged(position, persons.size());
             }
         });
 
@@ -74,7 +74,8 @@ public class UnverifiedViewRVAdapter extends TrainingViewRVAdapter
             public void onClick(View view)
             {
                 // To Do: dialog appearance
-
+                // persons.get(position) gives the selected detected_face
+                
             }
         });
     }
