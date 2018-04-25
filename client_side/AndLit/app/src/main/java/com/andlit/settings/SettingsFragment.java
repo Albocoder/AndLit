@@ -8,10 +8,8 @@ import com.andlit.R;
 import com.andlit.cron.CronMaster;
 import com.andlit.cron.jobs.BackupJob;
 import com.andlit.cron.jobs.TrainingJob;
-
 import android.support.v7.preference.PreferenceFragmentCompat;
 import android.widget.Toast;
-
 import static com.andlit.settings.SettingsDefinedKeys.BACKUP_FREQUENCY;
 import static com.andlit.settings.SettingsDefinedKeys.LANGUAGE;
 import static com.andlit.settings.SettingsDefinedKeys.TRAINING_FREQUENCY;

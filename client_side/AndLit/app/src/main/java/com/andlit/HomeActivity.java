@@ -24,9 +24,12 @@ import android.widget.Button;
 import com.andlit.cloudInterface.authentication.Authenticator;
 import com.andlit.cron.CronMaster;
 import com.andlit.face.FaceRecognizerSingleton;
+import com.andlit.groupView.GroupViewActivity;
 import com.andlit.settings.SettingsActivity;
+import com.andlit.trainingView.TrainingViewActivity;
 import com.andlit.ui.HandsFreeMode;
 import com.andlit.ui.IntermediateCameraActivity;
+import com.andlit.unverifiedView.UnverifiedViewActivity;
 
 
 public class HomeActivity extends AppCompatActivity
@@ -45,7 +48,7 @@ public class HomeActivity extends AppCompatActivity
 
         navigationDrawerInit();
 
-        checkTTS();
+        checkTTS(); // check if textToSpeech engine exists on device
 
         // Camera button init
         Button cameraButton = findViewById(R.id.camera_button);
@@ -57,6 +60,7 @@ public class HomeActivity extends AppCompatActivity
             }
         });
 
+        // Handsfree button init
         Button handsFree = findViewById(R.id.handsfree_button);
         handsFree.setOnClickListener(new View.OnClickListener(){
             @Override
@@ -65,6 +69,7 @@ public class HomeActivity extends AppCompatActivity
             }
         });
 
+        // Training button init
         Button trainingButton = findViewById(R.id.training_button);
         trainingButton.setOnClickListener(new View.OnClickListener(){
             @Override
@@ -83,9 +88,11 @@ public class HomeActivity extends AppCompatActivity
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         ActionBar actionbar = getSupportActionBar();
-        actionbar.setDisplayHomeAsUpEnabled(true);
-        actionbar.setHomeAsUpIndicator(R.drawable.ic_menu_black);
-
+        if( actionbar != null )
+        {
+            actionbar.setDisplayHomeAsUpEnabled(true);
+            actionbar.setHomeAsUpIndicator(R.drawable.ic_menu_black);
+        }
         mDrawerLayout = findViewById(R.id.drawer_layout);
 
         final NavigationView navigationView = findViewById(R.id.nav_view);
@@ -94,7 +101,7 @@ public class HomeActivity extends AppCompatActivity
                     @Override
                     public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
                         // set item as selected to persist highlight
-                        menuItem.setChecked(true);
+                        menuItem.setChecked(false);
                         // close drawer when item is tapped
                         mDrawerLayout.closeDrawers();
 
@@ -103,34 +110,54 @@ public class HomeActivity extends AppCompatActivity
                         int id = menuItem.getItemId();
                         Context context = navigationView.getContext();
 
-                        if (id == R.id.nav_logout)
+                        switch( id )
                         {
-                            // handle logout and try to backup if not than no prob
-                            new AlertDialog.Builder(HomeActivity.this)
-                                .setTitle("Do you really want to logout?")
-                                .setMessage(Html.fromHtml("Logging out will delete all your data. " +
-                                        "When logging in you have to wait for all to come back. <br>" +
-                                        "<b>Tip:</b> Use lock to protect your data."))
-                                .setIcon(android.R.drawable.ic_dialog_alert)
-                                .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
-                                    public void onClick(DialogInterface dialog, int whichButton) {
-                                        new LogoutTask().execute();
-                                    }
-                                })
-                                .setNegativeButton(android.R.string.no, null).show();
-                        }
-                        else if (id == R.id.nav_settings)
-                        {
-                            // Handle Settings
-                            loadSettingsScreen();
-                        }
-                        else if (id == R.id.nav_lock)
-                        {
-                            // Handle Lock
-                            if(new Authenticator(context).lock())
-                                goToLoginScreen();
-                            else
-                                Log.d(TAG,"Locking didn't work for some reason");
+                            case R.id.nav_logout:
+                                // handle logout and try to backup if not than no prob
+                                new AlertDialog.Builder(HomeActivity.this)
+                                        .setTitle("Do you really want to logout?")
+                                        .setMessage(Html.fromHtml("Logging out will delete all your data. " +
+                                                "When logging in you have to wait for all to come back. <br>" +
+                                                "<b>Tip:</b> Use lock to protect your data."))
+                                        .setIcon(android.R.drawable.ic_dialog_alert)
+                                        .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                                            public void onClick(DialogInterface dialog, int whichButton) {
+                                                new LogoutTask().execute();
+                                            }
+                                        })
+                                        .setNegativeButton(android.R.string.no, null).show();
+                                break;
+
+                            case R.id.nav_settings:
+                                // Handle Settings
+                                loadSettingsScreen();
+                                break;
+
+                            case R.id.nav_lock:
+                                // Handle Lock
+                                if (new Authenticator(context).lock())
+                                    goToLoginScreen();
+                                else
+                                    Log.d(TAG, "Locking didn't work for some reason");
+                                break;
+
+                            case R.id.nav_training_view:
+                                // Handle Training View
+                                Intent intent = new Intent(context, TrainingViewActivity.class);
+                                startActivity(intent);
+                                break;
+
+                            case R.id.nav_unverified_view:
+                                // Handle Unverified View
+                                intent = new Intent(context, UnverifiedViewActivity.class);
+                                startActivity(intent);
+                                break;
+
+                            case R.id.nav_group_view:
+                                // Handle Unverified View
+                                intent = new Intent(context, GroupViewActivity.class);
+                                startActivity(intent);
+                                break;
                         }
 
                         return true;
