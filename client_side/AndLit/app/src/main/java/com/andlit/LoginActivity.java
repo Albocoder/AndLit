@@ -265,7 +265,7 @@ public class LoginActivity extends AppCompatActivity {
                 }
                 UserLogin ul = a.login(paramsObj[0],paramsObj[1]);
                 if ( ul == null )
-                    return 1;
+                    return 1; // TODO: CONTINUE FROM HERE
             } catch ( IOException e ) {
                 return 2;
             }
@@ -277,7 +277,7 @@ public class LoginActivity extends AppCompatActivity {
             progressDialog.dismiss();
             switch (ret){
                 case(1):
-                    onLoginFailed("Wrong credentials!");
+                    onLoginFailed("Wrong credentials or error in retrieving backup data from server!");
                     break;
                 case(2):
                     onLoginFailed("No internet connection!");
@@ -308,13 +308,19 @@ public class LoginActivity extends AppCompatActivity {
 
         @Override
         protected Integer doInBackground(String... paramsObj) {
-            a.logout();
+            if(!a.logoutAndBackup())
+                return 1;
             return 0;
         }
 
         @Override
         protected void onPostExecute(Integer ret) {
-            switchToLoggedOutMode();
+            if(ret == 0)
+                switchToLoggedOutMode();
+            else
+                Toast.makeText(LoginActivity.this,
+                        "Couldn't log you out. Please make sure you have internet connection.",
+                        Toast.LENGTH_SHORT).show();
             progressDialog.dismiss();
         }
     }

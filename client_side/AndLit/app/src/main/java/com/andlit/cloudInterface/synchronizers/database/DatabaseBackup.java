@@ -32,7 +32,7 @@ public class DatabaseBackup {
     // variables
     private DatabaseBackupAPI a;
     private UserLogin ul;
-    private File dbFile;
+    private File dbFile,shmFile,walFile;
     private Context c;
 
     public DatabaseBackup(Context c) throws Exception {
@@ -44,6 +44,8 @@ public class DatabaseBackup {
         dbFile = c.getDatabasePath(AppDatabase.DATABASE_NAME);
         if(!dbFile.exists())
             throw new Exception("Database doesn't exist!");
+        shmFile = new File(dbFile.getAbsolutePath()+"-shm");
+        walFile = new File(dbFile.getAbsolutePath()+"-wal");
         AppDatabase db = AppDatabase.getDatabase(c);
         ul = db.userLoginDao().getLoginEntry().get(0);
     }
@@ -123,7 +125,10 @@ public class DatabaseBackup {
                 fos.close();
                 is.close();
             } catch (IOException ignored) { }
-            //todo: delete shm and wal files
+            if(shmFile.exists())
+                shmFile.delete();
+            if(walFile.exists())
+                walFile.delete();
             return true;
         }
         return false;
@@ -154,8 +159,14 @@ public class DatabaseBackup {
 
     public boolean backupAllData() {
         try {
-            saveDatabase();
+            backupDatabase(getInfoAboutUploadedDB());
         } catch (Throwable throwable) { return false; }
         return true;
+    }
+
+    public boolean retrieveAllData() {
+        try {
+            return restoreDatabase(getInfoAboutUploadedDB());
+        } catch (IOException e) { return false; }
     }
 }

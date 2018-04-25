@@ -4,6 +4,7 @@ import android.content.Context;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.andlit.cloudInterface.synchronizers.photo.PhotoBackup;
 import com.andlit.database.AppDatabase;
 import com.andlit.database.entities.Classifier;
 import com.andlit.database.entities.training_face;
@@ -55,6 +56,8 @@ public class FaceRecognizerSingleton {
             loadTrainedModel();
     }
 
+    public boolean isReady(){ return trainedModel != null; }
+
     public synchronized void trainModel() {
         AppDatabase db = AppDatabase.getDatabase(c);
         int trainingInstances = db.trainingFaceDao().getNumberOfTrainingInstances();
@@ -88,7 +91,8 @@ public class FaceRecognizerSingleton {
             return null;
         if (classifierMetadata == null)
             return null;
-
+        if(!isReady())
+            return new RecognizedFace(face,new int[]{-1},new double[]{-1});
         // JVM data holders
         int minimumLabels = Math.min(TOP_PREDICTIONS,classifierMetadata.num_recogn);
         int [] foundLabels = new int[minimumLabels];        // top 5 predictions
@@ -160,5 +164,5 @@ public class FaceRecognizerSingleton {
         } catch (IOException|NoSuchAlgorithmException ignored) {}
     }
 
-    public synchronized void destroyInstance() { trainedModel = null; }
+    public static synchronized void destroyInstance() { trainedModel = null; }
 }

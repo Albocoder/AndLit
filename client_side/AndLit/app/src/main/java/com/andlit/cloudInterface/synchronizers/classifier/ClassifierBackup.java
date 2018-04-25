@@ -145,11 +145,18 @@ public class ClassifierBackup {
     }
 
     public void deleteAllData() {
-        try {
-            backupClassifier(getInfoAboutUploadedCls());
-        } catch (IOException ignored) {}
         classifierFile.delete();
-        AppDatabase db = AppDatabase.getDatabase(c);
-        db.classifierDao().deleteClassifier();
+    }
+
+    public boolean backupAllData() {
+        try {
+            return backupClassifier(getInfoAboutUploadedCls());
+        } catch (IOException e) { return false; }
+    }
+
+    public boolean retrieveAllData(){
+        try {
+            return restoreClassifier(getInfoAboutUploadedCls());
+        } catch (IOException e) { return false;}
     }
 }

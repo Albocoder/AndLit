@@ -21,6 +21,8 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.Toast;
+
 import com.andlit.cloudInterface.authentication.Authenticator;
 import com.andlit.cron.CronMaster;
 import com.andlit.face.FaceRecognizerSingleton;
@@ -220,7 +222,8 @@ public class HomeActivity extends AppCompatActivity
         startActivityForResult(check, RequestCodes.AUDIO_FEEDBACK_RC);
     }
 
-    private void goToLoginScreen(){
+    private void goToLoginScreen() {
+        FaceRecognizerSingleton.destroyInstance();
         Intent i = new Intent(this,LoginActivity.class);
         startActivity(i);
         finish();
@@ -248,14 +251,20 @@ public class HomeActivity extends AppCompatActivity
 
         @Override
         protected Integer doInBackground(String... paramsObj) {
-            new Authenticator(HomeActivity.this).logout();
-            return 0;
+            if(new Authenticator(HomeActivity.this).logoutAndBackup())
+                return 0;
+            return 1;
         }
 
         @Override
         protected void onPostExecute(Integer ret) {
             progressDialog.dismiss();
-            goToLoginScreen();
+            if(ret == 0)
+                goToLoginScreen();
+            else
+                Toast.makeText(HomeActivity.this,
+                        "Couldn't log out. Make sure you have internet or just lock.",
+                        Toast.LENGTH_SHORT).show();
         }
     }
 }

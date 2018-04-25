@@ -77,6 +77,7 @@ public class PhotoBackup {
         return toReturn;
     }
 
+    // ********************************* BACKUP RELATED *********************************** //
     public boolean saveAllTrainingData() throws IOException {
         List<training_face> tfs = db.trainingFaceDao().getAllRecords();
 
@@ -147,83 +148,6 @@ public class PhotoBackup {
             return saveSingleDetectedFace(df.get(0));
     }
 
-    public SinglePhotoResponse getImageFromHash(String hash) throws IOException {
-        Call<JsonObject> call = a.getImageStats("Token "+ul.access_token,hash);
-        Response<JsonObject> resp = call.execute();
-        int code = resp.code();
-        if ( code >= 200 && code < 300) {
-            JsonObject tmp = resp.body();
-            if(tmp == null)
-                return null;
-            String tmpHash = tmp.get("image_hash").getAsString();
-            boolean isTraining = !tmp.get("image_label").getAsString().equalsIgnoreCase("-1");
-            int size = tmp.get("image_size").getAsInt();
-            return new SinglePhotoResponse(tmpHash,isTraining,size);
-        }
-        else
-            return  null;
-    }
-
-    public Bitmap getBitmapForHash(String hash) throws IOException {
-        Bitmap toReturn;
-        JsonParser parser = new JsonParser();
-        JsonObject o = parser.parse("{\"image_hash\": \""+hash+"\"}").getAsJsonObject();
-        Call<ResponseBody> call = a.loadPhoto("Token "+ul.access_token,o);
-        Response<ResponseBody> resp = call.execute();
-        int code = resp.code();
-        if ( code >= 200 && code < 300) {
-            ResponseBody body = resp.body();
-            if(body == null)
-                return null;
-            InputStream inputStream = body.byteStream();
-            toReturn = BitmapFactory.decodeStream(inputStream);
-        }
-        else
-            return null;
-        return toReturn;
-    }
-
-    public boolean loadSinglePhotoResponse(SinglePhotoResponse r) throws IOException {
-        if(r == null)
-            return false;
-        if(r.getHash() == null)
-            return false;
-        if(r.getBmp() == null)
-            r.setBmp(getBitmapForHash(r.getHash()));
-        String path;
-        if(r.isTraining()) {
-            List<training_face> tfs = db.trainingFaceDao().getTrainingFaceWithHash(r.getHash());
-            if(tfs.size() != 1)     // entry was deleted from database
-                return false;
-            else {
-                training_face t = tfs.get(0);
-                path = FaceOperator.getAbsolutePath(c,t);
-            }
-        }
-        else {
-            List<detected_face> dfs = db.detectedFacesDao().getDetectionWithHash(r.getHash());
-            if(dfs.size() != 1)     // entry was deleted from database
-                return false;
-            else {
-                detected_face t = dfs.get(0);
-                path = FaceOperator.getAbsolutePath(c,t);
-            }
-        }
-        File f = new File(path);
-        if(!f.exists()) {
-            try {
-                f.createNewFile();
-            } catch (IOException e) { return false; }
-        }
-        FileOutputStream fos;
-        try {
-            fos = new FileOutputStream(f);
-        } catch (FileNotFoundException e) { return false; }
-        Bitmap bmp = r.getBmp();
-        bmp.compress(Bitmap.CompressFormat.PNG,100, fos);
-        return true;
-    }
-
     public boolean backupDetections( List<SinglePhotoResponse> inCloud ) throws IOException {
         List<detected_face> dfs = db.detectedFacesDao().getAllRecords();
         if (dfs == null)
@@ -252,7 +176,7 @@ public class PhotoBackup {
             return saveAllTrainingData();
         for (SinglePhotoResponse s : inCloud) {
             for (training_face t : tfs) {
-                if (s.getHash().equals(t.hash)){
+                if (s.getHash().equals(t.hash)) {
                     tfs.remove(t);
                     break;
                 }
@@ -304,11 +228,193 @@ public class PhotoBackup {
         return saved;
     }
 
-    public void deleteAllData() {
+    public boolean backupAllData() {
         try {
-            backupBoth(listAllPhotos());
-        } catch (IOException ignored) {}
-        db.trainingFaceDao().purgeData();
-        db.detectedFacesDao().purgeData();
+            return backupBoth(listAllPhotos());
+        } catch (IOException ignored) { return false; }
     }
+
+
+    // ********************************* RETRIEVAL RELATED *********************************** //
+    public boolean loadSinglePhotoResponse(SinglePhotoResponse r) throws IOException {
+        if(r == null)
+            return false;
+        if(r.getHash() == null)
+            return false;
+        if(r.getBmp() == null)
+            r.setBmp(getBitmapForHash(r.getHash()));
+        String path;
+        if(r.isTraining()) {
+            List<training_face> tfs = db.trainingFaceDao().getTrainingFaceWithHash(r.getHash());
+            if(tfs.size() != 1)     // entry was deleted from database
+                return false;
+            else {
+                training_face t = tfs.get(0);
+                path = FaceOperator.getAbsolutePath(c,t);
+            }
+        }
+        else {
+            List<detected_face> dfs = db.detectedFacesDao().getDetectionWithHash(r.getHash());
+            if(dfs.size() != 1)     // entry was deleted from database
+                return false;
+            else {
+                detected_face t = dfs.get(0);
+                path = FaceOperator.getAbsolutePath(c,t);
+            }
+        }
+        File f = new File(path);
+        File folder = new File(path.substring(0,path.lastIndexOf("/")));
+        if(!f.exists()) {
+            try {
+                folder.mkdirs();
+                f.createNewFile();
+            } catch (IOException e) { return false; }
+        }
+        FileOutputStream fos;
+        try {
+            fos = new FileOutputStream(f);
+        } catch (FileNotFoundException e) { return false; }
+        Bitmap bmp = r.getBmp();
+        bmp.compress(Bitmap.CompressFormat.PNG,100, fos);
+        return true;
+    }
+
+    public boolean loadSingleTrainingPhoto(training_face tf) throws IOException {
+        if(tf == null)
+            return false;
+        Bitmap toWrite = getBitmapForHash(tf.hash);
+        String path = FaceOperator.getAbsolutePath(c,tf);
+
+        File f = new File(path);
+        File folder = new File(path.substring(0,path.lastIndexOf("/")));
+        if(!f.exists()) {
+            try {
+                folder.mkdirs();
+                f.createNewFile();
+            } catch (IOException e) { return false; }
+        }
+
+        FileOutputStream fos;
+        try {
+            fos = new FileOutputStream(f);
+        } catch (FileNotFoundException e) { return false; }
+        toWrite.compress(Bitmap.CompressFormat.PNG,100, fos);
+        return true;
+    }
+
+    public boolean loadSingleDetectionPhoto(detected_face df) throws IOException {
+        if(df == null)
+            return false;
+        Bitmap toWrite = getBitmapForHash(df.hash);
+        String path = FaceOperator.getAbsolutePath(c,df);
+
+        File f = new File(path);
+        File folder = new File(path.substring(0,path.lastIndexOf("/")));
+        if(!f.exists()) {
+            try {
+                folder.mkdirs();
+                f.createNewFile();
+            } catch (IOException e) { return false; }
+        }
+
+        FileOutputStream fos;
+        try {
+            fos = new FileOutputStream(f);
+        } catch (FileNotFoundException e) { return false; }
+        toWrite.compress(Bitmap.CompressFormat.PNG,100, fos);
+        return true;
+    }
+
+    public SinglePhotoResponse getImageFromHash(String hash) throws IOException {
+        Call<JsonObject> call = a.getImageStats("Token "+ul.access_token,hash);
+        Response<JsonObject> resp = call.execute();
+        int code = resp.code();
+        if ( code >= 200 && code < 300) {
+            JsonObject tmp = resp.body();
+            if(tmp == null)
+                return null;
+            String tmpHash = tmp.get("image_hash").getAsString();
+            boolean isTraining = !tmp.get("image_label").getAsString().equalsIgnoreCase("-1");
+            int size = tmp.get("image_size").getAsInt();
+            return new SinglePhotoResponse(tmpHash,isTraining,size);
+        }
+        else
+            return  null;
+    }
+
+    public Bitmap getBitmapForHash(String hash) throws IOException {
+        Bitmap toReturn;
+        JsonParser parser = new JsonParser();
+        JsonObject o = parser.parse("{\"image_hash\": \""+hash+"\"}").getAsJsonObject();
+        Call<ResponseBody> call = a.loadPhoto("Token "+ul.access_token,o);
+        Response<ResponseBody> resp = call.execute();
+        int code = resp.code();
+        if ( code >= 200 && code < 300) {
+            ResponseBody body = resp.body();
+            if(body == null)
+                return null;
+            InputStream inputStream = body.byteStream();
+            toReturn = BitmapFactory.decodeStream(inputStream);
+        }
+        else
+            return null;
+        return toReturn;
+    }
+
+    public boolean loadAllData(){
+        return loadAllDetectionData() && loadAllTrainingData();
+    }
+
+    public boolean retrieveAllData() { return loadAllData(); }
+
+    public boolean loadAllTrainingData(){
+        AppDatabase db = AppDatabase.getDatabase(c);
+        List<training_face> dfs = db.trainingFaceDao().getAllRecords();
+        for(training_face tmp: dfs) {
+            try {
+                loadSingleTrainingPhoto(tmp);
+            } catch (IOException e) { return false; }
+        }
+        return true;
+    }
+
+    public boolean loadAllDetectionData(){
+        AppDatabase db = AppDatabase.getDatabase(c);
+        List<detected_face> dfs = db.detectedFacesDao().getAllRecords();
+        for(detected_face tmp: dfs) {
+            try {
+                loadSingleDetectionPhoto(tmp);
+            } catch (IOException e) { return false; }
+        }
+        return true;
+    }
+
+    // ********************************* CLEANUP RELATED *********************************** //
+    public void deleteAllData() {
+        deleteAllDetections();
+        deleteAllTraining();
+    }
+
+    public void deleteAllDetections() {
+        AppDatabase db = AppDatabase.getDatabase(c);
+        List<detected_face> dfs = db.detectedFacesDao().getAllRecords();
+        for(detected_face tmp: dfs) {
+            String path = FaceOperator.getAbsolutePath(c,tmp);
+            File tmpFile = new File(path);
+            if(tmpFile.exists())
+                tmpFile.delete();
+        }
+    }
+
+    public void deleteAllTraining() {
+        AppDatabase db = AppDatabase.getDatabase(c);
+        List<training_face> tfs = db.trainingFaceDao().getAllRecords();
+        for(training_face tmp: tfs) {
+            String path = FaceOperator.getAbsolutePath(c,tmp);
+            File tmpFile = new File(path);
+            if(tmpFile.exists())
+                tmpFile.delete();
+        }
+    }
+
 }

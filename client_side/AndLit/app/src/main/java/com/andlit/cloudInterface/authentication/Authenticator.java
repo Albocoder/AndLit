@@ -1,6 +1,5 @@
 package com.andlit.cloudInterface.authentication;
 
-import android.accounts.NetworkErrorException;
 import android.content.Context;
 
 import com.andlit.R;
@@ -39,30 +38,26 @@ public class Authenticator {
 
     public boolean logoutAndBackup() {
         try {
-            new ClassifierBackup(c).deleteAllData();
-            new PhotoBackup(c).deleteAllData();
+            ClassifierBackup    cb = new ClassifierBackup(c);
+            DatabaseBackup      dbb = new DatabaseBackup(c);
+            PhotoBackup         pb  = new PhotoBackup(c);
+
+            if( !(cb.backupAllData() && dbb.backupAllData() && pb.backupAllData()) )
+                return false;
+
+            cb.deleteAllData();
+            dbb.deleteAllData();
             CronMaster.cancelAllJobs(c);
-            new DatabaseBackup(c).deleteAllData();
-        } catch (IOException|NetworkErrorException e) {
-            return false;
-        } catch (Exception e) {
-            return false;
-        }
+            dbb.deleteAllData();
+        } catch (Exception e) { return false; }
         return true;
     }
 
     public boolean logout(){
-        try {
-            new ClassifierBackup(c).deleteAllData();
-        } catch (Exception e) {
-            AppDatabase db = AppDatabase.getDatabase(c);
-            db.classifierDao().deleteClassifier();
-        }
+        try { new ClassifierBackup(c).deleteAllData(); } catch (Exception e) {}
+        try { new DatabaseBackup(c).deleteAllData(); } catch (Exception ignored) {}
         new PhotoBackup(c).deleteAllData();
         CronMaster.cancelAllJobs(c);
-        try {
-            new DatabaseBackup(c).deleteAllData();
-        } catch (Exception ignored) {}
         return true;
     }
 
@@ -99,6 +94,20 @@ public class Authenticator {
                     return null;
                 long id = res.get("id").getAsLong();
                 UserLogin ul = new UserLogin(id,un,accessToken);
+
+                try {
+                    ClassifierBackup    cb = new ClassifierBackup(c);
+                    DatabaseBackup      dbb = new DatabaseBackup(c);
+                    PhotoBackup         pb  = new PhotoBackup(c);
+
+                    if( !(cb.retrieveAllData() && dbb.retrieveAllData() && pb.retrieveAllData()) )
+                        return null;
+                } catch (Exception e) {
+                    db.userLoginDao().deleteEntries();
+                    db.clearAllTables();
+                    return null;
+                }
+
                 db.userLoginDao().deleteEntries();
                 db.userLoginDao().insertEntry(ul);
                 return ul;
@@ -181,6 +190,34 @@ public class Authenticator {
         if(!isLocked())
             return null;
         String un = db.userLoginDao().getLoginEntry().get(0).username;
-        return login(un,pw);
+        if(un.length() <=0 || pw.length() <= 0)
+            return null;
+        JsonParser parser = new JsonParser();
+        JsonObject o = parser.parse("{\"username\": \""+un+"\",\"password\":\""+pw+"\"}").getAsJsonObject();
+        Call<JsonObject> call = a.getAuthTokenForUser(o);
+        Response<JsonObject> resp = call.execute();
+        int code = resp.code();
+        if ( code >= 200 && code < 300) {
+            JsonObject res = resp.body();
+            if(res == null)
+                return null;
+            String accessToken = res.get("token").getAsString();
+            resp = a.getInfoForLoggedInUser("Token "+accessToken).execute();
+            code = resp.code();
+            if( code >= 200 && code < 300) {
+                res = resp.body();
+                if(res == null)
+                    return null;
+                long id = res.get("id").getAsLong();
+                UserLogin ul = new UserLogin(id,un,accessToken);
+                db.userLoginDao().deleteEntries();
+                db.userLoginDao().insertEntry(ul);
+                return ul;
+            }
+            else
+                return null;
+        }
+        else
+            return null;
     }
 }
