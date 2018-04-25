@@ -126,7 +126,7 @@ public class Authenticator {
                 long id = o.get("id").getAsLong();
                 String username = o.get("username").getAsString();
                 String accessToken = o.get("token").getAsString();
-                logout();
+                db.userLoginDao().deleteEntries();
                 UserLogin ul = new UserLogin(id,username,accessToken);
                 db.userLoginDao().insertEntry(ul);
                 return ul;

@@ -235,39 +235,6 @@ public class IntermediateCameraActivity extends Activity {
         exitActivity(0);
     }
 
-//    // TODO: FIX THIS!!!
-//    @Override
-//    public void onConfigurationChanged(Configuration newConfig) {
-//        super.onConfigurationChanged(newConfig);
-//        if (vis == null)
-//            return;
-//        Bitmap result = BitmapFactory.decodeFile(vis.getImgFile().getAbsolutePath());
-//        if (result == null)
-//            return;
-//        double widthRatio; double heightRatio;
-//        if(newConfig.orientation == Configuration.ORIENTATION_PORTRAIT) {
-//            widthRatio = (double) SCREEN_WIDTH / (double) result.getWidth();
-//            heightRatio = (double) SCREEN_HEIGHT / (double) result.getHeight();
-//        }
-//        else {
-//            widthRatio = (double) SCREEN_WIDTH / (double) result.getHeight();
-//            heightRatio = (double) SCREEN_HEIGHT / (double) result.getWidth();
-//        }
-//        analyzed.setImageBitmap(result);
-//
-//        if(fop == null)
-//            return;
-//        Face[] faces = fop.getFaces();
-//        if (faces == null)
-//            return;
-//        for (Face aFacesArray : faces)
-//            aFacesArray.getBoundingBoxWithRatio(widthRatio, heightRatio);
-//        if(t == null)
-//            return;
-//        for (Text t1:t)
-//            t1.getRatioedLoc(widthRatio,heightRatio);
-//    }
-
     // helper function to cleanly exit the activity
     private void exitActivity(int code){
         if(imageLocation!= null)
@@ -502,7 +469,7 @@ public class IntermediateCameraActivity extends Activity {
         String title;
         Bitmap photo;
         PersonDataAdapter pdAdapter = null;
-        if(bestPrediction == -1) { // todo find what label the classifier returns as instance not found
+        if(bestPrediction == -1) {
             if(audioFeedback)
                 speaker.speak("Face not recognized.");
             title = "Unknown Person";

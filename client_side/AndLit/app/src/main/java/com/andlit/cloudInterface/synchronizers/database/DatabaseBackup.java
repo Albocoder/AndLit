@@ -123,6 +123,7 @@ public class DatabaseBackup {
                 fos.close();
                 is.close();
             } catch (IOException ignored) { }
+            //todo: delete shm and wal files
             return true;
         }
         return false;
@@ -145,12 +146,16 @@ public class DatabaseBackup {
     }
 
     public void deleteAllData() {
-        try {
-            backupDatabase(getInfoAboutUploadedDB());
-        } catch (Throwable ignored) {}
         AppDatabase db = AppDatabase.getDatabase(c);
         db.clearAllTables();
         AppDatabase.destroyInstance();
         dbFile.delete();
+    }
+
+    public boolean backupAllData() {
+        try {
+            saveDatabase();
+        } catch (Throwable throwable) { return false; }
+        return true;
     }
 }

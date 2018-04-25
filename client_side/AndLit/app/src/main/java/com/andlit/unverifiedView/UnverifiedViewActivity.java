@@ -6,6 +6,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import com.andlit.R;
 import com.andlit.database.AppDatabase;
+import com.andlit.database.entities.KnownPPL;
 import com.andlit.database.entities.detected_face;
 import com.andlit.trainingView.TrainingViewRVAdapter;
 
@@ -15,6 +16,7 @@ public class UnverifiedViewActivity extends Activity
 {
     private RecyclerView rv;
     private List<detected_face> faces;
+    private List<KnownPPL> kp;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -38,11 +40,12 @@ public class UnverifiedViewActivity extends Activity
         // To Do: initialize persons using actual data
         AppDatabase db = AppDatabase.getDatabase(this);
         faces = db.detectedFacesDao().getAllRecords();
+        kp = db.knownPplDao().getAllRecords();
     }
 
     private void initializeAdapter()
     {
-        TrainingViewRVAdapter adapter = new UnverifiedViewRVAdapter(faces);
+        TrainingViewRVAdapter adapter = new UnverifiedViewRVAdapter(faces,kp);
         rv.setAdapter(adapter);
     }
 }
