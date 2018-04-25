@@ -447,11 +447,11 @@ public abstract class Session extends Activity {
             cb.backupClassifier(cb.getInfoAboutUploadedCls());
         } catch (IOException e) {
             audioFeedback(CLASSIFIER_FILE_CANT_CREATE);
-        } catch (NetworkErrorException e) {}
+        } catch (NetworkErrorException ignored) {}
         try {
             DatabaseBackup dbb = new DatabaseBackup(this);
             dbb.backupDatabase(dbb.getInfoAboutUploadedDB());
-        } catch (Throwable e) {}
+        } catch (Throwable ignored) {}
         PhotoBackup pb = new PhotoBackup(this);
         try {
             pb.backupBoth(pb.listAllPhotos());
