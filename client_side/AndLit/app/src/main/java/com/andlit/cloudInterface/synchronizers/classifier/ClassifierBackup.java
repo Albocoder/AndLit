@@ -26,6 +26,8 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
+import static com.andlit.face.FaceRecognizerSingleton.CLASSIFIER_NAME;
+
 public class ClassifierBackup {
     // constants
     private static final String TAG = "ClassifierBackup";
@@ -45,7 +47,10 @@ public class ClassifierBackup {
         this.c = c;
         ul = db.userLoginDao().getLoginEntry().get(0);
         Classifier cls = db.classifierDao().getClassifier();
-        classifierFile = new File(c.getFilesDir(),cls.path);
+        if(cls != null)
+            classifierFile = new File(c.getFilesDir(),cls.path);
+        else
+            classifierFile = new File(c.getFilesDir(),CLASSIFIER_NAME);
         if(!classifierFile.exists()) {
             classifierFile.createNewFile();
             if (!loadClassifier())
@@ -54,6 +59,8 @@ public class ClassifierBackup {
     }
 
     public boolean saveClassifier() throws IOException {
+        if(classifierFile.length() == 0)
+            return true;
         RequestBody file = RequestBody.create(MediaType.parse("application/x-sqlite3"),classifierFile);
         MultipartBody.Part fileFromElement =
                 MultipartBody.Part.createFormData("uploaded_file", classifierFile.getName(), file);
@@ -125,10 +132,14 @@ public class ClassifierBackup {
             } catch (IOException ignored) { }
             return true;
         }
+        if(code == 404)
+            return true;
         return false;
     }
 
     public boolean backupClassifier( ClassifierStats inCloud ) throws IOException {
+        if(inCloud == null)
+            return saveClassifier();
         long localSize = classifierFile.length();
         long remoteSize = inCloud.getSize();
         if( localSize != remoteSize )
@@ -137,6 +148,8 @@ public class ClassifierBackup {
     }
 
     public boolean restoreClassifier( ClassifierStats inCloud ) throws IOException {
+        if(inCloud == null)
+            return loadClassifier();
         long localSize = classifierFile.length();
         long remoteSize = inCloud.getSize();
         if( localSize != remoteSize )

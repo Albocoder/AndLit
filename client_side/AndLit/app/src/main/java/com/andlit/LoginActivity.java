@@ -57,7 +57,7 @@ public class LoginActivity extends AppCompatActivity {
         if(a.isLoggedIn())
             goToHomePage();
         else if(a.isLocked()){
-            _signupLink.setText(R.string.logout);
+            _signupLink.setText(R.string.logout_no_backup);
             _loginButton.setText(R.string.unlock);
             _loginButton.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -308,7 +308,7 @@ public class LoginActivity extends AppCompatActivity {
 
         @Override
         protected Integer doInBackground(String... paramsObj) {
-            if(!a.logoutAndBackup())
+            if(!a.logout())
                 return 1;
             return 0;
         }

@@ -5,6 +5,7 @@
     <string name="profile_picture">Profile picture</string>
     <string name="server_url" translatable="false">https://andlit.info</string>
     <string name="logout">Logout</string>
+    <string name="logout_no_backup">Logout no backup</string>
     <string name="unlock">Unlock</string>
     <string name="logged_in_prompt">Logged in as "%1$s"</string>
     <string name="create_account_prompt">No account yet? Create one</string>
@@ -12,5 +13,7 @@
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="unknown_person">Unknown Person</string>
+    <string name="not_available">Not Available</string>
 
 </resources>

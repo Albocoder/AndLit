@@ -115,7 +115,7 @@ public class IntermediateCameraActivity extends Activity {
         // setting up settings to operate on
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
         audioFeedback = sharedPref.getBoolean(SettingsDefinedKeys.AUDIO_FEEDBACK, false);
-        saveOnExit = sharedPref.getBoolean(SettingsDefinedKeys.SAVE_UNLABELED_ON_EXIT, false);
+        saveOnExit = sharedPref.getBoolean(SettingsDefinedKeys.SAVE_UNLABELED_ON_EXIT, true);
 
         // setting up listeners
         Button takeImage = findViewById(R.id.BtnCpt);

@@ -38,7 +38,7 @@ public class Authenticator {
 
     public boolean logoutAndBackup() {
         try {
-            ClassifierBackup    cb = new ClassifierBackup(c);
+            ClassifierBackup    cb  = new ClassifierBackup(c);
             DatabaseBackup      dbb = new DatabaseBackup(c);
             PhotoBackup         pb  = new PhotoBackup(c);
 
@@ -46,17 +46,17 @@ public class Authenticator {
                 return false;
 
             cb.deleteAllData();
+            pb.deleteAllData();
             dbb.deleteAllData();
             CronMaster.cancelAllJobs(c);
-            dbb.deleteAllData();
         } catch (Exception e) { return false; }
         return true;
     }
 
     public boolean logout(){
+        new PhotoBackup(c).deleteAllData();
         try { new ClassifierBackup(c).deleteAllData(); } catch (Exception ignored) {}
         try { new DatabaseBackup(c).deleteAllData(); } catch (Exception ignored) {}
-        new PhotoBackup(c).deleteAllData();
         CronMaster.cancelAllJobs(c);
         return true;
     }
@@ -98,24 +98,24 @@ public class Authenticator {
                 db.userLoginDao().insertEntry(ul);
 
                 try {
-                    DatabaseBackup      dbb = new DatabaseBackup(c);
-                    ClassifierBackup    cb = new ClassifierBackup(c);
-                    PhotoBackup         pb  = new PhotoBackup(c);
-
+                    DatabaseBackup dbb = new DatabaseBackup(c);
                     boolean passes = dbb.loadDatabase();
+                    db = AppDatabase.getDatabase(c);
                     if(passes){
                         db.userLoginDao().deleteEntries();
                         db.userLoginDao().insertEntry(ul);
                     }
                     else { return null; }
+                    db = AppDatabase.getDatabase(c);
+
+                    ClassifierBackup    cb = new ClassifierBackup(c);
+                    PhotoBackup         pb  = new PhotoBackup(c);
 
                     passes = pb.retrieveAllData();
                     passes &= cb.retrieveAllData();
                     if(!passes)
                         return null;
                 } catch (Exception e) {
-                    db.userLoginDao().deleteEntries();
-                    db.clearAllTables();
                     return null;
                 }
 

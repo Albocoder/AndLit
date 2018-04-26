@@ -61,8 +61,7 @@ public class TrainingViewRVAdapter extends RecyclerView.Adapter<TrainingViewRVAd
     public PersonViewHolder onCreateViewHolder(ViewGroup viewGroup, int i)
     {
         View v = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.training_view_item, viewGroup, false);
-        PersonViewHolder pvh = new PersonViewHolder(v);
-        return pvh;
+        return new PersonViewHolder(v);
     }
 
     // Replace the contents of a view (invoked by the layout manager)
@@ -74,15 +73,15 @@ public class TrainingViewRVAdapter extends RecyclerView.Adapter<TrainingViewRVAd
         final AppDatabase db = AppDatabase.getDatabase(context);
         if(label == -1)
         {
-            personViewHolder.personName.setText("Unknown Person");
-            personViewHolder.personAge.setText("Not Available");
+            personViewHolder.personName.setText(R.string.unknown_person);
+            personViewHolder.personAge.setText(R.string.not_available);
         }
         else
         {
             db.knownPplDao().getEntryWithID(label);
             KnownPPL person = db.knownPplDao().getEntryWithID(label);
-            personViewHolder.personName.setText(person.name + " " + person.sname);
-            personViewHolder.personAge.setText(person.age + " years old");
+            personViewHolder.personName.setText(String.format("%s %s", person.name, person.sname));
+            personViewHolder.personAge.setText(person.age);
         }
 
         File imgFile = new  File(FaceOperator.getAbsolutePath(context, persons.get(position)));
@@ -100,7 +99,6 @@ public class TrainingViewRVAdapter extends RecyclerView.Adapter<TrainingViewRVAd
             {
                 // Remove from database as well
                 FaceOperator.deleteTrainingInstance(context, persons.get(position));
-
                 // Remove the item on remove button click
                 persons.remove(position);
                 notifyItemRemoved(position);

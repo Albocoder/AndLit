@@ -4,9 +4,12 @@
     <string name="not_the_real_person">El ile yüzü etiket et!</string>
     <string name="profile_picture">Profil fotoğrafı</string>
     <string name="logout">Çıkış yap</string>
+    <string name="logout_no_backup">Yeadeksiz çıkış yap</string>
     <string name="unlock">Kilidini aç</string>
     <string name="logged_in_prompt">"%1$s" hesabın.</string>
     <string name="create_account_prompt">Hesabin yok mu? Hemen yarat</string>
     <string name="login">Oturum aç</string>
+    <string name="unknown_person">Bilinmeyen kişi</string>
+    <string name="not_available">Bilinmeyen</string>
 
 </resources>

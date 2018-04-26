@@ -143,7 +143,6 @@ public class VisionEndpoint {
             Set<String> keys = reply.keySet();
             Iterator<String> i = keys.iterator();
 
-            // todo get top 5
             int count = 0;
             String [] keysArr = new String[5];
             while(i.hasNext() && count < 5){

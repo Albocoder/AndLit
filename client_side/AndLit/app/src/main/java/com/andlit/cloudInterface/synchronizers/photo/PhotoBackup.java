@@ -81,9 +81,9 @@ public class PhotoBackup {
     public boolean saveAllTrainingData() throws IOException {
         List<training_face> tfs = db.trainingFaceDao().getAllRecords();
 
-        boolean newSave = false;
+        boolean newSave = true;
         for(training_face tmp:tfs)
-            newSave |= saveSingleTrainingFace(tmp);
+            newSave &= saveSingleTrainingFace(tmp);
 
         return newSave;
     }
@@ -91,9 +91,9 @@ public class PhotoBackup {
     public boolean saveAllDetections() throws IOException {
         List<detected_face> dfs = db.detectedFacesDao().getAllRecords();
 
-        boolean newSave = false;
+        boolean newSave = true;
         for(detected_face tmp:dfs)
-            newSave |= saveSingleDetectedFace(tmp);
+            newSave &= saveSingleDetectedFace(tmp);
 
         return newSave;
     }

@@ -87,6 +87,14 @@ public class DatabaseBackup {
     public boolean loadDatabase() throws IOException {
         Call<ResponseBody> call = a.downloadDatabase("Token "+ul.access_token);
         Response<ResponseBody> resp = call.execute();
+        if(shmFile.exists())
+            shmFile.delete();
+        if(walFile.exists())
+            walFile.delete();
+        if(dbFile.exists())
+            dbFile.delete();
+        dbFile.createNewFile();
+        AppDatabase.destroyInstance();
         if(resp == null)
             return false;
         int code = resp.code();
@@ -131,10 +139,14 @@ public class DatabaseBackup {
                 walFile.delete();
             return true;
         }
+        if(code == 404)
+            return true;
         return false;
     }
 
     public boolean backupDatabase( DatabaseStats inCloud ) throws Throwable {
+        if(inCloud == null)
+            return saveDatabase();
         long localSize = dbFile.length();
         long remoteSize = inCloud.getSize();
         if( localSize != remoteSize )
@@ -159,9 +171,8 @@ public class DatabaseBackup {
 
     public boolean backupAllData() {
         try {
-            backupDatabase(getInfoAboutUploadedDB());
+            return backupDatabase(getInfoAboutUploadedDB());
         } catch (Throwable throwable) { return false; }
-        return true;
     }
 
     public boolean retrieveAllData() {

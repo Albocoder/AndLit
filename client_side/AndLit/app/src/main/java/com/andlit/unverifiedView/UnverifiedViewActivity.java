@@ -37,7 +37,6 @@ public class UnverifiedViewActivity extends Activity
 
     private void initializeData()
     {
-        // To Do: initialize persons using actual data
         AppDatabase db = AppDatabase.getDatabase(this);
         faces = db.detectedFacesDao().getAllRecords();
         kp = db.knownPplDao().getAllRecords();

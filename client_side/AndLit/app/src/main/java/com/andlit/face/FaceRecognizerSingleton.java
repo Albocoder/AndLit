@@ -37,7 +37,7 @@ public class FaceRecognizerSingleton {
     private static final double INSTANCES_DETECTION_RATIO = 3.0;
     private static final double RELATIVE_RATIO = 0.25;
     private static final String TAG = "FaceRecognizerSingleton";
-    private static final String CLASSIFIER_NAME = "lbphClassifier.yml"; // Default path for the classifier if it doesn't exist
+    public static final String CLASSIFIER_NAME = "lbphClassifier.yml"; // Default path for the classifier if it doesn't exist
 
     // statics
     private static LBPHFaceRecognizer trainedModel;
@@ -62,7 +62,9 @@ public class FaceRecognizerSingleton {
         AppDatabase db = AppDatabase.getDatabase(c);
         int trainingInstances = db.trainingFaceDao().getNumberOfTrainingInstances();
         if(trainingInstances == 0) {
-            Toast.makeText(c, "No training instances found! Synchronize or add faces.", Toast.LENGTH_SHORT).show();
+            try{
+                Toast.makeText(c, "No training instances found! Synchronize or add faces.", Toast.LENGTH_SHORT).show();
+            }catch (RuntimeException ignored){}
             return;
         }
         List<Integer> allLabels = db.trainingFaceDao().getAllPossibleRecognitions();
@@ -154,6 +156,10 @@ public class FaceRecognizerSingleton {
             }catch(Exception e){trainModel();}
         }
         else {
+            if(classifierFile.length() == 0) {
+                trainModel();
+                return;
+            }
             if(trainedModel == null)
                 trainedModel  = createLBPHFaceRecognizer();
             trainedModel.load(classifierFile.getAbsolutePath());
