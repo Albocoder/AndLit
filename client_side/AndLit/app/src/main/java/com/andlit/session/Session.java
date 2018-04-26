@@ -7,20 +7,12 @@ import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.speech.RecognizerIntent;
-import android.support.design.widget.Snackbar;
 import android.util.Log;
-import android.view.View;
-import android.widget.Button;
-import android.widget.TextView;
-import android.widget.Toast;
 
-import com.andlit.R;
 import com.andlit.RequestCodes;
 import com.andlit.camera.BitmapWrapper;
 import com.andlit.camera.CameraActivity;
@@ -79,6 +71,9 @@ public abstract class Session extends Activity {
     private static final String CROWDED_IMAGE = "Too many faces in the image!";
     private static final String DB_SAVE_ERROR = "Couldn't save new person to database!";
     private static final String FILE_SAVE_ERROR = "Couldn't save the face for the new person!";
+    private static final String NO_RECOGNIZER = "You can't use this service. Recognizer not available.";
+    private static final String ERR_LOADING_RECOGNIZER = "Error in loading face recognizer.";
+    private static final String SUCCESS_LOADING_RECOGNIZER = "Face recognizer loaded and ready to use.";
     // SUCCESS
     private static final String PICTURE_SUCCESS = "Picture was taken successfully!";
     private static final String PICTURE_STORED_SUCCESS = "Picture was stored and ready to query";
@@ -200,7 +195,7 @@ public abstract class Session extends Activity {
     public final void restartSession() {
         speaker = new VoiceGenerator(this);
         db = AppDatabase.getDatabase(this);
-        frs = new FaceRecognizerSingleton(this);
+        new LoadRecognizer(null).execute();
         vc = new VoiceToCommandWrapper(this);
         if(vis != null)
             vis.destroy();
@@ -233,6 +228,10 @@ public abstract class Session extends Activity {
     }
 
     public final boolean detectFaces() {
+        if(!frs.isReady()){
+            audioFeedback(NO_RECOGNIZER);
+            return false;
+        }
         if (vis == null) {
             audioFeedback(PICTURE_UNAVAILABLE);
             return false;
@@ -244,7 +243,7 @@ public abstract class Session extends Activity {
         if(fop == null) {
             audioFeedback(ANALYSIS_START);
             opencv_core.Mat toAnalyze = imread(vis.getImgFile().getAbsolutePath());
-            fop = new FaceOperator(this, toAnalyze);
+            fop = new FaceOperator(this, toAnalyze,frs);
         }
         fop.getFaces();
         audioFeedback(ANALYSIS_SUCCESS);
@@ -255,6 +254,10 @@ public abstract class Session extends Activity {
     public final boolean recognizeFaces() {
         if(!detectFaces())
             return false;
+        if(!frs.isReady()) {
+            audioFeedback(NO_RECOGNIZER);
+            return false;
+        }
         audioFeedback(RECOGNITION_START);
         fop.recognizeFaces();
         audioFeedback(RECOGNITION_SUCCESS);
@@ -273,6 +276,10 @@ public abstract class Session extends Activity {
     public final RecognizedFace recognizeFace(int index) {
         if(!detectFaces())
             return null;
+        if(!frs.isReady()) {
+            audioFeedback(NO_RECOGNIZER);
+            return null;
+        }
         Face[] f = fop.getFaces();
         try{
             return frs.recognize(f[index]);
@@ -621,6 +628,33 @@ public abstract class Session extends Activity {
                 cb.run(ret);
         }
 
+    }
+
+    @SuppressLint("StaticFieldLeak")
+    public class LoadRecognizer extends AsyncTask<Void,Void,Integer> {
+
+        private AsyncJobCallback cb;
+
+        public LoadRecognizer(AsyncJobCallback cb){ this.cb = cb; }
+
+        @Override
+        protected Integer doInBackground(Void... voids) {
+            frs = new FaceRecognizerSingleton(Session.this);
+            return 0;
+        }
+
+        @Override
+        protected void onPostExecute(Integer ret) {
+            if(!frs.isReady()) {
+                audioFeedback(ERR_LOADING_RECOGNIZER);
+            }
+            else{
+                audioFeedback(SUCCESS_LOADING_RECOGNIZER);
+            }
+
+            if(cb != null)
+                cb.run(ret);
+        }
     }
 
     // ************************* ACCESSORS FUNCTIONS **************************** //

@@ -55,7 +55,6 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Random;
 
 import static org.bytedeco.javacpp.opencv_core.LINE_8;
 import static org.bytedeco.javacpp.opencv_imgcodecs.imread;
@@ -111,8 +110,7 @@ public class IntermediateCameraActivity extends Activity {
         SCREEN_WIDTH = displayMetrics.widthPixels;
         allKnownPpl = db.knownPplDao().getAllRecords();
 
-        // todo remove train() and just // instantiate FaceRecognizerSingleton
-        train(); frs = new FaceRecognizerSingleton(this);
+        new InstantiateRecognizer().execute();
 
         // setting up settings to operate on
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
@@ -404,6 +402,26 @@ public class IntermediateCameraActivity extends Activity {
         }
     }
 
+    @SuppressLint("StaticFieldLeak")
+    private class InstantiateRecognizer extends AsyncTask<Void,Void,Void> {
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            frs = new FaceRecognizerSingleton(IntermediateCameraActivity.this);
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void res){
+            if(frs.isReady())
+                Toast.makeText(IntermediateCameraActivity.this,
+                        "Face recognizer loaded successfully",Toast.LENGTH_SHORT).show();
+            else
+                Toast.makeText(IntermediateCameraActivity.this,
+                        "Error in loading face recognizer",Toast.LENGTH_SHORT).show();
+        }
+    }
+
     // ********************************** UI related functions ***********************************//
     public void startCameraActivity() {
         if(ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
@@ -682,7 +700,7 @@ public class IntermediateCameraActivity extends Activity {
 
 
     // an adapter for known people list in manual labeling
-    private PersonDataAdapter getKnownDataForKnownPerson(KnownPPL p){
+    private PersonDataAdapter getKnownDataForKnownPerson(KnownPPL p) {
         if (p.id <= 0)
             return null;
         db = AppDatabase.getDatabase(this);
@@ -718,7 +736,9 @@ public class IntermediateCameraActivity extends Activity {
         Bitmap result = BitmapFactory.decodeFile(imageLocation.getAbsolutePath());
         double widthRatio = (double) SCREEN_WIDTH / (double) result.getWidth();
         double heightRatio = (double) SCREEN_HEIGHT / (double) result.getHeight();
-        fop = new FaceOperator(this,toAnalyze);
+        if(!frs.isReady())
+            return;
+        fop = new FaceOperator(this,toAnalyze,frs);
         Face[] faces = fop.getFaces();
 
         if (faces == null)
@@ -732,7 +752,7 @@ public class IntermediateCameraActivity extends Activity {
             // this is used to reset the rect to the screen size
             aFacesArray.getBoundingBoxWithRatio(widthRatio, heightRatio);
             rectangle(toAnalyze,new opencv_core.Point(x, y), new opencv_core.Point(x + w, y + h)
-                    , opencv_core.Scalar.GREEN,2, LINE_8,0);
+                    ,opencv_core.Scalar.GREEN,2, LINE_8,0);
         }
         imwrite(imageLocation.getAbsolutePath(),toAnalyze);
     }
@@ -770,68 +790,6 @@ public class IntermediateCameraActivity extends Activity {
         } catch (IOException e) {
             Log.d(TAG,"Couldn't open file to save the image!");
             exitActivity(-1);
-        }
-    }
-
-
-    // TODO: DELETE THIS IN PRODUCTION! USER WILL START WITH NO KNOWN INSTANCES!
-    private void train() {
-        if (frs != null)
-            return;
-        List<training_face> recs =  db.trainingFaceDao().getAllRecords();
-        if(recs.size() > 0)
-            return;
-        // testing classifier
-        db.knownPplDao().insertEntry(
-                new KnownPPL(1,"Erin","Avllazagaj",new Date(1996,3,13), 21,"Dorm #76 Bilkent") );
-        db.knownPplDao().insertEntry(
-                new KnownPPL(2,"Barack","Obama",new Date(1961,8,4), 56,"USA") );
-        db.knownPplDao().insertEntry(
-                new KnownPPL(3,"Argert","Boja",new Date(2016,2,2), 2,"107") );
-        // random generator for md5 (NEVER DO THIS IRL) use: StorageHelper.getMD5OfFile()
-        Random r = new Random();
-
-        // delete all instances
-        recs =  db.trainingFaceDao().getAllRecords();
-        if(recs.size() != 0)
-            return;
-
-        List<Integer> erinIndex  = new ArrayList<>();
-        erinIndex.add(1);erinIndex.add(2);erinIndex.add(3);erinIndex.add(4);erinIndex.add(5);
-        List<Integer> obamaIndex  = new ArrayList<>();
-        obamaIndex.add(6);obamaIndex.add(7);obamaIndex.add(8);obamaIndex.add(9);obamaIndex.add(10);obamaIndex.add(11);
-        List<Integer> argertIndex  = new ArrayList<>();
-        argertIndex.add(13);argertIndex.add(14);argertIndex.add(16);
-        Face detected;
-        for(int i = 1; i < 17; i++) {
-            String filepath;
-            try {
-                filepath = StorageHelper.getFilePathFromAssets(this,"training/face"+i+".png","training","face"+i+".png");
-            } catch (IOException e) { continue; }
-
-            opencv_core.Mat m = imread(filepath);
-            if (m==null)
-                continue;
-            detected = new Face(m);
-            if(erinIndex.contains(i)) {
-                detected.setID(1);
-            }
-            else if(obamaIndex.contains(i)){
-                detected.setID(2);
-            }
-            else if(argertIndex.contains(i)){
-                detected.setID(3);
-            }else{
-                continue;
-            }
-            try{
-                training_face f = FaceOperator.moveDetectionToTraining(this,
-                        FaceOperator.saveDetectedFaceToDatabase(this,detected));
-                Log.d(TAG,f.toString());
-            }catch (NoSuchAlgorithmException|IOException e) {
-                e.printStackTrace();
-            }
-            new File(filepath).delete();
         }
     }
 }

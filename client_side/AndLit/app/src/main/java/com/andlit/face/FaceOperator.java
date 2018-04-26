@@ -53,24 +53,26 @@ public class FaceOperator {
     private int mAbsoluteFaceSize;
     private Mat scene;
     private final Context context;
+    private FaceRecognizerSingleton frs;
 
     // calculated fields
     private Face[] foundFaces;
     private RecognizedFace[] recognizedFaces;
 
     // constructors
-    public FaceOperator(Context c, Mat f, int abs, float rel){
+    public FaceOperator(Context c, Mat f, int abs, float rel,FaceRecognizerSingleton frs){
         super();
         context = c;
         scene = f.clone();
         mAbsoluteFaceSize = abs;
         mRelativeFaceSize = rel;
+        this.frs = frs;
         foundFaces = null;
         recognizedFaces = null;
     }
-    public FaceOperator(Context c, Mat f){this (c,f,FACE_MIN_SQUARE_EDGE,FACE_MIN_SQUARE_RELATIVE_EDGE);}
-    public FaceOperator(Context c, Mat f,float rel){this (c,f,0,rel);}
-    public FaceOperator(Context c, Mat f,int abs){this (c,f,abs,FACE_MIN_SQUARE_RELATIVE_EDGE);}
+    public FaceOperator(Context c, Mat f,FaceRecognizerSingleton frs){this (c,f,FACE_MIN_SQUARE_EDGE,FACE_MIN_SQUARE_RELATIVE_EDGE,frs);}
+    public FaceOperator(Context c, Mat f,float rel,FaceRecognizerSingleton frs){this (c,f,0,rel,frs);}
+    public FaceOperator(Context c, Mat f,int abs,FaceRecognizerSingleton frs){this (c,f,abs,FACE_MIN_SQUARE_RELATIVE_EDGE,frs);}
 
     public Face[] getFaces() {
         if (foundFaces != null)
@@ -164,8 +166,9 @@ public class FaceOperator {
     public RecognizedFace[] recognizeFaces() {
         if(recognizedFaces != null)
             return recognizedFaces;
+        if(frs == null)
+            return null;
         Face [] ff = this.getFaces();
-        FaceRecognizerSingleton frs = new FaceRecognizerSingleton(context);
         recognizedFaces = new RecognizedFace[ff.length];
         for(int i = 0; i < recognizedFaces.length; i++) {
             recognizedFaces[i] = frs.recognize(ff[i]);
@@ -174,6 +177,8 @@ public class FaceOperator {
         return recognizedFaces;
     }
     public RecognizedFace recognizeFace(int index) {
+        if(frs == null)
+            return null;
         Face [] ff = this.getFaces();
         if(index>=ff.length)
             return null;
@@ -183,7 +188,6 @@ public class FaceOperator {
         }
         else
             recognizedFaces = new RecognizedFace[ff.length];
-        FaceRecognizerSingleton frs = new FaceRecognizerSingleton(context);
         recognizedFaces[index] = frs.recognize(ff[index]);
         recognizedFaces[index].setBestMatch(context);
         return recognizedFaces[index];

@@ -54,7 +54,7 @@ public class Authenticator {
     }
 
     public boolean logout(){
-        try { new ClassifierBackup(c).deleteAllData(); } catch (Exception e) {}
+        try { new ClassifierBackup(c).deleteAllData(); } catch (Exception ignored) {}
         try { new DatabaseBackup(c).deleteAllData(); } catch (Exception ignored) {}
         new PhotoBackup(c).deleteAllData();
         CronMaster.cancelAllJobs(c);
@@ -94,13 +94,24 @@ public class Authenticator {
                     return null;
                 long id = res.get("id").getAsLong();
                 UserLogin ul = new UserLogin(id,un,accessToken);
+                db.userLoginDao().deleteEntries();
+                db.userLoginDao().insertEntry(ul);
 
                 try {
-                    ClassifierBackup    cb = new ClassifierBackup(c);
                     DatabaseBackup      dbb = new DatabaseBackup(c);
+                    ClassifierBackup    cb = new ClassifierBackup(c);
                     PhotoBackup         pb  = new PhotoBackup(c);
 
-                    if( !(cb.retrieveAllData() && dbb.retrieveAllData() && pb.retrieveAllData()) )
+                    boolean passes = dbb.loadDatabase();
+                    if(passes){
+                        db.userLoginDao().deleteEntries();
+                        db.userLoginDao().insertEntry(ul);
+                    }
+                    else { return null; }
+
+                    passes = pb.retrieveAllData();
+                    passes &= cb.retrieveAllData();
+                    if(!passes)
                         return null;
                 } catch (Exception e) {
                     db.userLoginDao().deleteEntries();
@@ -108,8 +119,6 @@ public class Authenticator {
                     return null;
                 }
 
-                db.userLoginDao().deleteEntries();
-                db.userLoginDao().insertEntry(ul);
                 return ul;
             }
             else

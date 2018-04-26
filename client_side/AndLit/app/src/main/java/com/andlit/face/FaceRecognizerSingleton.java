@@ -4,7 +4,7 @@ import android.content.Context;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.andlit.cloudInterface.synchronizers.photo.PhotoBackup;
+import com.andlit.cloudInterface.synchronizers.classifier.ClassifierBackup;
 import com.andlit.database.AppDatabase;
 import com.andlit.database.entities.Classifier;
 import com.andlit.database.entities.training_face;
@@ -66,7 +66,8 @@ public class FaceRecognizerSingleton {
             return;
         }
         List<Integer> allLabels = db.trainingFaceDao().getAllPossibleRecognitions();
-        trainedModel = createLBPHFaceRecognizer(SEARCH_RADIUS,NEIGHBORS,GRID_X,GRID_Y,THRESHOLD);
+        if(trainedModel == null)
+            trainedModel = createLBPHFaceRecognizer(SEARCH_RADIUS,NEIGHBORS,GRID_X,GRID_Y,THRESHOLD);
 
         Mat labels = new Mat( trainingInstances,1,CV_32SC1 );
         IntBuffer labelsBuffer = labels.createBuffer();
@@ -131,22 +132,34 @@ public class FaceRecognizerSingleton {
             // if in average there is less than 3 photos per detection don't train
             return !(((double) newInstances / (double) newDetections) < INSTANCES_DETECTION_RATIO);
         }
-
-        // else train
     }
+
     private synchronized void loadTrainedModel() {
         File classifierFile = null;
         if (classifierMetadata != null)
             classifierFile = new File(c.getFilesDir(),classifierMetadata.path);
         if(classifierFile==null)
             classifierFile = new File(c.getFilesDir(),CLASSIFIER_NAME);
-        if (classifierFile.exists()) {
-            trainedModel  = createLBPHFaceRecognizer();
+        if(!classifierFile.exists()) {
+            try{
+                ClassifierBackup cb = new ClassifierBackup(c);
+                cb.loadClassifier();
+                if(classifierFile.exists()){
+                    if(trainedModel == null)
+                        trainedModel  = createLBPHFaceRecognizer();
+                    trainedModel.load(classifierFile.getAbsolutePath());
+                }else {
+                    trainModel();
+                }
+            }catch(Exception e){trainModel();}
+        }
+        else {
+            if(trainedModel == null)
+                trainedModel  = createLBPHFaceRecognizer();
             trainedModel.load(classifierFile.getAbsolutePath());
         }
-        else
-            trainModel();
     }
+
     private synchronized void saveTrainedModel(int numberOfDetections, int numInstTrained){
         File classifierFile;
         if (classifierMetadata != null)

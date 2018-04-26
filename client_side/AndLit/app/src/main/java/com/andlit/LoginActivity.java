@@ -265,7 +265,7 @@ public class LoginActivity extends AppCompatActivity {
                 }
                 UserLogin ul = a.login(paramsObj[0],paramsObj[1]);
                 if ( ul == null )
-                    return 1; // TODO: CONTINUE FROM HERE
+                    return 1;
             } catch ( IOException e ) {
                 return 2;
             }

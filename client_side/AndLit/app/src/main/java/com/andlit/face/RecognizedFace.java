@@ -7,6 +7,7 @@ import com.andlit.database.AppDatabase;
 import com.andlit.database.entities.KnownPPL;
 import com.andlit.database.entities.misc_info;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class RecognizedFace {
@@ -39,7 +40,11 @@ public class RecognizedFace {
             return;
         AppDatabase db = AppDatabase.getDatabase(c);
         bestMatch = db.knownPplDao().getEntryWithID(labels[0]);
+        if(bestMatch == null)
+            bestMatch = new KnownPPL(-1,"Unknown","Person",0,0,"");
         bestMisc = db.miscInfoDao().getInfosForID(labels[0]);
+        if(bestMisc == null)
+            bestMisc = new ArrayList<>();
     }
     public KnownPPL getBestMatch() { return bestMatch; }
     public List<misc_info> getMisc() { return bestMisc; }
