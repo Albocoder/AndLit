@@ -140,7 +140,8 @@
         <activity android:name=".TrainingView" />
         <activity android:name=".trainingView.TrainingViewActivity" />
         <activity android:name=".unverifiedView.UnverifiedViewActivity" />
-        <activity android:name=".groupView.GroupViewActivity"></activity>
+        <activity android:name=".groupView.GroupViewActivity" />
+        <activity android:name=".groupView.GroupMembersViewActivity"></activity>
     </application>
 
 </manifest>
