@@ -45,7 +45,6 @@ public class PotentialPeopleAdapter extends ArrayAdapter<KnownPPL> {
         name.setText(format("%s %s", p.name, p.sname));
         desc.setText(format("ID:%d", p.id));
         AppDatabase db = AppDatabase.getDatabase(getContext());
-        //todo: p.id = null must fix
         List<training_face> images = db.trainingFaceDao().getInstancesOfLabel(p.id); //
         Bitmap tmp;
         if (images.size() != 0) {
