@@ -1,6 +1,5 @@
 package com.andlit.ui.helperUI.listRelated;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -29,7 +28,6 @@ public class PotentialPeopleAdapter extends ArrayAdapter<KnownPPL> {
         super(c,0,kp);
     }
 
-    @SuppressLint("DefaultLocale")
     @Override
     @NonNull
     public View getView(int position, View convertView, @NonNull ViewGroup parent) {
@@ -47,7 +45,8 @@ public class PotentialPeopleAdapter extends ArrayAdapter<KnownPPL> {
         name.setText(format("%s %s", p.name, p.sname));
         desc.setText(format("ID:%d", p.id));
         AppDatabase db = AppDatabase.getDatabase(getContext());
-        List<training_face> images = db.trainingFaceDao().getInstancesOfLabel(p.id);
+        //todo: p.id = null must fix
+        List<training_face> images = db.trainingFaceDao().getInstancesOfLabel(p.id); //
         Bitmap tmp;
         if (images.size() != 0) {
             tmp = BitmapFactory.decodeFile(FaceOperator.getAbsolutePath(this.getContext(),images.get(0)));

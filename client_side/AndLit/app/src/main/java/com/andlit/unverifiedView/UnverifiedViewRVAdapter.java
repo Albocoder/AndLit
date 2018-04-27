@@ -217,6 +217,7 @@ public class UnverifiedViewRVAdapter extends TrainingViewRVAdapter
                     AppDatabase db = AppDatabase.getDatabase(view.getContext());
                     long id = db.knownPplDao().insertEntry(newPerson);
                     df.id = ((int)id);
+                    newPerson.id = df.id;
                     training_face f = FaceOperator.moveDetectionToTraining(c,df);
                     if( f == null )
                         Snackbar.make(view,"Couldn't save instance to database!",Snackbar.LENGTH_SHORT);

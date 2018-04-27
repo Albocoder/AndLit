@@ -500,6 +500,19 @@ public class IntermediateCameraActivity extends Activity {
             if(defaultPhoto != null)
                 new File(defaultPhoto).delete();
         }
+        if(bestPrediction == -2) {
+            if(audioFeedback)
+                speaker.speak("Face recognizer not loaded yet or not existing.");
+            title = "Error: Recognizer not loaded";
+            String defaultPhoto = null;
+            try {
+                defaultPhoto = StorageHelper.getFilePathFromAssets
+                        (this, "default_profile.jpg","tmp", "default_profile.jpg");
+            } catch (IOException ignored) {}
+            photo = BitmapFactory.decodeFile(defaultPhoto);
+            if(defaultPhoto != null)
+                new File(defaultPhoto).delete();
+        }
         else {
             db = AppDatabase.getDatabase(this);
             KnownPPL p = db.knownPplDao().getPersonWithID(bestPrediction);
@@ -578,6 +591,7 @@ public class IntermediateCameraActivity extends Activity {
                     AppDatabase db = AppDatabase.getDatabase(view.getContext());
                     long id = db.knownPplDao().insertEntry(newPerson);
                     rf.getFace().setID((int)id);
+                    newPerson.id = (int)id;
                     try {
                         training_face f = FaceOperator.saveTrainingFaceToDatabase(view.getContext(),rf);
                         if( f == null )
@@ -736,8 +750,7 @@ public class IntermediateCameraActivity extends Activity {
         Bitmap result = BitmapFactory.decodeFile(imageLocation.getAbsolutePath());
         double widthRatio = (double) SCREEN_WIDTH / (double) result.getWidth();
         double heightRatio = (double) SCREEN_HEIGHT / (double) result.getHeight();
-        if(!frs.isReady())
-            return;
+
         fop = new FaceOperator(this,toAnalyze,frs);
         Face[] faces = fop.getFaces();
 

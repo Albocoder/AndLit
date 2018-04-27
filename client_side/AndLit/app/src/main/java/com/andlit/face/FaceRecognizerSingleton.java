@@ -93,7 +93,7 @@ public class FaceRecognizerSingleton {
         if (face == null)
             return null;
         if (classifierMetadata == null)
-            return null;
+            return new RecognizedFace(face,new int[]{-2},new double[]{-2});
         if(!isReady())
             return new RecognizedFace(face,new int[]{-1},new double[]{-1});
         // JVM data holders

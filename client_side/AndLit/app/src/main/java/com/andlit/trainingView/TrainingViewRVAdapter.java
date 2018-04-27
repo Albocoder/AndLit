@@ -71,7 +71,7 @@ public class TrainingViewRVAdapter extends RecyclerView.Adapter<TrainingViewRVAd
         Integer label = persons.get(position).label;
         final Context context = personViewHolder.itemView.getContext();
         final AppDatabase db = AppDatabase.getDatabase(context);
-        if(label == -1)
+        if(label == -1 || label == -2)
         {
             personViewHolder.personName.setText(R.string.unknown_person);
             personViewHolder.personAge.setText(R.string.not_available);
@@ -81,7 +81,7 @@ public class TrainingViewRVAdapter extends RecyclerView.Adapter<TrainingViewRVAd
             db.knownPplDao().getEntryWithID(label);
             KnownPPL person = db.knownPplDao().getEntryWithID(label);
             personViewHolder.personName.setText(String.format("%s %s", person.name, person.sname));
-            personViewHolder.personAge.setText(person.age);
+            personViewHolder.personAge.setText(""+person.age);
         }
 
         File imgFile = new  File(FaceOperator.getAbsolutePath(context, persons.get(position)));
