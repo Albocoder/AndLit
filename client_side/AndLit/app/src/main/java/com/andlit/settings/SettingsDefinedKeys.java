@@ -21,4 +21,6 @@ public final class SettingsDefinedKeys {
     public static final String NOTIFY_SCHEDULED_TASKS = "notify_scheduled_tasks";
 
     public static final String BACKUP_FREQUENCY = "backup_frequency";
+
+    public static final String CAMERA_SCREEN_ORIENTATION = "camera_screen_orientation";
 }
