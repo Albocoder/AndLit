@@ -95,7 +95,7 @@ public class VisionEndpoint {
             return null;
         JsonParser parser = new JsonParser();
         Log.d("test","Fired Description request!");
-        JsonObject o = parser.parse("{\"image\": \""+base64OfImage+"\"").getAsJsonObject();
+        JsonObject o = parser.parse("{\"image\": \""+base64OfImage+"\"}").getAsJsonObject();
         Call<JsonObject> call = a.describeContentOfImage("Token "+ul.access_token,o);
         return getDescriptionFromCall(call);
     }
@@ -119,7 +119,7 @@ public class VisionEndpoint {
         if (base64OfImage == null)
             return null;
         JsonParser parser = new JsonParser();
-        JsonObject o = parser.parse("{\"image\": \""+base64OfImage+"\"").getAsJsonObject();
+        JsonObject o = parser.parse("{\"image\": \""+base64OfImage+"\"}").getAsJsonObject();
         Call<JsonObject> call = a.readTextInImage("Token "+ul.access_token,o);
         return getTextFromCall(call);
     }
