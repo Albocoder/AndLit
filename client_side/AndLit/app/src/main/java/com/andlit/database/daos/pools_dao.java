@@ -21,6 +21,9 @@ public interface pools_dao {
     @Update
     void updatePool(Pool g);
 
+    @Query("delete from pools")
+    void purgeData();
+
     @Query("select * from pools where creator_un = :un")
     List<Pool> getAllPoolsCreatedByUsername(String un);
 

@@ -1,5 +1,6 @@
 package com.andlit.cloudInterface.pools;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
 import retrofit2.Call;
@@ -28,11 +29,11 @@ public interface PoolsAPI {
 
     @Headers( "Content-Type: application/json" )
     @GET("pools/list_pools/")
-    Call<JsonObject> listPools(@Header("Authorization") String auth);
+    Call<JsonArray> listPools(@Header("Authorization") String auth);
 
     @Headers( "Content-Type: application/json" )
     @POST("pools/list_users/")
-    Call<JsonObject> listUsersInPool(@Header("Authorization") String auth, @Body JsonObject poolData);
+    Call<JsonArray> listUsersInPool(@Header("Authorization") String auth, @Body JsonObject poolData);
 
     @Headers( "Content-Type: application/json" )
     @POST("pools/kick_user/")
