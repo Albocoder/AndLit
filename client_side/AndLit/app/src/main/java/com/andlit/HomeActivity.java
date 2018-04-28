@@ -24,7 +24,10 @@ import android.widget.Button;
 import android.widget.Toast;
 
 import com.andlit.cloudInterface.authentication.Authenticator;
+import com.andlit.cloudInterface.pools.PoolOps;
 import com.andlit.cron.CronMaster;
+import com.andlit.database.AppDatabase;
+import com.andlit.database.entities.Pool;
 import com.andlit.face.FaceRecognizerSingleton;
 import com.andlit.groupView.GroupViewActivity;
 import com.andlit.settings.SettingsActivity;
@@ -33,6 +36,8 @@ import com.andlit.ui.HandsFreeMode;
 import com.andlit.ui.IntermediateCameraActivity;
 import com.andlit.unverifiedView.UnverifiedViewActivity;
 
+import java.util.List;
+
 
 public class HomeActivity extends AppCompatActivity
 {
@@ -40,7 +45,6 @@ public class HomeActivity extends AppCompatActivity
 
     // View related Properties
     private DrawerLayout mDrawerLayout;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState)

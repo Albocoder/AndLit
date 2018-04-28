@@ -37,9 +37,9 @@ public interface PoolsAPI {
 
     @Headers( "Content-Type: application/json" )
     @POST("pools/kick_user/")
-    Call<JsonObject> kickUserFromPool(@Header("Authorization") String auth, @Body JsonObject userAndPoolData);
+    Call<String> kickUserFromPool(@Header("Authorization") String auth, @Body JsonObject userAndPoolData);
 
     @Headers( "Content-Type: application/json" )
     @POST("pools/leave/")
-    Call<JsonObject> leavePool(@Header("Authorization") String auth, @Body JsonObject poolData);
+    Call<String> leavePool(@Header("Authorization") String auth, @Body JsonObject poolData);
 }

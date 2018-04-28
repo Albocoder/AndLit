@@ -24,6 +24,9 @@ public interface pools_dao {
     @Query("delete from pools")
     void purgeData();
 
+    @Query("delete from pools where id = :i")
+    void deletePoolWithID(String i);
+
     @Query("select * from pools where creator_un = :un")
     List<Pool> getAllPoolsCreatedByUsername(String un);
 

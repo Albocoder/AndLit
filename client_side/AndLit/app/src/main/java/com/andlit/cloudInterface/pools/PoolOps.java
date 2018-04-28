@@ -22,7 +22,6 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
-// todo: test this
 public class PoolOps {
 
     // constants
@@ -126,11 +125,10 @@ public class PoolOps {
         return changePoolPassword(p.id);
     }
 
-    //todo: ask gunduz to give this response parsePoolFromResponse
     public Pool joinPool(String id,String pw) throws IOException {
         JsonParser parser = new JsonParser();
         JsonObject o = parser.parse("{\"pool_id\": \""+id+"\", \"pool_password\":\""+
-                pw+"\" ").getAsJsonObject();
+                pw+"\" }").getAsJsonObject();
         Call<JsonObject> call = a.joinPool("Token "+ul.access_token,o);
         Response<JsonObject> resp = call.execute();
         int code = resp.code();
@@ -149,6 +147,7 @@ public class PoolOps {
         return null;
     }
 
+    // todo: test this method the moment it will work
     public List<Pool> listPools() throws IOException {
         Call<JsonArray> call = a.listPools("Token "+ul.access_token);
         Response<JsonArray> resp = call.execute();
@@ -199,10 +198,10 @@ public class PoolOps {
     }
     public boolean kickFromPool(String poolID,String username) throws IOException {
         JsonParser parser = new JsonParser();
-        JsonObject o = parser.parse("{\"pool_id\": \""+poolID+"\",\"username\":\""
+        JsonObject o = parser.parse("{ \"pool_id\" : \""+poolID+"\" , \"username\" : \""
                 +username+"\" }").getAsJsonObject();
-        Call<JsonObject> call = a.kickUserFromPool("Token "+ul.access_token,o);
-        Response<JsonObject> resp = call.execute();
+        Call<String> call = a.kickUserFromPool("Token "+ul.access_token,o);
+        Response<String> resp = call.execute();
         int code = resp.code();
         return code >= 200 && code < 300;
     }
@@ -213,10 +212,16 @@ public class PoolOps {
     public boolean leavePool (String poolID) throws IOException {
         JsonParser parser = new JsonParser();
         JsonObject o = parser.parse("{\"pool_id\": \""+poolID+"\" }").getAsJsonObject();
-        Call<JsonObject> call = a.leavePool("Token "+ul.access_token,o);
-        Response<JsonObject> resp = call.execute();
+        Call<String> call = a.leavePool("Token "+ul.access_token,o);
+        Response<String> resp = call.execute();
         int code = resp.code();
-        return code >= 200 && code < 300;
+        if(code >= 200 && code < 300){
+            try {
+                db.poolsDao().deletePoolWithID(poolID);
+            }catch (Exception ignored){}
+            return true;
+        }
+        return false;
     }
 
     // *************************** PRIVATE FUNCTIONS ******************************* //
