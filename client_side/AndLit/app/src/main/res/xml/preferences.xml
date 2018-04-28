@@ -51,4 +51,13 @@
         android:entries="@array/LanguageEntries"
         android:entryValues="@array/LanguageValues"
         android:defaultValue="English" />
+
+    <android.support.v7.preference.ListPreference
+        android:summary="Choose Camera Screen Orientation"
+        android:key="camera_screen_orientation"
+        android:title="Camera Screen Orientation"
+        android:dialogTitle="Choose Camera Screen Orientation"
+        android:entries="@array/CameraOrientationEntries"
+        android:entryValues="@array/CameraOrientationValues"
+        android:defaultValue="1" />
 </PreferenceScreen>
