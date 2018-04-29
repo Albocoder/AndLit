@@ -8,7 +8,7 @@ import android.media.AudioManager;
 import android.preference.PreferenceManager;
 import android.speech.tts.TextToSpeech;
 
-import com.andlit.settings.SettingsDefinedKeys;
+import com.andlit.ui.settings.SettingsDefinedKeys;
 
 
 /**

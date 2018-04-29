@@ -24,20 +24,15 @@ import android.widget.Button;
 import android.widget.Toast;
 
 import com.andlit.cloudInterface.authentication.Authenticator;
-import com.andlit.cloudInterface.pools.PoolOps;
 import com.andlit.cron.CronMaster;
-import com.andlit.database.AppDatabase;
-import com.andlit.database.entities.Pool;
 import com.andlit.face.FaceRecognizerSingleton;
-import com.andlit.groupView.GroupViewActivity;
-import com.andlit.knownPeopleView.KnownPeopleViewActivity;
-import com.andlit.settings.SettingsActivity;
-import com.andlit.trainingView.TrainingViewActivity;
-import com.andlit.ui.HandsFreeMode;
-import com.andlit.ui.IntermediateCameraActivity;
-import com.andlit.unverifiedView.UnverifiedViewActivity;
-
-import java.util.List;
+import com.andlit.ui.groupView.GroupViewActivity;
+import com.andlit.ui.knownPeopleView.KnownPeopleViewActivity;
+import com.andlit.ui.settings.SettingsActivity;
+import com.andlit.ui.trainingView.TrainingViewActivity;
+import com.andlit.ui.camera.HandsFreeMode;
+import com.andlit.ui.camera.IntermediateCameraActivity;
+import com.andlit.ui.unverifiedView.UnverifiedViewActivity;
 
 
 public class HomeActivity extends AppCompatActivity

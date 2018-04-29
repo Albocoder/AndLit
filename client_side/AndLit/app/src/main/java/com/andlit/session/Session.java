@@ -29,7 +29,7 @@ import com.andlit.face.Face;
 import com.andlit.face.FaceOperator;
 import com.andlit.face.FaceRecognizerSingleton;
 import com.andlit.face.RecognizedFace;
-import com.andlit.settings.SettingsDefinedKeys;
+import com.andlit.ui.settings.SettingsDefinedKeys;
 import com.andlit.utils.StorageHelper;
 import com.andlit.voice.VoiceGenerator;
 import com.andlit.voice.VoiceToCommandWrapper;

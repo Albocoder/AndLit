@@ -60,24 +60,24 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".ui.IntermediateCameraActivity"
+            android:name=".ui.camera.IntermediateCameraActivity"
             android:configChanges="orientation|screenSize|keyboardHidden"/>
         <activity
-            android:name=".ui.helperUI.ImgGrabber"
+            android:name=".ui.camera.helperUI.ImgGrabber"
             android:launchMode="singleInstance" />
         <activity
-            android:name=".settings.SettingsActivity"
+            android:name=".ui.settings.SettingsActivity"
             android:label="Settings" />
         <activity android:name=".HomeActivity" />
         <activity
             android:name=".camera.CameraActivity"
             android:launchMode="singleInstance" />
         <activity
-            android:name=".ui.HandsFreeMode"
+            android:name=".ui.camera.HandsFreeMode"
             android:configChanges="orientation|screenSize|keyboardHidden"/>
 
         <!-- *************************** Share related *************************** -->
-        <activity android:name=".shareEntryPoint.ShareActivityReceiver">
+        <activity android:name=".ui.shareEntryPoint.ShareActivityReceiver">
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />
 
@@ -134,11 +134,11 @@
         <!-- *************************** End of Cron related *************************** -->
 
         <activity android:name=".TrainingView" />
-        <activity android:name=".trainingView.TrainingViewActivity" />
-        <activity android:name=".unverifiedView.UnverifiedViewActivity" />
-        <activity android:name=".groupView.GroupViewActivity" />
-        <activity android:name=".groupView.GroupMembersViewActivity" />
-        <activity android:name=".knownPeopleView.KnownPeopleViewActivity"></activity>
+        <activity android:name=".ui.trainingView.TrainingViewActivity" />
+        <activity android:name=".ui.unverifiedView.UnverifiedViewActivity" />
+        <activity android:name=".ui.groupView.GroupViewActivity" />
+        <activity android:name=".ui.groupView.GroupMembersViewActivity" />
+        <activity android:name=".ui.knownPeopleView.KnownPeopleViewActivity"></activity>
     </application>
 
 </manifest>

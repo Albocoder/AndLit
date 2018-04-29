@@ -4,7 +4,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 
-import com.andlit.settings.SettingsDefinedKeys;
+import com.andlit.ui.settings.SettingsDefinedKeys;
 
 public class VoiceToCommandWrapper {
 

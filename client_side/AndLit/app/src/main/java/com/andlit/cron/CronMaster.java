@@ -13,7 +13,7 @@ import android.support.v4.app.NotificationCompat;
 import com.andlit.R;
 import com.andlit.cron.jobs.BackupJob;
 import com.andlit.cron.jobs.TrainingJob;
-import com.andlit.settings.SettingsDefinedKeys;
+import com.andlit.ui.settings.SettingsDefinedKeys;
 import com.evernote.android.job.JobManager;
 import com.evernote.android.job.JobRequest;
 
