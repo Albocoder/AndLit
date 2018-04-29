@@ -138,6 +138,7 @@
         <activity android:name=".unverifiedView.UnverifiedViewActivity" />
         <activity android:name=".groupView.GroupViewActivity" />
         <activity android:name=".groupView.GroupMembersViewActivity" />
+        <activity android:name=".knownPeopleView.KnownPeopleViewActivity"></activity>
     </application>
 
 </manifest>

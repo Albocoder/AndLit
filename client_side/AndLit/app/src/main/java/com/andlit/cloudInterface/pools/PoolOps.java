@@ -2,7 +2,6 @@ package com.andlit.cloudInterface.pools;
 
 import android.content.Context;
 import android.util.Log;
-
 import com.andlit.R;
 import com.andlit.cloudInterface.pools.models.PoolMember;
 import com.andlit.database.AppDatabase;
@@ -12,11 +11,9 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-
 import retrofit2.Call;
 import retrofit2.Response;
 import retrofit2.Retrofit;

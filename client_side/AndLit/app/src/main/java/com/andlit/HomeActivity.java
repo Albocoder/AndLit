@@ -30,6 +30,7 @@ import com.andlit.database.AppDatabase;
 import com.andlit.database.entities.Pool;
 import com.andlit.face.FaceRecognizerSingleton;
 import com.andlit.groupView.GroupViewActivity;
+import com.andlit.knownPeopleView.KnownPeopleViewActivity;
 import com.andlit.settings.SettingsActivity;
 import com.andlit.trainingView.TrainingViewActivity;
 import com.andlit.ui.HandsFreeMode;
@@ -162,6 +163,12 @@ public class HomeActivity extends AppCompatActivity
                             case R.id.nav_group_view:
                                 // Handle Unverified View
                                 intent = new Intent(context, GroupViewActivity.class);
+                                startActivity(intent);
+                                break;
+
+                            case R.id.nav_known_people_view:
+                                // Handle known people view
+                                intent = new Intent(context, KnownPeopleViewActivity.class);
                                 startActivity(intent);
                                 break;
                         }

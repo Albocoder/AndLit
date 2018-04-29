@@ -50,7 +50,7 @@
         android:dialogTitle="Choose Language"
         android:entries="@array/LanguageEntries"
         android:entryValues="@array/LanguageValues"
-        android:defaultValue="English" />
+        android:defaultValue="en" />
 
     <android.support.v7.preference.ListPreference
         android:summary="Choose Camera Screen Orientation"

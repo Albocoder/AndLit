@@ -18,9 +18,9 @@ public class GroupViewActivity extends AppCompatActivity
         setSupportActionBar(toolbar);
 
         TabLayout tabLayout = findViewById(R.id.tab_layout);
-        tabLayout.addTab(tabLayout.newTab().setText("Your Groups"));
-        tabLayout.addTab(tabLayout.newTab().setText("Join Groups"));
-        tabLayout.addTab(tabLayout.newTab().setText("Create Groups"));
+        tabLayout.addTab(tabLayout.newTab().setText("Your Pools"));
+        tabLayout.addTab(tabLayout.newTab().setText("Join Pools"));
+        tabLayout.addTab(tabLayout.newTab().setText("Create Pools"));
         tabLayout.setTabGravity(TabLayout.GRAVITY_FILL);
 
         final ViewPager viewPager = findViewById(R.id.pager);

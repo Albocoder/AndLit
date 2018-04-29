@@ -12,6 +12,11 @@
             android:title="Unverified List" />
 
         <item
+            android:id="@+id/nav_known_people_view"
+            android:icon="@drawable/ic_list_white"
+            android:title="Known People List" />
+
+        <item
             android:id="@+id/nav_group_view"
             android:icon="@drawable/ic_group_work_white"
             android:title="Groups" />

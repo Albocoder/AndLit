@@ -33,7 +33,7 @@ public class TrainingViewRVAdapter extends RecyclerView.Adapter<TrainingViewRVAd
     // provide access to all the views for a data item in a view holder
     public static class PersonViewHolder extends RecyclerView.ViewHolder
     {
-        CardView cv;
+        public CardView cv;
         public TextView personName;
         public TextView personAge;
         public ImageView personPhoto;

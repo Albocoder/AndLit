@@ -43,6 +43,7 @@ public class YourGroupsFragment extends Fragment
     {
         // TODO: 4/25/18 initialize using actual data
 
+
         groups = new ArrayList();
         groups.add(new Group("Football", true));
         groups.add(new Group("Hockey", false));
