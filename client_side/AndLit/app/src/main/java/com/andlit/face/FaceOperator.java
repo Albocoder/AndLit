@@ -543,7 +543,7 @@ public class FaceOperator {
                 try{
                     db.trainingFaceDao().insertTrainingFace(trainingInstance);
                     Log.e(TAG, "First Try failed: "+e.getLocalizedMessage());
-                }catch (RuntimeException e2) {
+                }catch (Exception e2) {
                     Log.e(TAG, "Second Try failed: "+e2.getLocalizedMessage());
                     mFileTemp.delete();
                     return null;
