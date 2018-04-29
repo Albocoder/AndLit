@@ -60,6 +60,7 @@ import static org.bytedeco.javacpp.opencv_core.LINE_8;
 import static org.bytedeco.javacpp.opencv_imgcodecs.imread;
 import static org.bytedeco.javacpp.opencv_imgcodecs.imwrite;
 import static org.bytedeco.javacpp.opencv_imgproc.rectangle;
+import static org.bytedeco.javacpp.opencv_imgproc.resize;
 
 // TODO: this will be reworked for better modularity and using session framework
 public class IntermediateCameraActivity extends Activity {
@@ -747,13 +748,20 @@ public class IntermediateCameraActivity extends Activity {
         if(audioFeedback)
             speaker.speak("Processing image.");
         opencv_core.Mat toAnalyze = imread(imageLocation.getAbsolutePath());
+        if(imageLocation.length() > 5*1024*1024){
+            opencv_core.Mat resizedImg = new opencv_core.Mat();
+            opencv_core.Size oldSize = toAnalyze.size();
+            opencv_core.Size newSize = new opencv_core.Size((int)(oldSize.width()*0.7),(int)(oldSize.height()*0.7));
+            resize(toAnalyze,resizedImg,newSize);
+            toAnalyze.release();
+            toAnalyze = resizedImg;
+            imwrite(imageLocation.getAbsolutePath(),toAnalyze);
+        }
         Bitmap result = BitmapFactory.decodeFile(imageLocation.getAbsolutePath());
         double widthRatio = (double) SCREEN_WIDTH / (double) result.getWidth();
         double heightRatio = (double) SCREEN_HEIGHT / (double) result.getHeight();
-
         fop = new FaceOperator(this,toAnalyze,frs);
         Face[] faces = fop.getFaces();
-
         if (faces == null)
             return;
         for (Face aFacesArray : faces) {
