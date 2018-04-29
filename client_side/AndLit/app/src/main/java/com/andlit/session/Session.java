@@ -71,9 +71,8 @@ public abstract class Session extends Activity {
     private static final String CROWDED_IMAGE = "Too many faces in the image!";
     private static final String DB_SAVE_ERROR = "Couldn't save new person to database!";
     private static final String FILE_SAVE_ERROR = "Couldn't save the face for the new person!";
-    private static final String NO_RECOGNIZER = "You can't use this service. Recognizer not available.";
-    private static final String ERR_LOADING_RECOGNIZER = "Error in loading face recognizer.";
-    private static final String SUCCESS_LOADING_RECOGNIZER = "Face recognizer loaded and ready to use.";
+    private static final String NO_RECOGNIZER = "You can't use this service. Andlit recognizer not available.";
+    private static final String ERR_LOADING_RECOGNIZER = "Error in loading andlit recognizer.";
     // SUCCESS
     private static final String PICTURE_SUCCESS = "Picture was taken successfully!";
     private static final String PICTURE_STORED_SUCCESS = "Picture was stored and ready to query";
@@ -81,6 +80,7 @@ public abstract class Session extends Activity {
     private static final String RECOGNITION_SUCCESS = "Face recognition terminated successfully!";
     private static final String DESC_SUCCESS = "Description obtained successfully";
     private static final String TEXT_SUCCESS = "Text recognition results obtained successfully";
+    private static final String SUCCESS_LOADING_RECOGNIZER = "Andlit recognizer loaded and ready to use.";
     // INFO
     private static final String IMG_DESC_START = "Getting image description result from the server!";
     private static final String DESC_STILL_RUNNING = "Image description is still running. Please wait.";
@@ -88,8 +88,8 @@ public abstract class Session extends Activity {
     private static final String TEXT_STILL_RUNNING = "Text recognition is still running. Please wait.";
     private static final String TRAIN_START = "Training the classifier. This might take a while.";
     private static final String TRAIN_STILL_RUNNING = "Training is still running. Please wait.";
-    private static final String TRAIN_FINISH = "Training has finished!";
-    private static final String RETRAIN = "Training recently finished. Please repeat the same command to retrain.";
+    private static final String TRAIN_FINISH = "Andlit training has finished!";
+    private static final String RETRAIN = "Andlit training recently finished. Please repeat the same command to retrain.";
     private static final String RECOGNITION_START = "Started face recognition.";
     private static final String ANALYSIS_START = "Started face detection.";
     private static final String CLEARED_SESSION = "Session is now clear.";

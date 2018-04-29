@@ -61,8 +61,7 @@
         </activity>
         <activity
             android:name=".ui.IntermediateCameraActivity"
-            android:configChanges="orientation|screenSize|keyboardHidden"
-            android:screenOrientation="landscape" />
+            android:configChanges="orientation|screenSize|keyboardHidden"/>
         <activity
             android:name=".ui.helperUI.ImgGrabber"
             android:launchMode="singleInstance" />
@@ -75,8 +74,7 @@
             android:launchMode="singleInstance" />
         <activity
             android:name=".ui.HandsFreeMode"
-            android:configChanges="orientation|screenSize|keyboardHidden"
-            android:screenOrientation="portrait" />
+            android:configChanges="orientation|screenSize|keyboardHidden"/>
 
         <!-- *************************** Share related *************************** -->
         <activity android:name=".shareEntryPoint.ShareActivityReceiver">
@@ -88,7 +86,6 @@
                 <data android:mimeType="image/*" />
             </intent-filter>
         </activity>
-
         <!-- *************************** Cron related *************************** -->
         <service
             android:name="com.evernote.android.job.v21.PlatformJobService"
@@ -101,7 +98,6 @@
         <service
             android:name="com.evernote.android.job.v14.PlatformAlarmServiceExact"
             android:exported="false" />
-
         <receiver
             android:name="com.evernote.android.job.v14.PlatformAlarmReceiver"
             android:exported="false">
@@ -122,7 +118,6 @@
                 <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
             </intent-filter>
         </receiver>
-
         <service
             android:name="com.evernote.android.job.gcm.PlatformGcmService"
             android:enabled="false"
@@ -136,12 +131,13 @@
             android:name="com.evernote.android.job.JobRescheduleService"
             android:exported="false"
             android:permission="android.permission.BIND_JOB_SERVICE" />
+        <!-- *************************** End of Cron related *************************** -->
 
         <activity android:name=".TrainingView" />
         <activity android:name=".trainingView.TrainingViewActivity" />
         <activity android:name=".unverifiedView.UnverifiedViewActivity" />
         <activity android:name=".groupView.GroupViewActivity" />
-        <activity android:name=".groupView.GroupMembersViewActivity"></activity>
+        <activity android:name=".groupView.GroupMembersViewActivity" />
     </application>
 
 </manifest>

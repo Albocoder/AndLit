@@ -10,6 +10,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -69,6 +70,8 @@ public class IntermediateCameraActivity extends Activity {
     private static final String TAG = "IntermediateCamActivity";
     public static final String ARGUMENT_KEY = "filename";
     public static final int REQUEST_IMG_ANALYSIS = 1336;
+    public static final int SCREEN_PORTRAIT = 1;
+    public static final int SCREEN_LANDSCAPE = 2;
 
     // internal fields
     private File imageLocation;
@@ -117,6 +120,13 @@ public class IntermediateCameraActivity extends Activity {
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
         audioFeedback = sharedPref.getBoolean(SettingsDefinedKeys.AUDIO_FEEDBACK, false);
         saveOnExit = sharedPref.getBoolean(SettingsDefinedKeys.SAVE_UNLABELED_ON_EXIT, true);
+        int screenOrientation = Integer.parseInt(
+                sharedPref.getString(SettingsDefinedKeys.CAMERA_SCREEN_ORIENTATION,"2"));
+
+        if(screenOrientation == SCREEN_PORTRAIT)
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        else
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
 
         // setting up listeners
         Button takeImage = findViewById(R.id.BtnCpt);
@@ -416,10 +426,10 @@ public class IntermediateCameraActivity extends Activity {
         protected void onPostExecute(Void res){
             if(frs.isReady())
                 Toast.makeText(IntermediateCameraActivity.this,
-                        "Face recognizer loaded successfully",Toast.LENGTH_SHORT).show();
+                        "AndLit recognizer loaded successfully",Toast.LENGTH_SHORT).show();
             else
                 Toast.makeText(IntermediateCameraActivity.this,
-                        "Error in loading face recognizer",Toast.LENGTH_SHORT).show();
+                        "Error in loading AndLit recognizer",Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -503,7 +513,7 @@ public class IntermediateCameraActivity extends Activity {
         }
         if(bestPrediction == -2) {
             if(audioFeedback)
-                speaker.speak("Face recognizer not loaded yet or not existing.");
+                speaker.speak("AndLit recognizer not loaded yet or not existing.");
             title = "Error: Recognizer not loaded";
             String defaultPhoto = null;
             try {
