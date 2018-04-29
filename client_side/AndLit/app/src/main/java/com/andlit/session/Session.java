@@ -71,7 +71,7 @@ public abstract class Session extends Activity {
     private static final String CROWDED_IMAGE = "Too many faces in the image!";
     private static final String DB_SAVE_ERROR = "Couldn't save new person to database!";
     private static final String FILE_SAVE_ERROR = "Couldn't save the face for the new person!";
-    private static final String NO_RECOGNIZER = "You can't use this service. Andlit recognizer not available.";
+    private static final String NO_RECOGNIZER = "Can't do recognition. Andlit recognizer is not available.";
     private static final String ERR_LOADING_RECOGNIZER = "Error in loading andlit recognizer.";
     // SUCCESS
     private static final String PICTURE_SUCCESS = "Picture was taken successfully!";
@@ -81,6 +81,8 @@ public abstract class Session extends Activity {
     private static final String DESC_SUCCESS = "Description obtained successfully";
     private static final String TEXT_SUCCESS = "Text recognition results obtained successfully";
     private static final String SUCCESS_LOADING_RECOGNIZER = "Andlit recognizer loaded and ready to use.";
+    private static final String ADD_FACE_SUCCESS = "New person was registered successfully. Retrain andlit to recognize them.";
+    private static final String CLEARED_SESSION = "Session was restarted successfully";
     // INFO
     private static final String IMG_DESC_START = "Getting image description result from the server!";
     private static final String DESC_STILL_RUNNING = "Image description is still running. Please wait.";
@@ -92,7 +94,6 @@ public abstract class Session extends Activity {
     private static final String RETRAIN = "Andlit training recently finished. Please repeat the same command to retrain.";
     private static final String RECOGNITION_START = "Started face recognition.";
     private static final String ANALYSIS_START = "Started face detection.";
-    private static final String CLEARED_SESSION = "Session is now clear.";
     private static final String NO_TEXTS_FOUND = "No text blocks found.";
     private static final String ONE_TEXT_FOUND = "One text block found.";
     private static final String TEXT_FOUND_PROMPT = " text blocks found.";
@@ -488,11 +489,11 @@ public abstract class Session extends Activity {
     // ID: 11   (query face identities)
     public void functionEleven() { recognizeFaces(); }
     // ID: 12   (add new face)
-    //todo: test this
     public void functionTwelve() {
         String name = vc.v.name;
         String last = vc.v.last;
-        addNewFace(name,last);
+        if(addNewFace(name,last))
+            audioFeedback(ADD_FACE_SUCCESS);
     }
 
     // **************************** ASYNC CLASSES ******************************* //

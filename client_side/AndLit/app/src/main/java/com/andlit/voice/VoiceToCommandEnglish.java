@@ -19,7 +19,7 @@ public class VoiceToCommandEnglish extends VoiceToCommand {
     private static final Pattern opVerbs2 = Pattern.compile("read");
     private static final Pattern opVerbs3 = Pattern.compile("detect|show|analyze|get");
     private static final Pattern opVerbs4 = Pattern.compile("recognize|find|name");
-    private static final Pattern opVerbs5 = Pattern.compile("insert|add|put");
+    private static final Pattern opVerbs5 = Pattern.compile("insert|add|put|save|store");
     private static final Pattern opName5 = Pattern.compile("face|person|instance|recognition");
     private static final Pattern operation2_3Nouns = Pattern.compile("faces|face|people|humans|person|human");
     private static final Pattern clearOperationVerb = Pattern.compile("clean|clear|restart|renew|reset|delete");
@@ -47,8 +47,10 @@ public class VoiceToCommandEnglish extends VoiceToCommand {
                 int nameIndex = command.indexOf("name")+4;
                 String nameExtract = command.substring(nameIndex);
                 StringTokenizer nameRetriever = new StringTokenizer(nameExtract);
-                name = nameRetriever.nextToken();
-                last = nameRetriever.nextToken();
+                try{
+                    name = nameRetriever.nextToken();
+                    last = nameRetriever.nextToken();
+                } catch(Exception e){ return -1; }
                 return 12;
             }
             else

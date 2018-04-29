@@ -34,7 +34,7 @@ public class KnownPeopleViewRVAdapter extends TrainingViewRVAdapter
 
 
                 // Remove the item on remove button click
-                persons.remove(position);
+                persons.remove(position); // TODO: fix this bug here when you click delete
                 notifyItemRemoved(position);
                 notifyItemRangeChanged(position, persons.size());
             }
