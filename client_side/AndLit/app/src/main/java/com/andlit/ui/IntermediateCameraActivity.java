@@ -106,16 +106,6 @@ public class IntermediateCameraActivity extends Activity {
         // instantiating database connection
         db = AppDatabase.getDatabase(this);
 
-        // initializing more variables
-        fop = null;
-        DisplayMetrics displayMetrics = new DisplayMetrics();
-        getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
-        SCREEN_HEIGHT = displayMetrics.heightPixels;
-        SCREEN_WIDTH = displayMetrics.widthPixels;
-        allKnownPpl = db.knownPplDao().getAllRecords();
-
-        new InstantiateRecognizer().execute();
-
         // setting up settings to operate on
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
         audioFeedback = sharedPref.getBoolean(SettingsDefinedKeys.AUDIO_FEEDBACK, false);
@@ -127,6 +117,16 @@ public class IntermediateCameraActivity extends Activity {
             setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         else
             setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+
+        // initializing more variables
+        fop = null;
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+        SCREEN_HEIGHT = displayMetrics.heightPixels;
+        SCREEN_WIDTH = displayMetrics.widthPixels;
+        allKnownPpl = db.knownPplDao().getAllRecords();
+
+        new InstantiateRecognizer().execute();
 
         // setting up listeners
         Button takeImage = findViewById(R.id.BtnCpt);
