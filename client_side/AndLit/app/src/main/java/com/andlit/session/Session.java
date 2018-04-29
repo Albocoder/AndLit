@@ -13,7 +13,7 @@ import android.preference.PreferenceManager;
 import android.speech.RecognizerIntent;
 import android.util.Log;
 
-import com.andlit.RequestCodes;
+import com.andlit.utils.RequestCodes;
 import com.andlit.camera.BitmapWrapper;
 import com.andlit.camera.CameraActivity;
 import com.andlit.cloudInterface.synchronizers.classifier.ClassifierBackup;

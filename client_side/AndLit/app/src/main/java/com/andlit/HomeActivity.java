@@ -33,6 +33,7 @@ import com.andlit.ui.trainingView.TrainingViewActivity;
 import com.andlit.ui.camera.HandsFreeMode;
 import com.andlit.ui.camera.IntermediateCameraActivity;
 import com.andlit.ui.unverifiedView.UnverifiedViewActivity;
+import com.andlit.utils.RequestCodes;
 
 
 public class HomeActivity extends AppCompatActivity

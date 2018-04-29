@@ -8,7 +8,7 @@ import android.support.v4.content.ContextCompat;
 import android.view.View;
 import android.widget.Button;
 import com.andlit.R;
-import com.andlit.RequestCodes;
+import com.andlit.utils.RequestCodes;
 import com.andlit.session.Session;
 
 public class HandsFreeMode extends Session {

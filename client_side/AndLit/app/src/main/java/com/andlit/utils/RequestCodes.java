@@ -1,4 +1,4 @@
-package com.andlit;
+package com.andlit.utils;
 
 // This class will have all the request codes used in the application
 public final class RequestCodes
