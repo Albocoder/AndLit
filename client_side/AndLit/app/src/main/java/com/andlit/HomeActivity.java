@@ -80,7 +80,7 @@ public class HomeActivity extends AppCompatActivity
         trainingButton.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View view) {
-                new FaceRecognizerSingleton(view.getContext()).trainModel();
+                new TrainingTask().execute();
             }
         });
 
@@ -271,4 +271,21 @@ public class HomeActivity extends AppCompatActivity
                         Toast.LENGTH_SHORT).show();
         }
     }
+
+     @SuppressLint("StaticFieldLeak")
+    private class TrainingTask extends AsyncTask<String, Void, Integer> {
+
+        @Override
+        protected Integer doInBackground(String... paramsObj) {
+            new FaceRecognizerSingleton(HomeActivity.this).trainModel();
+            return 0;
+        }
+
+        @Override
+        protected void onPostExecute(Integer ret) {
+            Toast.makeText(HomeActivity.this,"AndLit trained with the current data!",
+                        Toast.LENGTH_SHORT).show();
+        }
+    }
+
 }
