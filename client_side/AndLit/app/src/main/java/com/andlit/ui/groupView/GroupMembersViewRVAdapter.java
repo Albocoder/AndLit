@@ -1,20 +1,32 @@
 package com.andlit.ui.groupView;
 
+import android.annotation.SuppressLint;
+import android.app.ProgressDialog;
+import android.content.Context;
 import android.graphics.drawable.Drawable;
+import android.os.AsyncTask;
 import android.view.View;
+import android.widget.Toast;
 import com.andlit.R;
+import com.andlit.cloudInterface.pools.PoolOps;
+import com.andlit.cloudInterface.pools.models.PoolMember;
 import java.util.List;
 
 public class GroupMembersViewRVAdapter extends GroupViewRVAdapter
 {
-    List<Group> groups;
-    boolean admin;
+    private List<PoolMember> members;
+    private boolean admin;
+    private String poolName;
+    private String poolId;
+    private Context context;
 
-    public GroupMembersViewRVAdapter(List persons, boolean admin)
+    public GroupMembersViewRVAdapter(List<PoolMember> persons, boolean admin, String poolName, String poolId)
     {
         super(null);
 
-        this.groups = persons;
+        this.poolId = poolId;
+        this.poolName = poolName;
+        this.members = persons;
         this.admin = admin;
     }
 
@@ -22,10 +34,12 @@ public class GroupMembersViewRVAdapter extends GroupViewRVAdapter
     @Override
     public void onBindViewHolder(final com.andlit.ui.groupView.GroupViewRVAdapter.GroupViewHolder personViewHolder, final int position)
     {
-        personViewHolder.groupName.setText(groups.get(position).getName());
+        personViewHolder.groupName.setText(members.get(position).getUsername());
 
         Drawable myDrawable = personViewHolder.itemView.getResources().getDrawable(R.drawable.ic_tag_faces_white);
         personViewHolder.adminPhoto.setImageDrawable(myDrawable);
+
+        this.context = personViewHolder.itemView.getContext();
 
         if(admin)
         {
@@ -38,13 +52,13 @@ public class GroupMembersViewRVAdapter extends GroupViewRVAdapter
                 @Override
                 public void onClick(View view)
                 {
-                    // TODO: 4/25/18 Remove from database as well
+                    // remove from db
+                    new kickMemberTask().execute(members.get(position).getUsername());
 
-
-                    // Remove the item on remove button click
-                    groups.remove(position);
+                    // Remove the item from the view
+                    members.remove(position);
                     notifyItemRemoved(position);
-                    notifyItemRangeChanged(position, groups.size());
+                    notifyItemRangeChanged(position, members.size());
                 }
             });
         }
@@ -53,6 +67,8 @@ public class GroupMembersViewRVAdapter extends GroupViewRVAdapter
             @Override
             public void onClick(View view) {
                 // TODO: 4/26/18 Query this person's classifier
+
+
             }
         });
     }
@@ -61,6 +77,54 @@ public class GroupMembersViewRVAdapter extends GroupViewRVAdapter
     @Override
     public int getItemCount()
     {
-        return groups.size();
+        return members.size();
+    }
+
+    @SuppressLint("StaticFieldLeak")
+    private class kickMemberTask extends AsyncTask<String, Void, Integer>
+    {
+        private ProgressDialog progressDialog = new ProgressDialog(context, R.style.AppTheme_Dark_Dialog);
+
+        @Override
+        protected void onPreExecute() {
+            // Display the loading spinner
+            progressDialog.setMessage("Removing user...");
+            progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+            progressDialog.setInverseBackgroundForced(false);
+            progressDialog.setIndeterminate(true);
+            progressDialog.setCancelable(false);
+            progressDialog.show();
+        }
+
+        @Override
+        protected Integer doInBackground(String... paramsObj)
+        {
+            try
+            {
+                PoolOps pops = new PoolOps(context);
+                pops.kickFromPool(poolId, paramsObj[0]);
+            }
+            catch( Exception e )
+            {
+                return 2;
+            }
+            return 0;
+        }
+
+        @Override
+        protected void onPostExecute(Integer ret)
+        {
+            if(ret == 0)
+            {
+                Toast toast = Toast.makeText(context, "User Successfully Removed!", Toast.LENGTH_SHORT);
+                toast.show();
+            }
+            else if(ret == 2)
+            {
+                Toast toast = Toast.makeText(context, "Couldn't Remove User!", Toast.LENGTH_SHORT);
+                toast.show();
+            }
+            progressDialog.dismiss();
+        }
     }
 }

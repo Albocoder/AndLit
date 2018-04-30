@@ -25,7 +25,7 @@
             android:layout_marginLeft="8dp"
             android:layout_marginStart="8dp"
             android:layout_marginTop="8dp"
-            android:textSize="30sp"
+            android:textSize="20sp"
             card_view:layout_constraintBottom_toBottomOf="parent"
             card_view:layout_constraintStart_toStartOf="parent"
             card_view:layout_constraintTop_toTopOf="parent" />
@@ -35,8 +35,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginBottom="8dp"
-            android:layout_marginEnd="56dp"
-            android:layout_marginRight="56dp"
+            android:layout_marginEnd="36dp"
+            android:layout_marginRight="36dp"
             android:layout_marginTop="8dp"
             card_view:layout_constraintBottom_toBottomOf="parent"
             card_view:layout_constraintEnd_toStartOf="@+id/remove_group"
@@ -45,7 +45,7 @@
         <ImageButton
             android:id="@+id/remove_group"
             android:layout_width="50dp"
-            android:layout_height="50dp"
+            android:layout_height="0dp"
             android:layout_alignParentEnd="true"
             android:layout_alignParentRight="true"
             android:layout_centerVertical="true"

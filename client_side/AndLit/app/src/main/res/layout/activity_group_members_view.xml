@@ -14,13 +14,13 @@
         android:layout_marginLeft="8dp"
         android:layout_marginRight="8dp"
         android:layout_marginStart="8dp"
-        android:text="Group Members"
+        android:text="Pool Members"
         android:textSize="28sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 
     <Button
-        android:id="@+id/query_all"
+        android:id="@+id/pool_info_button"
         android:layout_width="177dp"
         android:layout_height="wrap_content"
         android:layout_marginEnd="8dp"
@@ -28,7 +28,7 @@
         android:layout_marginRight="8dp"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
-        android:text="Query All"
+        android:text="Get Pool Info"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textView4" />
@@ -46,7 +46,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.507"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/query_all" />
+        app:layout_constraintTop_toBottomOf="@+id/pool_info_button" />
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/rvGroupMembersView"
