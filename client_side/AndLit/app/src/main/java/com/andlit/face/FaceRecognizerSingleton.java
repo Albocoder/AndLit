@@ -77,6 +77,8 @@ public class FaceRecognizerSingleton {
         int index = 0;
         for (int i: allLabels) {
             List<training_face> facesOfLabel = db.trainingFaceDao().getInstancesOfLabel(i);
+            if(facesOfLabel == null)
+                continue;
             for (training_face tf: facesOfLabel) {
                 Face tmp = FaceOperator.loadFaceFromDatabase(c,tf);
                 facePhotos.put(index,tmp.getgscaleContent());
