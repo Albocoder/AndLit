@@ -1,22 +1,31 @@
 package com.andlit.ui.groupView;
 
+import android.annotation.SuppressLint;
+import android.content.ClipData;
+import android.content.ClipboardManager;
+import android.content.Context;
+import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.Button;
-
+import android.widget.Toast;
 import com.andlit.R;
-import java.util.ArrayList;
+import com.andlit.cloudInterface.pools.PoolOps;
+import com.andlit.cloudInterface.pools.models.PoolMember;
 import java.util.List;
 
 public class GroupMembersViewActivity extends AppCompatActivity
 {
     private RecyclerView rv;
-    private List groups;
+    private List<PoolMember> members;
     private String groupName;
     private boolean admin;
+    private String groupId;
+    private Context context;
+    private String groupPass;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -27,12 +36,22 @@ public class GroupMembersViewActivity extends AppCompatActivity
 
         admin = getIntent().getBooleanExtra("ADMIN", false);
         groupName = getIntent().getStringExtra("groupName");
+        groupId = getIntent().getStringExtra("POOL_ID");
+        groupPass = getIntent().getStringExtra("POOL_PASS");
+
+        context = this.getApplicationContext();
         
-        Button button = findViewById(R.id.query_all);
+        Button button = findViewById(R.id.pool_info_button);
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                // TODO: 4/26/18 Query Entire Group 
+                // give pool info to the user
+                ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+                String poolData = "ID: " + groupId + "\n" + "Pass: " + groupPass;
+                ClipData clip = ClipData.newPlainText("POOL_INFO", poolData);
+                clipboard.setPrimaryClip(clip);
+                Toast toast = Toast.makeText(context, "Pool Info Has Been Copied To Clipboard!", Toast.LENGTH_SHORT);
+                toast.show();
             }
         });
 
@@ -42,22 +61,45 @@ public class GroupMembersViewActivity extends AppCompatActivity
         rv.setLayoutManager(llm);
         rv.setHasFixedSize(true);
 
-        initializeData();
-        initializeAdapter();
-    }
-
-    private void initializeData()
-    {
-        // TODO: 4/25/18 initialize using actual data
-
-        groups = new ArrayList();
-        groups.add(new Group("Hamza", true));
-        groups.add(new Group("Khan", false));
+        new getPoolMembersTask().execute();
     }
 
     private void initializeAdapter()
     {
-        GroupMembersViewRVAdapter adapter = new GroupMembersViewRVAdapter(groups, admin);
+        GroupMembersViewRVAdapter adapter = new GroupMembersViewRVAdapter(members, admin, groupName, groupId);
         rv.setAdapter(adapter);
+    }
+
+    @SuppressLint("StaticFieldLeak")
+    private class getPoolMembersTask extends AsyncTask<String, Void, Integer>
+    {
+        @Override
+        protected Integer doInBackground(String... paramsObj)
+        {
+            try
+            {
+                PoolOps pops = new PoolOps(context);
+                members = pops.getMembersOfPool(groupId);
+            }
+            catch( Exception e )
+            {
+                return 2;
+            }
+            return 0;
+        }
+
+        @Override
+        protected void onPostExecute(Integer ret)
+        {
+            if(ret == 0)
+            {
+                initializeAdapter();
+            }
+            else if(ret == 2)
+            {
+                Toast toast = Toast.makeText(context, "Couldn't Get Pool Members From Server!", Toast.LENGTH_SHORT);
+                toast.show();
+            }
+        }
     }
 }

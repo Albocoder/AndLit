@@ -37,7 +37,7 @@ public class CameraActivity extends AppCompatActivity
         Camera.Parameters params = mCamera.getParameters();
 
         // set the picture size
-        params.setPictureSize(3264,1836);
+        params.setPictureSize(2592,1944);
 
         // set Camera parameters
         mCamera.setParameters(params);
