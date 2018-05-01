@@ -3,6 +3,7 @@ package com.andlit.ui.groupView;
 import android.annotation.SuppressLint;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.view.View;
@@ -10,6 +11,8 @@ import android.widget.Toast;
 import com.andlit.R;
 import com.andlit.cloudInterface.pools.PoolOps;
 import com.andlit.cloudInterface.pools.models.PoolMember;
+import com.andlit.ui.unverifiedView.UnverifiedViewActivity;
+
 import java.util.List;
 
 public class GroupMembersViewRVAdapter extends GroupViewRVAdapter
@@ -63,12 +66,17 @@ public class GroupMembersViewRVAdapter extends GroupViewRVAdapter
             });
         }
         
-        personViewHolder.adminPhoto.setOnClickListener(new View.OnClickListener() {
+        personViewHolder.adminPhoto.setOnClickListener(new View.OnClickListener()
+        {
             @Override
-            public void onClick(View view) {
-                // TODO: 4/26/18 Query this person's classifier
-                
-
+            public void onClick(View view)
+            {
+                // Query this person's classifier
+                Intent intent = new Intent (context, UnverifiedViewActivity.class);
+                intent.putExtra("POOL_QUERY", true);
+                intent.putExtra("POOL_ID", poolId);
+                intent.putExtra("MEMBER_ID", members.get(position).getId());
+                context.startActivity(intent);
             }
         });
     }
@@ -81,8 +89,7 @@ public class GroupMembersViewRVAdapter extends GroupViewRVAdapter
     }
 
     @SuppressLint("StaticFieldLeak")
-    private class kickMemberTask extends AsyncTask<String, Void, Integer>
-    {
+    private class kickMemberTask extends AsyncTask<String, Void, Integer> {
         private ProgressDialog progressDialog = new ProgressDialog(context, R.style.AppTheme_Dark_Dialog);
 
         @Override

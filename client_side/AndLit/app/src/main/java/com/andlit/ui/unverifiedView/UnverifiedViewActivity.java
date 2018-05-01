@@ -9,7 +9,6 @@ import com.andlit.database.AppDatabase;
 import com.andlit.database.entities.KnownPPL;
 import com.andlit.database.entities.detected_face;
 import com.andlit.ui.trainingView.TrainingViewRVAdapter;
-
 import java.util.List;
 
 public class UnverifiedViewActivity extends Activity
@@ -17,6 +16,9 @@ public class UnverifiedViewActivity extends Activity
     private RecyclerView rv;
     private List<detected_face> faces;
     private List<KnownPPL> kp;
+    private boolean poolQuery;
+    private String poolId;
+    private String memberId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -31,6 +33,10 @@ public class UnverifiedViewActivity extends Activity
         rv.setLayoutManager(llm);
         rv.setHasFixedSize(true);
 
+        poolQuery = getIntent().getBooleanExtra("POOL_QUERY", false);
+        poolId = getIntent().getStringExtra("POOL_ID");
+        memberId = getIntent().getStringExtra("MEMBER_ID");
+
         initializeData();
         initializeAdapter();
     }
@@ -44,7 +50,7 @@ public class UnverifiedViewActivity extends Activity
 
     private void initializeAdapter()
     {
-        TrainingViewRVAdapter adapter = new UnverifiedViewRVAdapter(faces,kp);
+        TrainingViewRVAdapter adapter = new UnverifiedViewRVAdapter(faces, kp, poolQuery, poolId, memberId);
         rv.setAdapter(adapter);
     }
 }

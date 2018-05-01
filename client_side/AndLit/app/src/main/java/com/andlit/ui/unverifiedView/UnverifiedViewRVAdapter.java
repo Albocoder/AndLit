@@ -16,7 +16,6 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import com.andlit.R;
 import com.andlit.database.AppDatabase;
 import com.andlit.database.entities.KnownPPL;
@@ -28,7 +27,6 @@ import com.andlit.ui.trainingView.TrainingViewRVAdapter;
 import com.andlit.ui.camera.helperUI.listRelated.PersonDataAdapter;
 import com.andlit.ui.camera.helperUI.listRelated.PotentialPeopleAdapter;
 import com.andlit.ui.camera.helperUI.listRelated.TwoStringDataHolder;
-
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Date;
@@ -38,12 +36,18 @@ public class UnverifiedViewRVAdapter extends TrainingViewRVAdapter
 {
     List<detected_face> persons;
     List<KnownPPL> allKnownPpl;
+    boolean poolQuery;
+    String poolId;
+    String memberId;
 
-    UnverifiedViewRVAdapter(List<detected_face> persons,List<KnownPPL> known)
+    UnverifiedViewRVAdapter(List<detected_face> persons, List<KnownPPL> known, boolean poolQuery, String poolId, String memberId)
     {
         super(null);
         allKnownPpl = known;
         this.persons = persons;
+        this.poolQuery = poolQuery;
+        this.poolId = poolId;
+        this.memberId = memberId;
     }
 
     // Replace the contents of a view (invoked by the layout manager)
@@ -68,7 +72,7 @@ public class UnverifiedViewRVAdapter extends TrainingViewRVAdapter
         }
 
 
-        File imgFile = new File(FaceOperator.getAbsolutePath(context, persons.get(position)));
+        final File imgFile = new File(FaceOperator.getAbsolutePath(context, persons.get(position)));
         if(imgFile.exists())
         {
             Bitmap myBitmap = BitmapFactory.decodeFile(imgFile.getAbsolutePath());
@@ -91,16 +95,35 @@ public class UnverifiedViewRVAdapter extends TrainingViewRVAdapter
             }
         });
 
-        personViewHolder.personPhoto.setOnClickListener(new View.OnClickListener()
+        if( poolQuery )
         {
-            @Override
-            public void onClick(View view)
+            personViewHolder.personPhoto.setOnClickListener((new View.OnClickListener()
             {
-                // To Do: dialog appearance
-                detected_face df = persons.get(position);// gives the selected detected_face
-                showPopUpForFace(df,context,position);
-            }
-        });
+                @Override
+                public void onClick(View view) 
+                {
+                    // TODO: 5/1/18 Query Pool
+                    // poolId is global
+                    // memberId is global
+                    String picturePath = imgFile.getAbsolutePath();
+                    
+
+                }
+            }));
+        }
+        else
+        {
+            personViewHolder.personPhoto.setOnClickListener(new View.OnClickListener()
+            {
+                @Override
+                public void onClick(View view)
+                {
+                    // dialog appearance
+                    detected_face df = persons.get(position);// gives the selected detected_face
+                    showPopUpForFace(df,context,position);
+                }
+            });
+        }
     }
 
     @SuppressLint("SetTextI18n")
