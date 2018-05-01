@@ -61,7 +61,7 @@
         </activity>
         <activity
             android:name=".ui.camera.IntermediateCameraActivity"
-            android:configChanges="orientation|screenSize|keyboardHidden"/>
+            android:configChanges="orientation|screenSize|keyboardHidden" />
         <activity
             android:name=".ui.camera.helperUI.ImgGrabber"
             android:launchMode="singleInstance" />
@@ -74,7 +74,7 @@
             android:launchMode="singleInstance" />
         <activity
             android:name=".ui.camera.HandsFreeMode"
-            android:configChanges="orientation|screenSize|keyboardHidden"/>
+            android:configChanges="orientation|screenSize|keyboardHidden" />
 
         <!-- *************************** Share related *************************** -->
         <activity android:name=".ui.shareEntryPoint.ShareActivityReceiver">
@@ -98,6 +98,7 @@
         <service
             android:name="com.evernote.android.job.v14.PlatformAlarmServiceExact"
             android:exported="false" />
+
         <receiver
             android:name="com.evernote.android.job.v14.PlatformAlarmReceiver"
             android:exported="false">
@@ -118,6 +119,7 @@
                 <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
             </intent-filter>
         </receiver>
+
         <service
             android:name="com.evernote.android.job.gcm.PlatformGcmService"
             android:enabled="false"
@@ -138,7 +140,8 @@
         <activity android:name=".ui.unverifiedView.UnverifiedViewActivity" />
         <activity android:name=".ui.groupView.GroupViewActivity" />
         <activity android:name=".ui.groupView.GroupMembersViewActivity" />
-        <activity android:name=".ui.knownPeopleView.KnownPeopleViewActivity"></activity>
+        <activity android:name=".ui.knownPeopleView.KnownPeopleViewActivity" />
+        <activity android:name=".ui.classifierView.ClassifierViewActivity"></activity>
     </application>
 
 </manifest>

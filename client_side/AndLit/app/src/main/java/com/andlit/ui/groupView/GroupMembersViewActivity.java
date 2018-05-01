@@ -1,6 +1,7 @@
 package com.andlit.ui.groupView;
 
 import android.annotation.SuppressLint;
+import android.app.ProgressDialog;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
@@ -15,6 +16,8 @@ import android.widget.Toast;
 import com.andlit.R;
 import com.andlit.cloudInterface.pools.PoolOps;
 import com.andlit.cloudInterface.pools.models.PoolMember;
+import com.andlit.ui.classifierView.ClassifierViewActivity;
+
 import java.util.List;
 
 public class GroupMembersViewActivity extends AppCompatActivity
@@ -39,7 +42,7 @@ public class GroupMembersViewActivity extends AppCompatActivity
         groupId = getIntent().getStringExtra("POOL_ID");
         groupPass = getIntent().getStringExtra("POOL_PASS");
 
-        context = this.getApplicationContext();
+        context = this;
         
         Button button = findViewById(R.id.pool_info_button);
         button.setOnClickListener(new View.OnClickListener() {
@@ -73,6 +76,21 @@ public class GroupMembersViewActivity extends AppCompatActivity
     @SuppressLint("StaticFieldLeak")
     private class getPoolMembersTask extends AsyncTask<String, Void, Integer>
     {
+
+        private ProgressDialog progressDialog = new ProgressDialog(context, R.style.AppTheme_Dark_Dialog);
+
+        @Override
+        protected void onPreExecute()
+        {
+            // Display the loading spinner
+            progressDialog.setMessage("Loading Members' List...");
+            progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+            progressDialog.setInverseBackgroundForced(false);
+            progressDialog.setIndeterminate(true);
+            progressDialog.setCancelable(true);
+            progressDialog.show();
+        }
+
         @Override
         protected Integer doInBackground(String... paramsObj)
         {
@@ -100,6 +118,8 @@ public class GroupMembersViewActivity extends AppCompatActivity
                 Toast toast = Toast.makeText(context, "Couldn't Get Pool Members From Server!", Toast.LENGTH_SHORT);
                 toast.show();
             }
+
+            progressDialog.dismiss();
         }
     }
 }

@@ -20,6 +20,11 @@
             android:id="@+id/nav_group_view"
             android:icon="@drawable/ic_group_work_white"
             android:title="Pools" />
+
+        <item
+            android:id="@+id/nav_classifier_view"
+            android:icon="@drawable/ic_assessment_white"
+            android:title="Classifier Statistics" />
     </group>
 
     <group android:checkableBehavior="single">

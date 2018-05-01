@@ -1,6 +1,7 @@
 package com.andlit.ui.groupView;
 
 import android.annotation.SuppressLint;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -15,6 +16,8 @@ import android.widget.Toast;
 import com.andlit.R;
 import com.andlit.cloudInterface.pools.PoolOps;
 import com.andlit.database.entities.Pool;
+import com.andlit.ui.classifierView.ClassifierViewActivity;
+
 import java.util.List;
 
 public class YourGroupsFragment extends Fragment
@@ -42,7 +45,7 @@ public class YourGroupsFragment extends Fragment
         rv.setLayoutManager(llm);
         rv.setHasFixedSize(true);
 
-        context = getActivity().getApplicationContext();
+        context = getContext();
 
         new getPoolsTask().execute();
 

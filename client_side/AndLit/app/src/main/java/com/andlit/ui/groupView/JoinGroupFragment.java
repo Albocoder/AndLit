@@ -14,6 +14,7 @@ import android.widget.Button;
 import android.widget.Toast;
 import com.andlit.R;
 import com.andlit.cloudInterface.pools.PoolOps;
+import com.andlit.database.entities.Pool;
 
 public class JoinGroupFragment extends Fragment
 {
@@ -74,7 +75,10 @@ public class JoinGroupFragment extends Fragment
             try
             {
                 PoolOps pops = new PoolOps(context);
-                pops.joinPool(paramsObj[0], paramsObj[1]);
+                Pool pool = pops.joinPool(paramsObj[0], paramsObj[1]);
+
+                if(pool == null)
+                    return 2;
             }
             catch( Exception e )
             {
