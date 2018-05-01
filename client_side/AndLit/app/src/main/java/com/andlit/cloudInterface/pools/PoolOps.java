@@ -4,16 +4,24 @@ import android.content.Context;
 import android.util.Log;
 import com.andlit.R;
 import com.andlit.cloudInterface.pools.models.PoolMember;
+import com.andlit.cloudInterface.pools.models.QueriedFaceResponse;
 import com.andlit.database.AppDatabase;
 import com.andlit.database.entities.Pool;
 import com.andlit.database.entities.UserLogin;
+import com.andlit.face.FaceOperator;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
+import okhttp3.MediaType;
+import okhttp3.MultipartBody;
+import okhttp3.RequestBody;
 import retrofit2.Call;
 import retrofit2.Response;
 import retrofit2.Retrofit;
@@ -144,7 +152,6 @@ public class PoolOps {
         return null;
     }
 
-    // todo: test this method the moment it will work
     public List<Pool> listPools() throws IOException {
         Call<JsonArray> call = a.listPools("Token "+ul.access_token);
         Response<JsonArray> resp = call.execute();
@@ -219,6 +226,45 @@ public class PoolOps {
             return true;
         }
         return false;
+    }
+
+    public QueriedFaceResponse queryPoolMember(Pool p, PoolMember pm, File faceImg)
+            throws IOException {
+        return queryPoolMember(p.id,pm.getId(),faceImg.getAbsolutePath());
+    }
+
+    public QueriedFaceResponse queryPoolMember(String poolid, long poolmemberid ,
+                                               String faceFullPath) throws IOException {
+        File f = new File(faceFullPath);
+        if (!f.exists())
+            return null;
+        RequestBody file = RequestBody.create(MediaType.parse("image/*"), f);
+        MultipartBody.Part fileBody =
+                MultipartBody.Part.createFormData("image", f.getName(), file);
+        RequestBody memberId =
+                RequestBody.create( okhttp3.MultipartBody.FORM, ""+poolmemberid);
+        RequestBody pId =
+                RequestBody.create( okhttp3.MultipartBody.FORM, poolid);
+        Call<JsonObject> call = a.queryPoolMember("Token "+ul.access_token,fileBody,pId,memberId);
+        Response<JsonObject> resp = call.execute();
+        int code = resp.code();
+        if( code >= 200 && code < 300 ) {
+            JsonObject o = resp.body();
+            if( o == null)
+                return null;
+            if(!o.get("error").isJsonNull())
+                return null;
+            String output = o.get("output").getAsString();
+            JsonParser p = new JsonParser();
+            JsonObject result = p.parse(output).getAsJsonObject();
+            if(result.get("error").getAsInt() != 0)
+                return null;
+            String name = result.get("name").getAsString();
+            String last = result.get("last").getAsString();
+            double dist = result.get("distance").getAsDouble();
+            return new QueriedFaceResponse(name,last,dist);
+        }
+        return null;
     }
 
     // *************************** PRIVATE FUNCTIONS ******************************* //

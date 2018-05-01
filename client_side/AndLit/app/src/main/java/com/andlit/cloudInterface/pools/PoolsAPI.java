@@ -3,12 +3,16 @@ package com.andlit.cloudInterface.pools;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
+import okhttp3.MultipartBody;
+import okhttp3.RequestBody;
 import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.GET;
 import retrofit2.http.Header;
 import retrofit2.http.Headers;
+import retrofit2.http.Multipart;
 import retrofit2.http.POST;
+import retrofit2.http.Part;
 
 public interface PoolsAPI {
     @Headers( "Content-Type: application/json" )
@@ -42,4 +46,10 @@ public interface PoolsAPI {
     @Headers( "Content-Type: application/json" )
     @POST("pools/leave/")
     Call<String> leavePool(@Header("Authorization") String auth, @Body JsonObject poolData);
+
+    @Multipart
+    @POST("pools/query/")
+    Call<JsonObject> queryPoolMember(@Header("Authorization") String auth,@Part MultipartBody.Part image,
+                                     @Part("pool_id") RequestBody pid,
+                                     @Part("target_user_id") RequestBody id);
 }

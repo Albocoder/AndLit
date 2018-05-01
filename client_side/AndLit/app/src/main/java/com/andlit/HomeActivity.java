@@ -24,7 +24,11 @@ import android.widget.Button;
 import android.widget.Toast;
 
 import com.andlit.cloudInterface.authentication.Authenticator;
+import com.andlit.cloudInterface.pools.PoolOps;
+import com.andlit.cloudInterface.pools.models.QueriedFaceResponse;
 import com.andlit.cron.CronMaster;
+import com.andlit.database.AppDatabase;
+import com.andlit.face.FaceOperator;
 import com.andlit.face.FaceRecognizerSingleton;
 import com.andlit.ui.groupView.GroupViewActivity;
 import com.andlit.ui.knownPeopleView.KnownPeopleViewActivity;
@@ -43,6 +47,25 @@ public class HomeActivity extends AppCompatActivity
     // View related Properties
     private DrawerLayout mDrawerLayout;
 
+    public class TestClass extends AsyncTask<Void,Void,Void> {
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            try {
+                AppDatabase db = AppDatabase.getDatabase(HomeActivity.this);
+                String s = FaceOperator.getAbsolutePath(HomeActivity.this
+                        ,db.trainingFaceDao().getAllRecords().get(0));
+                PoolOps pops = new PoolOps(HomeActivity.this);
+                QueriedFaceResponse qfr =
+                        pops.queryPoolMember("5e41e433-4c24-4690-8852-efa61c677900",
+                        15,s);
+            } catch (Exception e) {
+                String msg = e.getLocalizedMessage();
+            }
+            return null;
+        }
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
@@ -52,6 +75,7 @@ public class HomeActivity extends AppCompatActivity
         navigationDrawerInit();
 
         checkTTS(); // check if textToSpeech engine exists on device
+        new TestClass().execute();
 
         // Camera button init
         Button cameraButton = findViewById(R.id.camera_button);
