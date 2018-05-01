@@ -14,16 +14,14 @@ import android.widget.EditText;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import com.andlit.cloudInterface.authentication.Authenticator;
 import com.andlit.database.entities.UserLogin;
-
 import java.io.IOException;
-
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class LoginActivity extends AppCompatActivity {
+public class LoginActivity extends AppCompatActivity
+{
     // constants
     private static final String TAG = "LoginActivity";
     private static final int REQUEST_SIGNUP = 0;

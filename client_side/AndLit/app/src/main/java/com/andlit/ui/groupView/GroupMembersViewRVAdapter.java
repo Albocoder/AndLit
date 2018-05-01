@@ -67,7 +67,7 @@ public class GroupMembersViewRVAdapter extends GroupViewRVAdapter
             @Override
             public void onClick(View view) {
                 // TODO: 4/26/18 Query this person's classifier
-
+                
 
             }
         });

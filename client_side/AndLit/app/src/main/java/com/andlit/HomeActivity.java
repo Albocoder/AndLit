@@ -30,6 +30,7 @@ import com.andlit.cron.CronMaster;
 import com.andlit.database.AppDatabase;
 import com.andlit.face.FaceOperator;
 import com.andlit.face.FaceRecognizerSingleton;
+import com.andlit.ui.classifierView.ClassifierViewActivity;
 import com.andlit.ui.groupView.GroupViewActivity;
 import com.andlit.ui.knownPeopleView.KnownPeopleViewActivity;
 import com.andlit.ui.settings.SettingsActivity;
@@ -169,6 +170,12 @@ public class HomeActivity extends AppCompatActivity
                             case R.id.nav_known_people_view:
                                 // Handle known people view
                                 intent = new Intent(context, KnownPeopleViewActivity.class);
+                                startActivity(intent);
+                                break;
+
+                            case R.id.nav_classifier_view:
+                                // Handle Classifier view
+                                intent = new Intent(context, ClassifierViewActivity.class);
                                 startActivity(intent);
                                 break;
                         }
