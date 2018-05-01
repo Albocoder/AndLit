@@ -141,7 +141,8 @@
         <activity android:name=".ui.groupView.GroupViewActivity" />
         <activity android:name=".ui.groupView.GroupMembersViewActivity" />
         <activity android:name=".ui.knownPeopleView.KnownPeopleViewActivity" />
-        <activity android:name=".ui.classifierView.ClassifierViewActivity"></activity>
+        <activity android:name=".ui.classifierView.ClassifierViewActivity" />
+        <activity android:name=".ui.knownPeopleView.PersonInfoActivity"></activity>
     </application>
 
 </manifest>

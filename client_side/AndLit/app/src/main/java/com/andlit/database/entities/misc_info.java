@@ -3,14 +3,15 @@ package com.andlit.database.entities;
 import android.arch.persistence.room.Entity;
 import android.arch.persistence.room.ForeignKey;
 import android.arch.persistence.room.Index;
-import android.arch.persistence.room.PrimaryKey;
+import android.support.annotation.NonNull;
 
-@Entity(foreignKeys = {@ForeignKey(entity = KnownPPL.class,
+@Entity(primaryKeys={"id","key"},foreignKeys = {@ForeignKey(entity = KnownPPL.class,
         childColumns = "id",parentColumns = "id",onDelete = ForeignKey.CASCADE)},
         indices = {@Index(value = {"id","key"},unique = true)})
 public class misc_info {
-    @PrimaryKey
+    @NonNull
     public Integer id;
+    @NonNull
     public String key;
     public String desc;
 

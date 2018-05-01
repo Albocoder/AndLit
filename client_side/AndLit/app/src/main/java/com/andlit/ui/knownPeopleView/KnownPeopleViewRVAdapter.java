@@ -1,6 +1,7 @@
 package com.andlit.ui.knownPeopleView;
 
 import android.content.Context;
+import android.content.Intent;
 import android.view.View;
 import com.andlit.database.AppDatabase;
 import com.andlit.database.entities.KnownPPL;
@@ -51,8 +52,10 @@ public class KnownPeopleViewRVAdapter extends TrainingViewRVAdapter
             @Override
             public void onClick(View view)
             {
-                // TODO: 4/29/18 pop up appearance for edit info
-                
+                // go to screen for person's info
+                Intent intent = new Intent(context, PersonInfoActivity.class);
+                intent.putExtra("PERSON_ID", allKnownPpl.get(position).id);
+                context.startActivity(intent);
             }
         });
     }

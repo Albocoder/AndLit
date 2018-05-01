@@ -511,7 +511,7 @@ public class IntermediateCameraActivity extends Activity {
             if(defaultPhoto != null)
                 new File(defaultPhoto).delete();
         }
-        if(bestPrediction == -2) {
+        else if(bestPrediction == -2) {
             if(audioFeedback)
                 speaker.speak("AndLit recognizer not loaded yet or not existing.");
             title = "Error: Recognizer not loaded";
