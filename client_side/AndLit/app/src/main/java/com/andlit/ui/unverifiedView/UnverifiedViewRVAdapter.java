@@ -106,7 +106,7 @@ public class UnverifiedViewRVAdapter extends TrainingViewRVAdapter
                     // poolId is global
                     // memberId is global
                     String picturePath = imgFile.getAbsolutePath();
-                    
+
 
                 }
             }));
