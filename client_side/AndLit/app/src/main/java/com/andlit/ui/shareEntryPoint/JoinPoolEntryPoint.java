@@ -46,7 +46,11 @@ public class JoinPoolEntryPoint extends Activity {
                         new JoinPoolTask().execute(id,pw);
                     }
                 })
-                .setNegativeButton(android.R.string.no, null).show();
+                .setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int whichButton) {
+                        JoinPoolEntryPoint.this.finish();
+                    }
+                }).show();
     }
     @SuppressLint("StaticFieldLeak")
     private class JoinPoolTask extends AsyncTask<String, Void, Integer>
