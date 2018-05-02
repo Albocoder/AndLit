@@ -28,10 +28,10 @@ import static org.bytedeco.javacpp.opencv_face.createLBPHFaceRecognizer;
 public class FaceRecognizerSingleton {
 
     // constants
-    private static final int SEARCH_RADIUS = 1;
+    private static final int SEARCH_RADIUS = 3;
     private static final int NEIGHBORS = 8;
-    private static final int GRID_X = 8;
-    private static final int GRID_Y = 8;
+    private static final int GRID_X = 10;
+    private static final int GRID_Y = 10;
     private static final double THRESHOLD = 120;
     private static final int TOP_PREDICTIONS = 1;
     private static final double INSTANCES_DETECTION_RATIO = 3.0;

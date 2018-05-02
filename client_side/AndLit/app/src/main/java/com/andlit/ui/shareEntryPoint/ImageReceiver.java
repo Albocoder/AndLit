@@ -17,8 +17,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-public class ShareActivityReceiver extends Activity {
-    private static String TAG = "ShareActivityReceiver";
+public class ImageReceiver extends Activity {
+    private static String TAG = "ImageReceiver";
 
     protected void onCreate(Bundle savedInstanceState) {
         // Get intent, action and MIME type

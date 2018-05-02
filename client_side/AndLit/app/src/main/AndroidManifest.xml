@@ -77,13 +77,28 @@
             android:configChanges="orientation|screenSize|keyboardHidden" />
 
         <!-- *************************** Share related *************************** -->
-        <activity android:name=".ui.shareEntryPoint.ShareActivityReceiver">
+        <activity android:name=".ui.shareEntryPoint.ImageReceiver">
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />
 
                 <category android:name="android.intent.category.DEFAULT" />
 
                 <data android:mimeType="image/*" />
+            </intent-filter>
+        </activity>
+
+        <activity
+            android:name=".ui.shareEntryPoint.JoinPoolEntryPoint"
+            android:label="Join Pool" >
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <!-- Accepts URIs that begin with "http://www.example.com/gizmos” -->
+                <data android:scheme="https"
+                    android:host="andlit.info"
+                    android:pathPrefix="/pooljoininfo/" />
+                <!-- note that the leading "/" is required for pathPrefix-->
             </intent-filter>
         </activity>
         <!-- *************************** Cron related *************************** -->
@@ -142,7 +157,7 @@
         <activity android:name=".ui.groupView.GroupMembersViewActivity" />
         <activity android:name=".ui.knownPeopleView.KnownPeopleViewActivity" />
         <activity android:name=".ui.classifierView.ClassifierViewActivity" />
-        <activity android:name=".ui.knownPeopleView.PersonInfoActivity"></activity>
+        <activity android:name=".ui.knownPeopleView.PersonInfoActivity" />
     </application>
 
 </manifest>

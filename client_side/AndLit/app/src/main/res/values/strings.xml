@@ -10,6 +10,8 @@
     <string name="logged_in_prompt">Logged in as "%1$s"</string>
     <string name="create_account_prompt">No account yet? Create one</string>
     <string name="login">Login</string>
+    <string name="invalid_url">Invalid Pool credentials!</string>
+    <string name="pool_join_url">https://andlit.info/pooljoininfo/</string>
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>

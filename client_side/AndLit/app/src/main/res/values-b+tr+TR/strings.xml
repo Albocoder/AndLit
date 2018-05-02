@@ -11,5 +11,6 @@
     <string name="login">Oturum aç</string>
     <string name="unknown_person">Bilinmeyen kişi</string>
     <string name="not_available">Bilinmeyen</string>
+    <string name="invalid_url">Geçersiz grup bilgileri!</string>
 
 </resources>
