@@ -54,7 +54,7 @@ public class KnownPeopleViewRVAdapter extends TrainingViewRVAdapter
             {
                 // go to screen for person's info
                 Intent intent = new Intent(context, PersonInfoActivity.class);
-                intent.putExtra("PERSON_ID", allKnownPpl.get(position).id);
+                intent.putExtra("PERSON_ID", "" + allKnownPpl.get(position).id);
                 context.startActivity(intent);
             }
         });

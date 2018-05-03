@@ -15,7 +15,7 @@ public class misc_info {
     public String key;
     public String desc;
 
-    public misc_info(int id,String key,String desc){
+    public misc_info(int id, @NonNull String key, String desc){
         this.id = id;
         this.key = key;
         this.desc = desc;

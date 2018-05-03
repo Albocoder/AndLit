@@ -69,6 +69,20 @@ public class YourGroupsFragment extends Fragment
     @SuppressLint("StaticFieldLeak")
     private class getPoolsTask extends AsyncTask<String, Void, Integer>
     {
+        private ProgressDialog progressDialog = new ProgressDialog(context, R.style.AppTheme_Dark_Dialog);
+
+        @Override
+        protected void onPreExecute()
+        {
+            // Display the loading spinner
+            progressDialog.setMessage("Loading Pools' List...");
+            progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+            progressDialog.setInverseBackgroundForced(false);
+            progressDialog.setIndeterminate(true);
+            progressDialog.setCancelable(true);
+            progressDialog.show();
+        }
+
         @Override
         protected Integer doInBackground(String... paramsObj)
         {
@@ -96,6 +110,7 @@ public class YourGroupsFragment extends Fragment
                 Toast toast = Toast.makeText(context, "Couldn't Get Pools From Server!", Toast.LENGTH_SHORT);
                 toast.show();
             }
+            progressDialog.dismiss();
         }
     }
 }

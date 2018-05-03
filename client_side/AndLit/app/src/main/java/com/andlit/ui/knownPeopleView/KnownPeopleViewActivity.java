@@ -14,6 +14,8 @@ public class KnownPeopleViewActivity extends AppCompatActivity
     private RecyclerView rv;
     private List<KnownPPL> kp;
 
+    KnownPeopleViewRVAdapter adapter;
+
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
@@ -40,7 +42,15 @@ public class KnownPeopleViewActivity extends AppCompatActivity
 
     private void initializeAdapter()
     {
-        KnownPeopleViewRVAdapter adapter = new KnownPeopleViewRVAdapter(kp);
+        adapter = new KnownPeopleViewRVAdapter(kp);
         rv.setAdapter(adapter);
+    }
+
+    @Override
+    public void onResume()
+    {
+        super.onResume();
+
+        adapter.notifyDataSetChanged();
     }
 }

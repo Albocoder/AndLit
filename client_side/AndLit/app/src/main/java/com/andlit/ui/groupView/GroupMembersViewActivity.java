@@ -57,6 +57,22 @@ public class GroupMembersViewActivity extends AppCompatActivity
                 toast.show();
             }
         });
+        
+        Button button1 = findViewById(R.id.pool_share_button);
+        button1.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View view)
+            {
+                // give pool link to the user
+                ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+                String poolData = getResources().getString(R.string.pool_join_url) + "?id=" + groupId + "&pw=" + groupPass;
+                ClipData clip = ClipData.newPlainText("POOL_INFO", poolData);
+                clipboard.setPrimaryClip(clip);
+                Toast toast = Toast.makeText(context, "Pool Link Has Been Copied To Clipboard!", Toast.LENGTH_SHORT);
+                toast.show();
+            }
+        });
 
         rv = findViewById(R.id.rvGroupMembersView);
 

@@ -4,12 +4,19 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.view.View;
+import android.widget.Button;
 import com.andlit.R;
+import com.andlit.database.AppDatabase;
+import com.andlit.database.entities.misc_info;
+import java.util.List;
 
 public class PersonInfoActivity extends AppCompatActivity
 {
     private RecyclerView rv;
     private String personId;
+    private List<misc_info> miscInfoList;
+    PersonInfoRVAdapter adapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -18,7 +25,7 @@ public class PersonInfoActivity extends AppCompatActivity
 
         setContentView(R.layout.activity_person_info);
 
-        rv = findViewById(R.id.rvKnownPeople);
+        rv = findViewById(R.id.rvPersonInfo);
 
         LinearLayoutManager llm = new LinearLayoutManager(this);
         rv.setLayoutManager(llm);
@@ -28,16 +35,45 @@ public class PersonInfoActivity extends AppCompatActivity
 
         initializeData();
         initializeAdapter();
+
+        final AddMiscInfoDialogFragment addMiscInfoDialogFragment = new AddMiscInfoDialogFragment();
+
+        addMiscInfoDialogFragment.setAdapter(adapter);
+
+        Bundle bundle = new Bundle();
+        bundle.putString("PERSON_ID", personId);
+        bundle.putSerializable("ADAPTER", adapter);
+        addMiscInfoDialogFragment.setArguments(bundle);
+
+        final Button addMiscInfoButton = findViewById(R.id.button_add_info);
+        addMiscInfoButton.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View view)
+            {
+                addMiscInfoDialogFragment.show(getSupportFragmentManager(), "ADD_INFO_DIALOG");
+            }
+        });
     }
 
     private void initializeData()
     {
+        AppDatabase db = AppDatabase.getDatabase(this);
 
+        miscInfoList = db.miscInfoDao().getInfosForID(Integer.parseInt(personId));
     }
 
     private void initializeAdapter()
     {
-        PersonInfoRVAdapter adapter = new PersonInfoRVAdapter(personId);
+        adapter = new PersonInfoRVAdapter(personId, miscInfoList, getSupportFragmentManager());
         rv.setAdapter(adapter);
+    }
+
+    @Override
+    public void onResume()
+    {
+        super.onResume();
+
+        adapter.notifyDataSetChanged();
     }
 }
