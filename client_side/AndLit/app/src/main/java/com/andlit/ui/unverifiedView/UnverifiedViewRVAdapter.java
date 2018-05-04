@@ -3,10 +3,13 @@ package com.andlit.ui.unverifiedView;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.media.FaceDetector;
+import android.os.AsyncTask;
 import android.support.design.widget.Snackbar;
 import android.text.Html;
 import android.view.View;
@@ -17,12 +20,15 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 import com.andlit.R;
+import com.andlit.cloudInterface.pools.PoolOps;
+import com.andlit.cloudInterface.pools.models.QueriedFaceResponse;
 import com.andlit.database.AppDatabase;
 import com.andlit.database.entities.KnownPPL;
 import com.andlit.database.entities.detected_face;
 import com.andlit.database.entities.misc_info;
 import com.andlit.database.entities.training_face;
 import com.andlit.face.FaceOperator;
+import com.andlit.ui.camera.IntermediateCameraActivity;
 import com.andlit.ui.trainingView.TrainingViewRVAdapter;
 import com.andlit.ui.camera.helperUI.listRelated.PersonDataAdapter;
 import com.andlit.ui.camera.helperUI.listRelated.PotentialPeopleAdapter;
@@ -34,11 +40,11 @@ import java.util.List;
 
 public class UnverifiedViewRVAdapter extends TrainingViewRVAdapter
 {
-    List<detected_face> persons;
-    List<KnownPPL> allKnownPpl;
-    boolean poolQuery;
-    String poolId;
-    String memberId;
+    private List<detected_face> persons;
+    private List<KnownPPL> allKnownPpl;
+    private boolean poolQuery;
+    private String poolId;
+    private String memberId;
 
     UnverifiedViewRVAdapter(List<detected_face> persons, List<KnownPPL> known, boolean poolQuery, String poolId, String memberId)
     {
@@ -102,12 +108,8 @@ public class UnverifiedViewRVAdapter extends TrainingViewRVAdapter
                 @Override
                 public void onClick(View view) 
                 {
-                    // TODO: 5/1/18 Query Pool
-                    // poolId is global
-                    // memberId is global
-                    String picturePath = imgFile.getAbsolutePath();
-
-
+                    detected_face df = persons.get(position);
+                    new AsyncServerQuery(context).execute(memberId,poolId,df,position);
                 }
             }));
         }
@@ -166,6 +168,43 @@ public class UnverifiedViewRVAdapter extends TrainingViewRVAdapter
                 alertSettingIDForFace(df,c,personName.getText().toString(),id,dialog,position);
             }
         });
+
+        ListView userData = dialog.findViewById(R.id.profileInfo);
+        userData.setAdapter(pdAdapter);
+        Button addNew = dialog.findViewById(R.id.addNew);
+        addNew.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                dialog.dismiss();
+                addNewFace(df,c,position);
+            }
+        });
+        Button close = dialog.findViewById(R.id.close);
+        close.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                dialog.dismiss();
+            }
+        });
+        dialog.show();
+    }
+
+    @SuppressLint("SetTextI18n")
+    private void showPopUpForQueriedFace(final QueriedFaceResponse qfr, final detected_face df, final Context c, final int position) {
+        final Dialog dialog = new Dialog(c);
+        dialog.setContentView(R.layout.user_face_profile_dialogue);
+        Bitmap photo = BitmapFactory.decodeFile(FaceOperator.getAbsolutePath(c,df));
+        PersonDataAdapter pdAdapter = new PersonDataAdapter
+                (c,new ArrayList<TwoStringDataHolder>());
+        pdAdapter.add(new TwoStringDataHolder("Full name", qfr.getName()+" "+qfr.getLast()));
+        pdAdapter.add(new TwoStringDataHolder("Date of birth","Unknown"));
+        pdAdapter.add(new TwoStringDataHolder("Age","Unknown"));
+
+        dialog.setTitle("Queried face result");
+        ImageView profilePhoto = dialog.findViewById(R.id.profilePhoto);
+        profilePhoto.setImageBitmap(photo);
+        TextView name = dialog.findViewById(R.id.profileName);
+        name.setText(qfr.getName()+" "+qfr.getLast());
 
         ListView userData = dialog.findViewById(R.id.profileInfo);
         userData.setAdapter(pdAdapter);
@@ -272,5 +311,57 @@ public class UnverifiedViewRVAdapter extends TrainingViewRVAdapter
     public int getItemCount()
     {
         return persons.size();
+    }
+
+    @SuppressLint("StaticFieldLeak")
+    private class AsyncServerQuery extends AsyncTask<Object,Void,QueriedFaceResponse> {
+        private ProgressDialog progressDialog;
+        private detected_face df;
+        private int position;
+
+        Context c;
+        AsyncServerQuery(Context c){
+            this.c = c;
+            progressDialog = new ProgressDialog(c, R.style.AppTheme_Dark_Dialog);
+        }
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            progressDialog.setTitle("Querying...");
+            progressDialog.setMessage("Please wait!");
+            progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+            progressDialog.setInverseBackgroundForced(false);
+            progressDialog.setIndeterminate(true);
+            progressDialog.setCancelable(false);
+            progressDialog.show();
+        }
+
+
+        @Override
+        protected QueriedFaceResponse doInBackground(Object[] args) {
+            if(args.length < 4)
+                return null;
+            String memberID = (String)args[0];
+            String poolID = (String)args[1];
+            df = (detected_face)args[2];
+            position = (Integer)args[3];
+
+            try {
+                PoolOps pops = new PoolOps(c);
+                return pops.queryPoolMember(poolID,Long.parseLong(memberID),
+                        FaceOperator.getAbsolutePath(c,df));
+            } catch (Exception e) { return null; }
+        }
+
+        @Override
+        protected void onPostExecute(QueriedFaceResponse qfr) {
+            progressDialog.dismiss();
+            if(qfr == null){
+                Toast.makeText(c,"Error while querying!",Toast.LENGTH_SHORT).show();
+                return;
+            }
+            showPopUpForQueriedFace(qfr,df,c,position);
+        }
     }
 }
