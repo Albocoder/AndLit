@@ -10,7 +10,7 @@ import java.util.List;
 
 public class KnownPeopleViewRVAdapter extends TrainingViewRVAdapter
 {
-    List<KnownPPL> allKnownPpl;
+    private List<KnownPPL> allKnownPpl;
 
     KnownPeopleViewRVAdapter( List<KnownPPL> known )
     {
@@ -21,8 +21,9 @@ public class KnownPeopleViewRVAdapter extends TrainingViewRVAdapter
 
     // Replace the contents of a view (invoked by the layout manager)
     @Override
-    public void onBindViewHolder(PersonViewHolder personViewHolder, final int position)
+    public void onBindViewHolder(PersonViewHolder personViewHolder, int pos)
     {
+        final int position = pos;
         final Context context = personViewHolder.itemView.getContext();
 
         KnownPPL person = allKnownPpl.get(position);

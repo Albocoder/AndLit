@@ -1,8 +1,10 @@
 package com.andlit.ui.knownPeopleView;
 
+import android.app.Activity;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
 import android.view.LayoutInflater;
@@ -15,8 +17,7 @@ import com.andlit.database.entities.misc_info;
 
 public class AddMiscInfoDialogFragment extends DialogFragment
 {
-    PersonInfoRVAdapter adapter;
-
+    @NonNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState)
     {
@@ -56,12 +57,6 @@ public class AddMiscInfoDialogFragment extends DialogFragment
                         }
 
                         AddMiscInfoDialogFragment.this.getDialog().dismiss();
-
-                        // TODO: 5/2/18 fix refresh list
-                        if(adapter != null)
-                        {
-                            adapter.notifyDataSetChanged();
-                        }
                     }
                 })
                 .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -73,8 +68,13 @@ public class AddMiscInfoDialogFragment extends DialogFragment
         return builder.create();
     }
 
-    public void setAdapter(PersonInfoRVAdapter adapter)
+    @Override
+    public void onDismiss(DialogInterface dialog)
     {
-        this.adapter = adapter;
+        super.onDismiss(dialog);
+
+        Activity activity = getActivity();
+        if(activity instanceof DialogCloseListener)
+            ((DialogCloseListener)activity).handleDialogClose(dialog);
     }
 }

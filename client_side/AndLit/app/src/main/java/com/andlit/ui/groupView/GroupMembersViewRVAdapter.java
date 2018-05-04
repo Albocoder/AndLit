@@ -12,7 +12,6 @@ import com.andlit.R;
 import com.andlit.cloudInterface.pools.PoolOps;
 import com.andlit.cloudInterface.pools.models.PoolMember;
 import com.andlit.ui.unverifiedView.UnverifiedViewActivity;
-
 import java.util.List;
 
 public class GroupMembersViewRVAdapter extends GroupViewRVAdapter
@@ -23,7 +22,7 @@ public class GroupMembersViewRVAdapter extends GroupViewRVAdapter
     private String poolId;
     private Context context;
 
-    public GroupMembersViewRVAdapter(List<PoolMember> persons, boolean admin, String poolName, String poolId)
+    GroupMembersViewRVAdapter(List<PoolMember> persons, boolean admin, String poolName, String poolId)
     {
         super(null);
 

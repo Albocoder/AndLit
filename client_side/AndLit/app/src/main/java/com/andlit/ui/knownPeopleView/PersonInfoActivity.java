@@ -1,5 +1,6 @@
 package com.andlit.ui.knownPeopleView;
 
+import android.content.DialogInterface;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -11,7 +12,7 @@ import com.andlit.database.AppDatabase;
 import com.andlit.database.entities.misc_info;
 import java.util.List;
 
-public class PersonInfoActivity extends AppCompatActivity
+public class PersonInfoActivity extends AppCompatActivity implements DialogCloseListener
 {
     private RecyclerView rv;
     private String personId;
@@ -38,11 +39,8 @@ public class PersonInfoActivity extends AppCompatActivity
 
         final AddMiscInfoDialogFragment addMiscInfoDialogFragment = new AddMiscInfoDialogFragment();
 
-        addMiscInfoDialogFragment.setAdapter(adapter);
-
         Bundle bundle = new Bundle();
         bundle.putString("PERSON_ID", personId);
-        bundle.putSerializable("ADAPTER", adapter);
         addMiscInfoDialogFragment.setArguments(bundle);
 
         final Button addMiscInfoButton = findViewById(R.id.button_add_info);
@@ -59,7 +57,6 @@ public class PersonInfoActivity extends AppCompatActivity
     private void initializeData()
     {
         AppDatabase db = AppDatabase.getDatabase(this);
-
         miscInfoList = db.miscInfoDao().getInfosForID(Integer.parseInt(personId));
     }
 
@@ -70,10 +67,10 @@ public class PersonInfoActivity extends AppCompatActivity
     }
 
     @Override
-    public void onResume()
+    public void handleDialogClose(DialogInterface dialog)
     {
-        super.onResume();
-
-        adapter.notifyDataSetChanged();
+        rv.invalidate();
+        initializeData();
+        initializeAdapter();
     }
 }

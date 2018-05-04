@@ -22,10 +22,10 @@ import java.util.List;
 
 public class GroupViewRVAdapter extends RecyclerView.Adapter<com.andlit.ui.groupView.GroupViewRVAdapter.GroupViewHolder>
 {
-    public List<Pool> groups;
+    private List<Pool> groups;
     private Context context;
 
-    public GroupViewRVAdapter(List<Pool> groups)
+    GroupViewRVAdapter(List<Pool> groups)
     {
         this.groups = groups;
     }

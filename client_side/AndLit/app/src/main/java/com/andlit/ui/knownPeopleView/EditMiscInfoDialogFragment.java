@@ -1,8 +1,11 @@
 package com.andlit.ui.knownPeopleView;
 
+import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
 import android.view.LayoutInflater;
@@ -18,6 +21,7 @@ public class EditMiscInfoDialogFragment extends DialogFragment
 {
     PersonInfoRVAdapter adapter;
 
+    @NonNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState)
     {
@@ -31,7 +35,7 @@ public class EditMiscInfoDialogFragment extends DialogFragment
 
         // Inflate and set the layout for the dialog
         // Pass null as the parent view because its going in the dialog layout
-        View view = inflater.inflate(R.layout.add_misc_info_dialog, null);
+        @SuppressLint("InflateParams") View view = inflater.inflate(R.layout.add_misc_info_dialog, null);
         builder.setView(view);
 
         final EditText descField = view.findViewById(R.id.desc);
@@ -56,35 +60,36 @@ public class EditMiscInfoDialogFragment extends DialogFragment
                 if(fixedItem)
                 {
                     KnownPPL person = db.knownPplDao().getPersonWithID(Integer.parseInt(personId));
-                    person.sname = infoNew;
-                    switch( desc )
+                    if( desc != null )
                     {
-                        case "Name: ":
-                            person.name = infoNew;
-                            break;
-                        case "Surname: ":
-                            person.sname = infoNew;
-                            break;
-                        case "Age: ":
-                            person.age = Integer.parseInt(infoNew);
-                            break;
-                        case "Address: ":
-                            person.address = infoNew;
-                            break;
+                        switch( desc )
+                        {
+                            case "Name: ":
+                                person.name = infoNew;
+                                break;
+                            case "Surname: ":
+                                person.sname = infoNew;
+                                break;
+                            case "Age: ":
+                                person.age = Integer.parseInt(infoNew);
+                                break;
+                            case "Address: ":
+                                person.address = infoNew;
+                                break;
+                        }
                     }
                     db.knownPplDao().updatePerson(person);
                 }
                 else
                 {
-                    misc_info miscInfo = new misc_info(Integer.parseInt(personId), desc, infoNew);
+                    misc_info miscInfo = null;
+                    if (desc != null) {
+                        miscInfo = new misc_info(Integer.parseInt(personId), desc, infoNew);
+                    }
                     db.miscInfoDao().updateRowData(miscInfo);
                 }
 
                 EditMiscInfoDialogFragment.this.getDialog().dismiss();
-
-                // TODO: 5/2/18 fix refresh list
-                if (adapter != null)
-                    adapter.notifyDataSetChanged();
             }
         });
         builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -98,5 +103,15 @@ public class EditMiscInfoDialogFragment extends DialogFragment
     public void setAdapter(PersonInfoRVAdapter adapter)
     {
         this.adapter = adapter;
+    }
+
+    @Override
+    public void onDismiss(DialogInterface dialog)
+    {
+        super.onDismiss(dialog);
+
+        Activity activity = getActivity();
+        if(activity instanceof DialogCloseListener)
+            ((DialogCloseListener)activity).handleDialogClose(dialog);
     }
 }
