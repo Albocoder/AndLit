@@ -46,14 +46,14 @@ public class UnverifiedViewRVAdapter extends TrainingViewRVAdapter
     private String poolId;
     private String memberId;
 
-    UnverifiedViewRVAdapter(List<detected_face> persons, List<KnownPPL> known, boolean poolQuery, String poolId, String memberId)
+    UnverifiedViewRVAdapter(List<detected_face> persons, List<KnownPPL> known, boolean poolQuery, String poolId, long memberId)
     {
         super(null);
         allKnownPpl = known;
         this.persons = persons;
         this.poolQuery = poolQuery;
         this.poolId = poolId;
-        this.memberId = memberId;
+        this.memberId = memberId + "";
     }
 
     // Replace the contents of a view (invoked by the layout manager)

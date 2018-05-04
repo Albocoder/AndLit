@@ -18,7 +18,7 @@ public class UnverifiedViewActivity extends Activity
     private List<KnownPPL> kp;
     private boolean poolQuery;
     private String poolId;
-    private String memberId;
+    private long memberId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -35,7 +35,7 @@ public class UnverifiedViewActivity extends Activity
 
         poolQuery = getIntent().getBooleanExtra("POOL_QUERY", false);
         poolId = getIntent().getStringExtra("POOL_ID");
-        memberId = getIntent().getStringExtra("MEMBER_ID");
+        memberId = getIntent().getLongExtra("MEMBER_ID", -1);
 
         initializeData();
         initializeAdapter();

@@ -74,7 +74,8 @@ public class GroupMembersViewRVAdapter extends GroupViewRVAdapter
                 Intent intent = new Intent (context, UnverifiedViewActivity.class);
                 intent.putExtra("POOL_QUERY", true);
                 intent.putExtra("POOL_ID", poolId);
-                intent.putExtra("MEMBER_ID", members.get(position).getId());
+                long memberId = members.get(position).getId();
+                intent.putExtra("MEMBER_ID", memberId);
                 context.startActivity(intent);
             }
         });
