@@ -15,16 +15,16 @@ import com.andlit.R;
 import com.andlit.database.AppDatabase;
 import com.andlit.database.entities.KnownPPL;
 import com.andlit.database.entities.misc_info;
-import java.io.Serializable;
 import java.util.List;
 
-public class PersonInfoRVAdapter extends RecyclerView.Adapter<PersonInfoRVAdapter.PersonInfoViewHolder> implements Serializable {
-    String personId;
-    List<misc_info> miscInfoList;
-    int fixedInfoSize = 4;
-    FragmentManager supportFragmentManager;
+public class PersonInfoRVAdapter extends RecyclerView.Adapter<PersonInfoRVAdapter.PersonInfoViewHolder>
+{
+    private String personId;
+    private List<misc_info> miscInfoList;
+    private int fixedInfoSize = 4;
+    private FragmentManager supportFragmentManager;
 
-    public PersonInfoRVAdapter(String personId, List<misc_info> miscInfoList, FragmentManager supportFragmentManager)
+    PersonInfoRVAdapter(String personId, List<misc_info> miscInfoList, FragmentManager supportFragmentManager)
     {
         super();
 
@@ -36,12 +36,12 @@ public class PersonInfoRVAdapter extends RecyclerView.Adapter<PersonInfoRVAdapte
     // Provide a reference to the views for each data item
     // Complex data items may need more than one view per item, and
     // provide access to all the views for a data item in a view holder
-    public static class PersonInfoViewHolder extends RecyclerView.ViewHolder
+    static class PersonInfoViewHolder extends RecyclerView.ViewHolder
     {
         CardView cv;
-        public TextView personInfoDesc;
-        public TextView personInfoItem;
-        public ImageButton removeButton;
+        TextView personInfoDesc;
+        TextView personInfoItem;
+        ImageButton removeButton;
 
         PersonInfoViewHolder(View itemView)
         {
@@ -64,14 +64,14 @@ public class PersonInfoRVAdapter extends RecyclerView.Adapter<PersonInfoRVAdapte
     public PersonInfoRVAdapter.PersonInfoViewHolder onCreateViewHolder(ViewGroup viewGroup, int i)
     {
         View v = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.person_info_item, viewGroup, false);
-        PersonInfoRVAdapter.PersonInfoViewHolder pvh = new PersonInfoRVAdapter.PersonInfoViewHolder(v);
-        return pvh;
+        return new PersonInfoViewHolder(v);
     }
 
     // Replace the contents of a view (invoked by the layout manager)
     @Override
-    public void onBindViewHolder(final PersonInfoRVAdapter.PersonInfoViewHolder viewHolder, final int position)
+    public void onBindViewHolder(final PersonInfoRVAdapter.PersonInfoViewHolder viewHolder, int pos)
     {
+        final int position = pos;
         Context context = viewHolder.itemView.getContext();
 
         final AppDatabase db = AppDatabase.getDatabase(context);
@@ -123,6 +123,8 @@ public class PersonInfoRVAdapter extends RecyclerView.Adapter<PersonInfoRVAdapte
             Drawable myDrawable = viewHolder.itemView.getResources().getDrawable(R.drawable.ic_delete_forever_white);
             viewHolder.removeButton.setImageDrawable(myDrawable);
 
+            viewHolder.removeButton.setVisibility(View.VISIBLE);
+
             // Set a click listener for item remove button
             viewHolder.removeButton.setOnClickListener(new View.OnClickListener()
             {
@@ -138,6 +140,10 @@ public class PersonInfoRVAdapter extends RecyclerView.Adapter<PersonInfoRVAdapte
                     notifyItemRangeChanged(position-fixedInfoSize, miscInfoList.size()+fixedInfoSize);
                 }
             });
+        }
+        else
+        {
+            viewHolder.removeButton.setVisibility(View.INVISIBLE);
         }
 
         final String desc = editInfoDesc;

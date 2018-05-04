@@ -16,8 +16,6 @@ import android.widget.Toast;
 import com.andlit.R;
 import com.andlit.cloudInterface.pools.PoolOps;
 import com.andlit.cloudInterface.pools.models.PoolMember;
-import com.andlit.ui.classifierView.ClassifierViewActivity;
-
 import java.util.List;
 
 public class GroupMembersViewActivity extends AppCompatActivity
@@ -52,7 +50,9 @@ public class GroupMembersViewActivity extends AppCompatActivity
                 ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
                 String poolData = "ID: " + groupId + "\n" + "Pass: " + groupPass;
                 ClipData clip = ClipData.newPlainText("POOL_INFO", poolData);
-                clipboard.setPrimaryClip(clip);
+                if (clipboard != null) {
+                    clipboard.setPrimaryClip(clip);
+                }
                 Toast toast = Toast.makeText(context, "Pool Info Has Been Copied To Clipboard!", Toast.LENGTH_SHORT);
                 toast.show();
             }
@@ -68,7 +68,9 @@ public class GroupMembersViewActivity extends AppCompatActivity
                 ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
                 String poolData = getResources().getString(R.string.pool_join_url) + "?id=" + groupId + "&pw=" + groupPass;
                 ClipData clip = ClipData.newPlainText("POOL_INFO", poolData);
-                clipboard.setPrimaryClip(clip);
+                if (clipboard != null) {
+                    clipboard.setPrimaryClip(clip);
+                }
                 Toast toast = Toast.makeText(context, "Pool Link Has Been Copied To Clipboard!", Toast.LENGTH_SHORT);
                 toast.show();
             }

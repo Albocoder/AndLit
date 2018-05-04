@@ -3,12 +3,8 @@ package com.andlit.database.entities;
 import android.arch.persistence.room.Entity;
 import android.arch.persistence.room.Index;
 import android.arch.persistence.room.PrimaryKey;
-
 import com.andlit.database.converters.DateConverter;
-
 import java.util.Date;
-
-
 
 @Entity(tableName = "known_ppl",indices = {@Index(value = "global_id")})
 public class KnownPPL {
