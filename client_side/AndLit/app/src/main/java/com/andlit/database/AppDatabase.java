@@ -6,7 +6,6 @@ import android.arch.persistence.room.Room;
 import android.arch.persistence.room.RoomDatabase;
 import android.content.Context;
 
-import com.andlit.database.daos.api_keys_dao;
 import com.andlit.database.daos.classifier_dao;
 import com.andlit.database.daos.detected_faces_dao;
 import com.andlit.database.daos.known_ppl_dao;
@@ -30,7 +29,6 @@ import com.andlit.database.entities.training_face;
 public abstract class AppDatabase extends RoomDatabase {
     private static AppDatabase INSTANCE;
 
-    public abstract api_keys_dao apiKeysDao();
     public abstract classifier_dao classifierDao();
     public abstract detected_faces_dao detectedFacesDao();
     public abstract known_ppl_dao knownPplDao();
@@ -44,10 +42,7 @@ public abstract class AppDatabase extends RoomDatabase {
     public static AppDatabase getDatabase(Context context) {
         if (INSTANCE == null || !INSTANCE.isOpen()) {
             INSTANCE = Room.databaseBuilder(context, AppDatabase.class,DATABASE_NAME)
-                            // Don't uncomment this!
                             .allowMainThreadQueries()
-
-                            // MAYBE? -> recreate the database if necessary
                             .fallbackToDestructiveMigration()
                             .build();
         }
@@ -55,7 +50,7 @@ public abstract class AppDatabase extends RoomDatabase {
     }
 
     public static void destroyInstance() {
-        if(INSTANCE != null && INSTANCE.isOpen())
+        if(INSTANCE != null)
             INSTANCE.close();
         INSTANCE = null;
     }

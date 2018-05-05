@@ -42,14 +42,21 @@ public class Authenticator {
             DatabaseBackup      dbb = new DatabaseBackup(c);
             PhotoBackup         pb  = new PhotoBackup(c);
 
-            if( !(cb.backupAllData() && dbb.backupAllData() && pb.backupAllData()) )
+            boolean passed = cb.backupClassifier(null);
+            passed &= pb.backupAllData();
+            passed &= dbb.saveDatabase();
+            if(!passed)
                 return false;
 
             cb.deleteAllData();
             pb.deleteAllData();
             dbb.deleteAllData();
             CronMaster.cancelAllJobs(c);
-        } catch (Exception e) { return false; }
+        } catch (Exception e) {
+            return false;
+        } catch (Throwable throwable) {
+            return false;
+        }
         return true;
     }
 
@@ -112,7 +119,7 @@ public class Authenticator {
                     PhotoBackup         pb  = new PhotoBackup(c);
 
                     passes = pb.retrieveAllData();
-                    passes &= cb.retrieveAllData();
+                    passes &= cb.loadClassifier();
                     if(!passes)
                         return null;
                 } catch (Exception e) {
