@@ -12,8 +12,6 @@ public class SettingsActivity extends AppCompatActivity
     {
         super.onCreate(savedInstanceState);
 
-        PreferenceManager.setDefaultValues(this, R.xml.preferences, false); // sets default settings
-
         getSupportFragmentManager().beginTransaction()
                 .replace(android.R.id.content, new SettingsFragment())
                 .commit();

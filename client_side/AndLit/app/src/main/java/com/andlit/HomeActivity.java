@@ -15,6 +15,7 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.preference.PreferenceManager;
 import android.support.v7.widget.Toolbar;
 import android.text.Html;
 import android.util.Log;
@@ -57,6 +58,8 @@ public class HomeActivity extends AppCompatActivity
         navigationDrawerInit();
 
         checkTTS(); // check if textToSpeech engine exists on device
+
+        PreferenceManager.setDefaultValues(this, R.xml.preferences, false); // sets default settings
 
         // Camera button init
         Button cameraButton = findViewById(R.id.camera_button);
