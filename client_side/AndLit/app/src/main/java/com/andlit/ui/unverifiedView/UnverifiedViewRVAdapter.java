@@ -55,9 +55,12 @@ public class UnverifiedViewRVAdapter extends TrainingViewRVAdapter
     }
 
     // Replace the contents of a view (invoked by the layout manager)
+    @SuppressLint("SetTextI18n")
     @Override
-    public void onBindViewHolder(PersonViewHolder personViewHolder, final int position)
+    public void onBindViewHolder(PersonViewHolder personViewHolder, int pos)
     {
+        final int position = pos;
+
         Integer predictedLabel = persons.get(position).predictedlabel;
         final Context context = personViewHolder.itemView.getContext();
         final AppDatabase db = AppDatabase.getDatabase(context);
@@ -133,7 +136,7 @@ public class UnverifiedViewRVAdapter extends TrainingViewRVAdapter
         dialog.setContentView(R.layout.user_face_profile_dialogue);
         String title;
         Bitmap photo = BitmapFactory.decodeFile(FaceOperator.getAbsolutePath(c,df));
-        PersonDataAdapter pdAdapter = null;
+        PersonDataAdapter pdAdapter;
         int bestPrediction = df.predictedlabel;
         if(bestPrediction == -1) {
             title = "Unknown Person";

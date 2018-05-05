@@ -1,5 +1,6 @@
 package com.andlit.ui.trainingView;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -21,7 +22,7 @@ import java.util.List;
 
 public class TrainingViewRVAdapter extends RecyclerView.Adapter<TrainingViewRVAdapter.PersonViewHolder>
 {
-    public List<training_face> persons;
+    private List<training_face> persons;
 
     public TrainingViewRVAdapter(List<training_face> persons)
     {
@@ -65,9 +66,12 @@ public class TrainingViewRVAdapter extends RecyclerView.Adapter<TrainingViewRVAd
     }
 
     // Replace the contents of a view (invoked by the layout manager)
+    @SuppressLint("SetTextI18n")
     @Override
-    public void onBindViewHolder(PersonViewHolder personViewHolder, final int position)
+    public void onBindViewHolder(PersonViewHolder personViewHolder, int pos)
     {
+        final int position = pos;
+
         Integer label = persons.get(position).label;
         final Context context = personViewHolder.itemView.getContext();
         final AppDatabase db = AppDatabase.getDatabase(context);

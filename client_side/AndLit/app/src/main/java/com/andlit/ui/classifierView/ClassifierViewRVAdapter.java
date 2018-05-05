@@ -1,5 +1,6 @@
 package com.andlit.ui.classifierView;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
@@ -13,7 +14,7 @@ import com.andlit.database.entities.Classifier;
 
 public class ClassifierViewRVAdapter extends RecyclerView.Adapter<com.andlit.ui.classifierView.ClassifierViewRVAdapter.ClassifierViewHolder>
 {
-    public ClassifierViewRVAdapter()
+    ClassifierViewRVAdapter()
     {
 
     }
@@ -21,11 +22,11 @@ public class ClassifierViewRVAdapter extends RecyclerView.Adapter<com.andlit.ui.
     // Provide a reference to the views for each data item
     // Complex data items may need more than one view per item, and
     // provide access to all the views for a data item in a view holder
-    public static class ClassifierViewHolder extends RecyclerView.ViewHolder
+    static class ClassifierViewHolder extends RecyclerView.ViewHolder
     {
         CardView cv;
-        public TextView classifierStatDesc;
-        public TextView classifierStatItem;
+        TextView classifierStatDesc;
+        TextView classifierStatItem;
 
         ClassifierViewHolder(View itemView)
         {
@@ -47,11 +48,11 @@ public class ClassifierViewRVAdapter extends RecyclerView.Adapter<com.andlit.ui.
     public com.andlit.ui.classifierView.ClassifierViewRVAdapter.ClassifierViewHolder onCreateViewHolder(ViewGroup viewGroup, int i)
     {
         View v = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.classifier_view_list_item, viewGroup, false);
-        com.andlit.ui.classifierView.ClassifierViewRVAdapter.ClassifierViewHolder pvh = new com.andlit.ui.classifierView.ClassifierViewRVAdapter.ClassifierViewHolder(v);
-        return pvh;
+        return new ClassifierViewHolder(v);
     }
 
     // Replace the contents of a view (invoked by the layout manager)
+    @SuppressLint("SetTextI18n")
     @Override
     public void onBindViewHolder(final com.andlit.ui.classifierView.ClassifierViewRVAdapter.ClassifierViewHolder viewHolder, final int position)
     {
@@ -90,7 +91,7 @@ public class ClassifierViewRVAdapter extends RecyclerView.Adapter<com.andlit.ui.
 
     }
 
-    // Return the size of your dataset (invoked by the layout manager)
+    // Return the size of your data set (invoked by the layout manager)
     @Override
     public int getItemCount()
     {

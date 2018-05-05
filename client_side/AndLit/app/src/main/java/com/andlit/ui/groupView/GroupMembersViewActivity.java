@@ -22,7 +22,6 @@ public class GroupMembersViewActivity extends AppCompatActivity
 {
     private RecyclerView rv;
     private List<PoolMember> members;
-    private String groupName;
     private boolean admin;
     private String groupId;
     private Context context;
@@ -36,7 +35,6 @@ public class GroupMembersViewActivity extends AppCompatActivity
         setContentView(R.layout.activity_group_members_view);
 
         admin = getIntent().getBooleanExtra("ADMIN", false);
-        groupName = getIntent().getStringExtra("groupName");
         groupId = getIntent().getStringExtra("POOL_ID");
         groupPass = getIntent().getStringExtra("POOL_PASS");
 
@@ -87,7 +85,7 @@ public class GroupMembersViewActivity extends AppCompatActivity
 
     private void initializeAdapter()
     {
-        GroupMembersViewRVAdapter adapter = new GroupMembersViewRVAdapter(members, admin, groupName, groupId);
+        GroupMembersViewRVAdapter adapter = new GroupMembersViewRVAdapter(members, admin, groupId);
         rv.setAdapter(adapter);
     }
 

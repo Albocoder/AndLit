@@ -1,5 +1,6 @@
 package com.andlit.ui.knownPeopleView;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
@@ -68,6 +69,7 @@ public class PersonInfoRVAdapter extends RecyclerView.Adapter<PersonInfoRVAdapte
     }
 
     // Replace the contents of a view (invoked by the layout manager)
+    @SuppressLint("SetTextI18n")
     @Override
     public void onBindViewHolder(final PersonInfoRVAdapter.PersonInfoViewHolder viewHolder, int pos)
     {

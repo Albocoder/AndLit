@@ -16,7 +16,6 @@ import android.widget.Toast;
 import com.andlit.R;
 import com.andlit.cloudInterface.pools.PoolOps;
 import com.andlit.database.entities.Pool;
-import com.andlit.ui.classifierView.ClassifierViewActivity;
 
 import java.util.List;
 
@@ -52,6 +51,7 @@ public class YourGroupsFragment extends Fragment
         return view;
     }
 
+    @SuppressLint("SetTextI18n")
     private void initializeAdapter()
     {
         if(pools != null)

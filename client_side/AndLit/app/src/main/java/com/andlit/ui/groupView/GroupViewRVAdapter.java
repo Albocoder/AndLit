@@ -61,14 +61,15 @@ public class GroupViewRVAdapter extends RecyclerView.Adapter<com.andlit.ui.group
     public com.andlit.ui.groupView.GroupViewRVAdapter.GroupViewHolder onCreateViewHolder(ViewGroup viewGroup, int i)
     {
         View v = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.your_groups_list_item, viewGroup, false);
-        com.andlit.ui.groupView.GroupViewRVAdapter.GroupViewHolder pvh = new com.andlit.ui.groupView.GroupViewRVAdapter.GroupViewHolder(v);
-        return pvh;
+        return new GroupViewHolder(v);
     }
 
     // Replace the contents of a view (invoked by the layout manager)
     @Override
-    public void onBindViewHolder(final com.andlit.ui.groupView.GroupViewRVAdapter.GroupViewHolder personViewHolder, final int position)
+    public void onBindViewHolder(final com.andlit.ui.groupView.GroupViewRVAdapter.GroupViewHolder personViewHolder, int pos)
     {
+        final int position = pos;
+
         context = personViewHolder.itemView.getContext();
 
         final String groupName = groups.get(position).name;
@@ -108,7 +109,6 @@ public class GroupViewRVAdapter extends RecyclerView.Adapter<com.andlit.ui.group
                 Context context = personViewHolder.itemView.getContext();
                 Intent intent = new Intent (context, GroupMembersViewActivity.class);
                 intent.putExtra("ADMIN", admin);
-                intent.putExtra("GROUP", groupName);
                 intent.putExtra("POOL_ID", groups.get(position).id);
                 intent.putExtra("POOL_PASS", groups.get(position).password);
                 context.startActivity(intent);
