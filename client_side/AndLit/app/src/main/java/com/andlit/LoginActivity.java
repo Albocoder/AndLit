@@ -16,6 +16,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 import com.andlit.cloudInterface.authentication.Authenticator;
 import com.andlit.database.entities.UserLogin;
+import com.andlit.device.SSHInterface;
+
 import java.io.IOException;
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -42,10 +44,25 @@ public class LoginActivity extends AppCompatActivity
     private ScrollView sv;
 
 
+    class TestClass extends AsyncTask<Void,Void,Void>{
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            String res;
+            try {
+                res = SSHInterface.executeRemoteCommand("pi","nehremislove13","139.179.213.68");
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            return null;
+        }
+    }
+
     // ******************************** VIEW RELATED FUNCTIONS ******************************** //
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        new TestClass().execute();
         setContentView(R.layout.activity_login);
         ButterKnife.bind(this);
         a = new Authenticator(this);
@@ -129,7 +146,7 @@ public class LoginActivity extends AppCompatActivity
 
     @Override
     public void onBackPressed() {
-        // Disable going back to the MainActivity
+        // Disable going back to the BluetoothConfigActivity
         moveTaskToBack(true);
     }
 

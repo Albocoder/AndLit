@@ -29,6 +29,7 @@ import com.andlit.cloudInterface.pools.PoolOps;
 import com.andlit.cloudInterface.pools.models.QueriedFaceResponse;
 import com.andlit.cron.CronMaster;
 import com.andlit.database.AppDatabase;
+import com.andlit.device.SSHInterface;
 import com.andlit.face.FaceOperator;
 import com.andlit.face.FaceRecognizerSingleton;
 import com.andlit.ui.classifierView.ClassifierViewActivity;
