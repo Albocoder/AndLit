@@ -18,24 +18,24 @@ public class GroupMembersViewRVAdapter extends GroupViewRVAdapter
 {
     private List<PoolMember> members;
     private boolean admin;
-    private String poolName;
     private String poolId;
     private Context context;
 
-    GroupMembersViewRVAdapter(List<PoolMember> persons, boolean admin, String poolName, String poolId)
+    GroupMembersViewRVAdapter(List<PoolMember> persons, boolean admin, String poolId)
     {
         super(null);
 
         this.poolId = poolId;
-        this.poolName = poolName;
         this.members = persons;
         this.admin = admin;
     }
 
     // Replace the contents of a view (invoked by the layout manager)
     @Override
-    public void onBindViewHolder(final com.andlit.ui.groupView.GroupViewRVAdapter.GroupViewHolder personViewHolder, final int position)
+    public void onBindViewHolder(final com.andlit.ui.groupView.GroupViewRVAdapter.GroupViewHolder personViewHolder, int pos)
     {
+        final int position = pos;
+
         personViewHolder.groupName.setText(members.get(position).getUsername());
 
         Drawable myDrawable = personViewHolder.itemView.getResources().getDrawable(R.drawable.ic_tag_faces_white);
@@ -81,7 +81,7 @@ public class GroupMembersViewRVAdapter extends GroupViewRVAdapter
         });
     }
 
-    // Return the size of your dataset (invoked by the layout manager)
+    // Return the size of your data set (invoked by the layout manager)
     @Override
     public int getItemCount()
     {

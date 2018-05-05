@@ -44,7 +44,8 @@ public class CreateGroupFragment extends Fragment
             @Override
             public void onClick(View view) {
                 // what happens when you press create group button
-                new CreatePoolTask().execute(poolNameInput.getEditText().getText().toString());
+                String inputText = poolNameInput.getEditText().getText().toString();
+                new CreatePoolTask().execute(inputText);
             }
         });
 

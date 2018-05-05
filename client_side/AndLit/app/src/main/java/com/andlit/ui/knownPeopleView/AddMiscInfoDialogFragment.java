@@ -1,5 +1,6 @@
 package com.andlit.ui.knownPeopleView;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.DialogInterface;
@@ -27,7 +28,7 @@ public class AddMiscInfoDialogFragment extends DialogFragment
 
         // Inflate and set the layout for the dialog
         // Pass null as the parent view because its going in the dialog layout
-        final View view = inflater.inflate(R.layout.add_misc_info_dialog, null);
+        @SuppressLint("InflateParams") final View view = inflater.inflate(R.layout.add_misc_info_dialog, null);
         builder.setView(view)
                 // Add action buttons
                 .setPositiveButton("Add Info", new DialogInterface.OnClickListener() {

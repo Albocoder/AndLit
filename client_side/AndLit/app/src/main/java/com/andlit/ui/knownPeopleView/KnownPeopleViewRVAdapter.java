@@ -1,5 +1,6 @@
 package com.andlit.ui.knownPeopleView;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.view.View;
@@ -20,6 +21,7 @@ public class KnownPeopleViewRVAdapter extends TrainingViewRVAdapter
     }
 
     // Replace the contents of a view (invoked by the layout manager)
+    @SuppressLint("SetTextI18n")
     @Override
     public void onBindViewHolder(PersonViewHolder personViewHolder, int pos)
     {
