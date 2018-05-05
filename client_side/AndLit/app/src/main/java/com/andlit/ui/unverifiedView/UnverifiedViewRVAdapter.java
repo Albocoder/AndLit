@@ -229,8 +229,8 @@ public class UnverifiedViewRVAdapter extends TrainingViewRVAdapter
     private void alertSettingIDForFace(final detected_face df,final Context c, String newPerson,
                                        final int i, final Dialog parent,final int position) {
         new AlertDialog.Builder(c)
-                .setTitle("Was it really wrong?")
-                .setMessage(Html.fromHtml("Saving this face as <b>"+newPerson
+                .setTitle("About to save the face")
+                .setMessage(Html.fromHtml("Do you really want to save the face as <b>"+newPerson
                         +"</b>?<br/><b>WARNING</b>: <i>Wrong person might compromise the accuracy.</i>"))
                 .setIcon(android.R.drawable.ic_dialog_alert)
                 .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
