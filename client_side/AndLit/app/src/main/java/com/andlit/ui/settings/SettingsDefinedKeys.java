@@ -23,4 +23,6 @@ public final class SettingsDefinedKeys {
     public static final String BACKUP_FREQUENCY = "backup_frequency";
 
     public static final String CAMERA_SCREEN_ORIENTATION = "camera_screen_orientation";
+
+    public static final String USE_ANDLIT_DEVICE = "use_andlit_device";
 }

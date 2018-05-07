@@ -25,6 +25,12 @@
         android:summary="Turn on to receive a notification whenever a scheduled task is executed"
         android:title="Scheduled Tasks Notifications" />
 
+    <android.support.v7.preference.SwitchPreferenceCompat
+        android:defaultValue="false"
+        android:key="use_andlit_device"
+        android:summary="Turn on to use AndLit device instead of your mobile camera"
+        android:title="Use AndLit Device" />
+
     <android.support.v7.preference.ListPreference
         android:summary="Choose the frequency at which you would like your device to automatically train"
         android:key="training_frequency"
