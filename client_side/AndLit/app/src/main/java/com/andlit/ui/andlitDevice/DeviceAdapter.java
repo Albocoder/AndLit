@@ -1,4 +1,4 @@
-package com.andlit.device;
+package com.andlit.ui.andlitDevice;
 
 import android.annotation.SuppressLint;
 import android.bluetooth.BluetoothDevice;

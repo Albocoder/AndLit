@@ -1,4 +1,4 @@
-package com.andlit.device;
+package com.andlit.ui.andlitDevice;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -43,15 +43,15 @@ public class BluetoothConfigActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_bluetooth_config);
 
-        ssidTextView = (TextView) findViewById(R.id.ssid_text);
-        pskTextView = (TextView) findViewById(R.id.psk_text);
-        messageTextView = (TextView) findViewById(R.id.messages_text);
+        ssidTextView = findViewById(R.id.ssid_text);
+        pskTextView = findViewById(R.id.psk_text);
+        messageTextView = findViewById(R.id.messages_text);
         messageTextView.setMovementMethod(new ScrollingMovementMethod());
 
-        devicesSpinner = (Spinner) findViewById(R.id.devices_spinner);
+        devicesSpinner = findViewById(R.id.devices_spinner);
 
-        refreshDevicesButton = (Button) findViewById(R.id.refresh_devices_button);
-        startButton = (Button) findViewById(R.id.start_button);
+        refreshDevicesButton = findViewById(R.id.refresh_devices_button);
+        startButton = findViewById(R.id.start_button);
 
         refreshDevicesButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -117,35 +117,22 @@ public class BluetoothConfigActivity extends Activity {
                     Thread.sleep(1000);
                 }
 
-                writeOutput("Connected.");
-
                 OutputStream mmOutputStream = mmSocket.getOutputStream();
                 final InputStream mmInputStream = mmSocket.getInputStream();
 
-                waitForResponse(mmInputStream, -1);
-
-                writeOutput("Sending SSID.");
+                waitForResponse(mmInputStream, 100);
 
                 mmOutputStream.write(ssid.getBytes());
                 mmOutputStream.flush();
-                waitForResponse(mmInputStream, -1);
-
-                writeOutput("Sending PSK.");
+                waitForResponse(mmInputStream, 100);
 
                 mmOutputStream.write(psk.getBytes());
                 mmOutputStream.flush();
-                waitForResponse(mmInputStream, -1);
+                waitForResponse(mmInputStream, 100);
 
                 mmSocket.close();
-
-                writeOutput("Success.");
-
-            } catch (Exception e) {
-                writeOutput("Error: " + e.getLocalizedMessage());
-            }
-            writeOutput("Done.");
+            } catch (Exception e) { writeOutput("Error: " + e.getLocalizedMessage()); }
         }
-
     }
 
     private void writeOutput(final String text) {
@@ -167,9 +154,6 @@ public class BluetoothConfigActivity extends Activity {
         });
     }
 
-    /*
-     * TODO actually use the timeout
-     */
     private void waitForResponse(InputStream mmInputStream, long timeout) throws IOException {
         int bytesAvailable;
 
@@ -195,6 +179,10 @@ public class BluetoothConfigActivity extends Activity {
                         readBuffer[readBufferPosition++] = b;
                     }
                 }
+            }else {
+                try {
+                    Thread.sleep(timeout);
+                } catch (InterruptedException ignored) {}
             }
         }
     }

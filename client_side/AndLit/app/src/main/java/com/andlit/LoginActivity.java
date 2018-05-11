@@ -16,7 +16,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 import com.andlit.cloudInterface.authentication.Authenticator;
 import com.andlit.database.entities.UserLogin;
-import com.andlit.device.SSHInterface;
+import com.andlit.ui.andlitDevice.BluetoothConfigActivity;
 
 import java.io.IOException;
 import butterknife.BindView;
@@ -43,26 +43,13 @@ public class LoginActivity extends AppCompatActivity
     private AnimationDrawable animationDrawable;
     private ScrollView sv;
 
-
-    class TestClass extends AsyncTask<Void,Void,Void>{
-
-        @Override
-        protected Void doInBackground(Void... voids) {
-            String res;
-            try {
-                res = SSHInterface.executeRemoteCommand("pi","nehremislove13","139.179.213.68");
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            return null;
-        }
-    }
-
     // ******************************** VIEW RELATED FUNCTIONS ******************************** //
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        new TestClass().execute();
+        Intent i = new Intent(this, BluetoothConfigActivity.class);
+        startActivity(i);
+
         setContentView(R.layout.activity_login);
         ButterKnife.bind(this);
         a = new Authenticator(this);

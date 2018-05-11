@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
-    tools:context="com.andlit.device.BluetoothConfigActivity">
+    tools:context="com.andlit.ui.andlitDevice.BluetoothConfigActivity">
 
     <TextView
         android:layout_width="wrap_content"
@@ -39,7 +39,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/ssid_text"
-        android:layout_below="@+id/ssid_label"/>
+        android:layout_below="@+id/ssid_label"
+        tools:ignore="LabelFor" />
 
 
     <TextView
@@ -54,7 +55,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/psk_text"
-        android:layout_below="@+id/psk_label" />
+        android:layout_below="@+id/psk_label"
+        tools:ignore="LabelFor" />
 
 
     <Button

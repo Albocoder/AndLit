@@ -1,12 +1,17 @@
 package com.andlit;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.speech.tts.TextToSpeech;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
@@ -29,6 +34,7 @@ import com.andlit.cloudInterface.pools.PoolOps;
 import com.andlit.cloudInterface.pools.models.QueriedFaceResponse;
 import com.andlit.cron.CronMaster;
 import com.andlit.database.AppDatabase;
+import com.andlit.device.DeviceController;
 import com.andlit.device.SSHInterface;
 import com.andlit.face.FaceOperator;
 import com.andlit.face.FaceRecognizerSingleton;
@@ -41,6 +47,7 @@ import com.andlit.ui.camera.HandsFreeMode;
 import com.andlit.ui.camera.IntermediateCameraActivity;
 import com.andlit.ui.unverifiedView.UnverifiedViewActivity;
 import com.andlit.utils.RequestCodes;
+import com.andlit.utils.StorageHelper;
 
 
 public class HomeActivity extends AppCompatActivity
@@ -55,7 +62,13 @@ public class HomeActivity extends AppCompatActivity
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
-
+//        todo: add this to bluetooth config activity
+//        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && checkSelfPermission
+//                (Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED){
+//            requestPermissions(new String[]{Manifest.permission.ACCESS_COARSE_LOCATION},1);
+//        }else{
+//            new TestClass().execute();
+//        }
         navigationDrawerInit();
 
         checkTTS(); // check if textToSpeech engine exists on device
