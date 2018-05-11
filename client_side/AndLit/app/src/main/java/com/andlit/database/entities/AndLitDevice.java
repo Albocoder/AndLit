@@ -6,17 +6,20 @@ import android.support.annotation.NonNull;
 
 @Entity(tableName = "andlit_devices")
 public class AndLitDevice {
-    @PrimaryKey(autoGenerate=true)
-    public Long id;
+    @PrimaryKey @NonNull
+    public String mac;
+    @NonNull
+    public String name;
     @NonNull
     public String username;
     @NonNull
     public String password;
-    public String ip;
 
-    public AndLitDevice(@NonNull String username, @NonNull String password, String ip) {
+    public AndLitDevice(@NonNull String mac, @NonNull String name, @NonNull String username,
+                        @NonNull String password) {
+        this.mac = mac;
+        this.name = name;
         this.username = username;
         this.password = password;
-        this.ip = ip;
     }
 }

@@ -31,14 +31,13 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceSmall"
-        android:text="SSID"
         android:id="@+id/ssid_label"
         android:layout_below="@+id/refresh_devices_button" />
 
-    <EditText
+    <Spinner
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/ssid_text"
+        android:id="@+id/ssid_spinner"
         android:layout_below="@+id/ssid_label"
         tools:ignore="LabelFor" />
 
@@ -49,7 +48,7 @@
         android:textAppearance="?android:attr/textAppearanceSmall"
         android:text="PSK"
         android:id="@+id/psk_label"
-        android:layout_below="@+id/ssid_text" />
+        android:layout_below="@+id/ssid_spinner" />
 
     <EditText
         android:layout_width="match_parent"

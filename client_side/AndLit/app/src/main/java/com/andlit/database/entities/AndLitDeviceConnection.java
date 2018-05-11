@@ -7,19 +7,21 @@ import android.arch.persistence.room.PrimaryKey;
 import android.support.annotation.NonNull;
 
 @Entity(tableName = "andlit_device_connection",foreignKeys = {
-        @ForeignKey(entity = AndLitDevice.class, childColumns = "id",
-                parentColumns = "id",onDelete = ForeignKey.CASCADE),
+        @ForeignKey(entity = AndLitDevice.class, childColumns = "mac",
+                parentColumns = "mac",onDelete = ForeignKey.CASCADE),
         @ForeignKey(entity = WifiCredentials.class, childColumns = "ssid",
                 parentColumns = "ssid",onDelete = ForeignKey.CASCADE)},
-        primaryKeys = {"id","ssid"},indices = {@Index("ssid")})
+        primaryKeys = {"mac","ssid"},indices = {@Index("ssid")})
 public class AndLitDeviceConnection {
     @NonNull
-    public Long id;
+    public String mac;
     @NonNull
     public String ssid;
+    public String ip;
 
-    public AndLitDeviceConnection (Long id,@NonNull String ssid){
-        this.id = id;
+    public AndLitDeviceConnection (@NonNull String mac, @NonNull String ssid, String ip){
+        this.mac = mac;
         this.ssid = ssid;
+        this.ip = ip;
     }
 }

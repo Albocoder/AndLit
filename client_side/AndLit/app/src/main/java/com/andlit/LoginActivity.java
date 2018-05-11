@@ -47,8 +47,6 @@ public class LoginActivity extends AppCompatActivity
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Intent i = new Intent(this, BluetoothConfigActivity.class);
-        startActivity(i);
 
         setContentView(R.layout.activity_login);
         ButterKnife.bind(this);

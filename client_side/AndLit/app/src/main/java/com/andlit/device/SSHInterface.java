@@ -26,7 +26,7 @@ public class SSHInterface {
             throw new JSchException("Did not connect successfully!");
     }
 
-    public boolean isReady(){ return session != null; }
+    public boolean isReady() { return session != null; }
 
     public String saveImageInFile(Context c) {
         if (session == null || !session.isConnected()) {

@@ -4,17 +4,29 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
+import android.Manifest;
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.pm.PackageManager;
+import android.net.wifi.ScanResult;
+import android.net.wifi.WifiManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.text.method.ScrollingMovementMethod;
+import android.util.Log;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -27,23 +39,25 @@ public class BluetoothConfigActivity extends Activity {
 
     Spinner devicesSpinner;
     Button refreshDevicesButton;
-    TextView ssidTextView;
+    Spinner ssidSpinner;
     TextView pskTextView;
     Button startButton;
     TextView messageTextView;
 
     private DeviceAdapter adapter_devices;
+    WifiManager wifiManager;
 
     final UUID uuid = UUID.fromString("815425a5-bfac-47bf-9321-c5ff980b5e11");
     final byte delimiter = 33;
     int readBufferPosition = 0;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_bluetooth_config);
 
-        ssidTextView = findViewById(R.id.ssid_text);
+        ssidSpinner = findViewById(R.id.ssid_spinner);
         pskTextView = findViewById(R.id.psk_text);
         messageTextView = findViewById(R.id.messages_text);
         messageTextView.setMovementMethod(new ScrollingMovementMethod());
@@ -57,13 +71,19 @@ public class BluetoothConfigActivity extends Activity {
             @Override
             public void onClick(View v) {
                 refreshDevices();
+                if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && checkSelfPermission
+                        (Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED){
+                    requestPermissions(new String[]{Manifest.permission.ACCESS_COARSE_LOCATION},1);
+                }else{
+                    refreshAPs();
+                }
             }
         });
 
         startButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String ssid = ssidTextView.getText().toString();
+                String ssid = (String) ssidSpinner.getSelectedItem();
                 String psk = pskTextView.getText().toString();
 
                 BluetoothDevice device = (BluetoothDevice) devicesSpinner.getSelectedItem();
@@ -72,6 +92,12 @@ public class BluetoothConfigActivity extends Activity {
         });
 
         refreshDevices();
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && checkSelfPermission
+                (Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED){
+            requestPermissions(new String[]{Manifest.permission.ACCESS_COARSE_LOCATION},1);
+        }else{
+            refreshAPs();
+        }
     }
 
     private void refreshDevices() {
@@ -91,6 +117,42 @@ public class BluetoothConfigActivity extends Activity {
                 adapter_devices.add(device);
             }
         }
+    }
+
+    private void refreshAPs() {
+        wifiManager = (WifiManager) this.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+        if(wifiManager == null) {
+            ssidSpinner.setAdapter(new WifiSSIDAdapter(BluetoothConfigActivity.this,
+                    R.layout.spinner_devices, new ArrayList<String>()));
+            return;
+        }
+        BroadcastReceiver mWifiScanReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context c, Intent intent) {
+                if (intent.getAction() != null &&
+                        intent.getAction().equals(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION)) {
+                    WifiSSIDAdapter wifiSSIDAdapter = new WifiSSIDAdapter
+                            (BluetoothConfigActivity.this,R.layout.spinner_devices,
+                                    new ArrayList<String>());
+                    List<ScanResult> scanResults = wifiManager.getScanResults();
+                    for (ScanResult tmp: scanResults) {
+                        if(tmp.SSID.equals(""))
+                            continue;
+                        String capabilities = tmp.capabilities;
+                        if (capabilities.contains("WPA")||capabilities.contains("WEP")) {
+                            wifiSSIDAdapter.add("ENC-"+tmp.SSID);
+                        }
+                        else {
+                            wifiSSIDAdapter.add("DEC-"+tmp.SSID);
+                        }
+                    }
+                    ssidSpinner.setAdapter(wifiSSIDAdapter);
+                }
+            }
+        };
+        registerReceiver(mWifiScanReceiver,
+                new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
+        wifiManager.startScan();
     }
 
     final class workerThread implements Runnable {

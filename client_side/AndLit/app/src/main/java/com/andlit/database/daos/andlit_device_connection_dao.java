@@ -22,7 +22,7 @@ public interface andlit_device_connection_dao {
     @Delete
     void deleteConnection(AndLitDeviceConnection adc);
 
-    @Query("select * from andlit_device_connection where id = :id")
+    @Query("select * from andlit_device_connection where mac = :id")
     List<AndLitDeviceConnection> getAllConnectionsOfDevice(Integer id);
 
     @Query("select * from andlit_device_connection where ssid = :s")

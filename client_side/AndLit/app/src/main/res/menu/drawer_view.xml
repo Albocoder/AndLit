@@ -25,6 +25,12 @@
             android:id="@+id/nav_classifier_view"
             android:icon="@drawable/ic_assessment_white"
             android:title="Classifier Statistics" />
+
+        <item
+            android:id="@+id/nav_device_setup"
+            android:icon="@drawable/ic_baseline_settings_remote"
+            android:title="Headset Settings" />
+
     </group>
 
     <group android:checkableBehavior="single">

@@ -38,6 +38,7 @@ import com.andlit.device.DeviceController;
 import com.andlit.device.SSHInterface;
 import com.andlit.face.FaceOperator;
 import com.andlit.face.FaceRecognizerSingleton;
+import com.andlit.ui.andlitDevice.BluetoothConfigActivity;
 import com.andlit.ui.classifierView.ClassifierViewActivity;
 import com.andlit.ui.groupView.GroupViewActivity;
 import com.andlit.ui.knownPeopleView.KnownPeopleViewActivity;
@@ -193,6 +194,12 @@ public class HomeActivity extends AppCompatActivity
                             case R.id.nav_classifier_view:
                                 // Handle Classifier view
                                 intent = new Intent(context, ClassifierViewActivity.class);
+                                startActivity(intent);
+                                break;
+
+                            case R.id.nav_device_setup:
+                                // Handle Device Settings
+                                intent = new Intent(context, BluetoothConfigActivity.class);
                                 startActivity(intent);
                                 break;
                         }
