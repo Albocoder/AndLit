@@ -26,6 +26,11 @@ public class SSHInterface {
             throw new JSchException("Did not connect successfully!");
     }
 
+    public SSHInterface() throws JSchException {
+        if(!isReady())
+            throw new JSchException("Session doesn't exist!");
+    }
+
     public boolean isReady() { return session != null; }
 
     public String saveImageInFile(Context c) {
@@ -92,12 +97,12 @@ public class SSHInterface {
         return true;
     }
 
-    public void disconnect(){
+    private void disconnect() {
         session.disconnect();
         session = null;
     }
 
-    public boolean connect(String un,String pw,String ip) {
+    private boolean connect(String un, String pw, String ip) {
         if(isReady())
             disconnect();
         JSch jsch = new JSch();

@@ -168,10 +168,6 @@ public class BluetoothConfigActivity extends Activity {
 
         public void run() {
             clearOutput();
-            writeOutput("Starting config update.");
-
-            writeOutput("Device: " + device.getName() + " - " + device.getAddress());
-
             try {
                 mmSocket = device.createRfcommSocketToServiceRecord(uuid);
                 if (!mmSocket.isConnected()) {
@@ -201,8 +197,7 @@ public class BluetoothConfigActivity extends Activity {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                String currentText = messageTextView.getText().toString();
-                messageTextView.setText(currentText + "\n" + text);
+                messageTextView.setText(text);
             }
         });
     }
@@ -234,7 +229,9 @@ public class BluetoothConfigActivity extends Activity {
                         System.arraycopy(readBuffer, 0, encodedBytes, 0, encodedBytes.length);
                         final String data = new String(encodedBytes, "US-ASCII");
 
-                        writeOutput("Received:" + data);
+                        if(data.contains("139.179")){
+                            Log.d("TESTDATA",data);
+                        }
 
                         return;
                     } else {
