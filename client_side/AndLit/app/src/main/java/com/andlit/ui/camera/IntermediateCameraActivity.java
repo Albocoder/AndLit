@@ -34,6 +34,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.andlit.R;
+import com.andlit.device.SSHInterface;
 import com.andlit.ui.camera.helperUI.ImgGrabber;
 import com.andlit.cloudInterface.vision.VisionEndpoint;
 import com.andlit.cloudInterface.vision.model.Description;
@@ -47,6 +48,7 @@ import com.andlit.ui.camera.helperUI.listRelated.PotentialPeopleAdapter;
 import com.andlit.ui.camera.helperUI.listRelated.TwoStringDataHolder;
 import com.andlit.utils.StorageHelper;
 import com.andlit.voice.VoiceGenerator;
+import com.jcraft.jsch.JSchException;
 
 import org.bytedeco.javacpp.opencv_core;
 
@@ -63,7 +65,6 @@ import static org.bytedeco.javacpp.opencv_imgcodecs.imwrite;
 import static org.bytedeco.javacpp.opencv_imgproc.rectangle;
 import static org.bytedeco.javacpp.opencv_imgproc.resize;
 
-// TODO: this will be reworked for better modularity and using session framework
 public class IntermediateCameraActivity extends Activity {
 
     // constants
@@ -85,7 +86,7 @@ public class IntermediateCameraActivity extends Activity {
     // external fields
     private Description d;
     private List<Text> t;
-    private Boolean saveOnExit,audioFeedback;
+    private Boolean saveOnExit,audioFeedback,useAndlitDevice;
 
     // view fields
     private ImageView analyzed;
@@ -110,6 +111,8 @@ public class IntermediateCameraActivity extends Activity {
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
         audioFeedback = sharedPref.getBoolean(SettingsDefinedKeys.AUDIO_FEEDBACK, false);
         saveOnExit = sharedPref.getBoolean(SettingsDefinedKeys.SAVE_UNLABELED_ON_EXIT, true);
+        useAndlitDevice = sharedPref.getBoolean(SettingsDefinedKeys.USE_ANDLIT_DEVICE, false);
+
         int screenOrientation = Integer.parseInt(
                 sharedPref.getString(SettingsDefinedKeys.CAMERA_SCREEN_ORIENTATION,"2"));
 
@@ -433,18 +436,98 @@ public class IntermediateCameraActivity extends Activity {
         }
     }
 
+    @SuppressLint("StaticFieldLeak")
+    private class TakePicture extends AsyncTask<Void,Void,Integer> {
+        private ProgressDialog progressDialog = new ProgressDialog(
+                IntermediateCameraActivity.this, R.style.AppTheme_Dark_Dialog);
+        private String location;
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            progressDialog.setTitle("Please wait...");
+            progressDialog.setMessage("Capturing image from AndLit device");
+            progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+            progressDialog.setInverseBackgroundForced(false);
+            progressDialog.setIndeterminate(true);
+            progressDialog.setCancelable(false);
+            progressDialog.show();
+        }
+
+        @Override
+        protected Integer doInBackground(Void... voids) {
+            SSHInterface i;
+            try {
+                i = new SSHInterface();
+            } catch (JSchException e) {
+                return 1;
+            }
+            i.captureImage();
+            try {
+                Thread.sleep(6000);
+            } catch (InterruptedException e) {
+                return 2;
+            }
+            if(imageLocation.exists())
+                imageLocation.delete();
+            location = i.saveImageInFile(IntermediateCameraActivity.this);
+            return 0;
+        }
+
+        @Override
+        protected void onPostExecute(Integer res){
+            progressDialog.dismiss();
+            if(res != 0){
+                if(audioFeedback)
+                    speaker.speak("Error taking picture!");
+                Toast.makeText(IntermediateCameraActivity.this,"Error taking picture!"
+                        ,Toast.LENGTH_SHORT).show();
+            }
+            else {
+                imageLocation = new File(location);
+                if (imageLocation.length() == 0)
+                    Toast.makeText(IntermediateCameraActivity.this
+                            , "Error in taking the image!", Toast.LENGTH_SHORT).show();
+                else {
+                    if(vis != null)
+                        vis.destroy();
+                    if(fop != null) {
+                        if(saveOnExit)
+                            fop.storeUnlabeledFaces();
+                        fop.destroy();
+                    }
+                    new ProcessInputAsync().execute(imageLocation,analyzed,
+                            IntermediateCameraActivity.this.getApplicationContext());
+                }
+            }
+        }
+    }
+
     // ********************************** UI related functions ***********************************//
     public void startCameraActivity() {
-        if(ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this,new String[] {Manifest.permission.CAMERA}, 1337);
+        if(useAndlitDevice){
+            SSHInterface i;
+            try {
+                i = new SSHInterface();
+            } catch (JSchException e) {
+                if(audioFeedback)
+                    speaker.speak("Error opening AndLit device!");
+                Toast.makeText(this,"Error opening AndLit device!",Toast.LENGTH_SHORT).show();
+                return;
+            }
+            new TakePicture().execute();
         }
         else {
-            Intent i = new Intent(IntermediateCameraActivity.this
-                    , ImgGrabber.class);
-            i.putExtra(ARGUMENT_KEY, imageLocation.getAbsolutePath());
-            i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-            i.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-            startActivityForResult(i, REQUEST_IMG_ANALYSIS);
+            if(ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(this,new String[] {Manifest.permission.CAMERA}, 1337);
+            }
+            else {
+                Intent i = new Intent(IntermediateCameraActivity.this
+                        , ImgGrabber.class);
+                i.putExtra(ARGUMENT_KEY, imageLocation.getAbsolutePath());
+                i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                i.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                startActivityForResult(i, REQUEST_IMG_ANALYSIS);
+            }
         }
     }
 

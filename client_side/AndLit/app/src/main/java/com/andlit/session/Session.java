@@ -147,6 +147,8 @@ public abstract class Session extends Activity {
         restartSession();
     }
 
+
+    // todo: add the adnlit device Input here
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode,resultCode,data);

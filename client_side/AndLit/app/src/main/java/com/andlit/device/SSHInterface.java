@@ -1,8 +1,6 @@
 package com.andlit.device;
 
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 
 import com.jcraft.jsch.Channel;
 import com.jcraft.jsch.ChannelExec;
@@ -10,12 +8,10 @@ import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.Properties;
 
 public class SSHInterface {
@@ -64,12 +60,12 @@ public class SSHInterface {
     }
 
     public boolean captureImage() {
-        ChannelExec channelssh = null;
+        ChannelExec channelssh;
         try {
             channelssh = (ChannelExec) session.openChannel("exec");
         } catch (JSchException e) { return false; }
         // Execute command
-        channelssh.setCommand("raspistill -v -o image.png");
+        channelssh.setCommand("raspistill -v -rot 90 -o image.png");
         try {
             InputStream in = channelssh.getInputStream();
         } catch (IOException e) { return false; }
@@ -80,13 +76,21 @@ public class SSHInterface {
         return true;
     }
 
-    public boolean cleanupImage() {
-        ChannelExec channelssh = null;
+    public boolean removeImage() {
+        return runCommand("rm image.png");
+    }
+
+    public boolean shutdownDevice() {
+        return !runCommand("sudo shutdown -s -t 0");
+    }
+
+    private boolean runCommand(String cmd) {
+        ChannelExec channelssh;
         try {
             channelssh = (ChannelExec) session.openChannel("exec");
         } catch (JSchException e) { return false; }
         // Execute command
-        channelssh.setCommand("rm image.png");
+        channelssh.setCommand(cmd);
         try {
             InputStream in = channelssh.getInputStream();
         } catch (IOException e) { return false; }

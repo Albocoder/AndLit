@@ -3,82 +3,76 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
+    android:layout_margin="10dp"
     tools:context="com.andlit.ui.andlitDevice.BluetoothConfigActivity">
 
     <TextView
+        android:id="@+id/devices_label"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:layout_alignParentTop="true"
         android:text="Paired Bluetooth Devices"
-        android:id="@+id/devices_label"
-        android:layout_alignParentTop="true" />
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:textSize="18sp"
+        android:textStyle="bold" />
 
     <Spinner
+        android:id="@+id/devices_spinner"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/devices_spinner"
         android:layout_below="@+id/devices_label" />
 
     <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Refresh Devices"
         android:id="@+id/refresh_devices_button"
-        android:layout_below="@+id/devices_spinner" />
+        android:layout_width="wrap_content"
+        android:layout_height="37dp"
+        android:layout_below="@+id/devices_spinner"
+        android:text="Refresh Data" />
 
 
     <TextView
+        android:id="@+id/ssid_label"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceSmall"
-        android:id="@+id/ssid_label"
-        android:layout_below="@+id/refresh_devices_button" />
+        android:layout_below="@+id/refresh_devices_button"
+        android:textAppearance="?android:attr/textAppearanceSmall" />
 
-    <Spinner
+    <TextView
+        android:id="@+id/ssid_text"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/ssid_spinner"
         android:layout_below="@+id/ssid_label"
+        android:text="Not connected to Wifi"
+        android:textAllCaps="false"
+        android:textColor="?attr/colorAccent"
+        android:textColorHint="?attr/colorAccent"
+        android:textStyle="bold"
         tools:ignore="LabelFor" />
 
 
     <TextView
+        android:id="@+id/psk_label"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:layout_below="@+id/ssid_text"
         android:text="PSK"
-        android:id="@+id/psk_label"
-        android:layout_below="@+id/ssid_spinner" />
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:textSize="18sp"
+        android:textStyle="bold" />
 
     <EditText
+        android:id="@+id/psk_text"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/psk_text"
         android:layout_below="@+id/psk_label"
         tools:ignore="LabelFor" />
 
 
     <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Start Configuration"
         android:id="@+id/start_button"
-        android:layout_below="@+id/psk_text"/>
-
-    <TextView
-        android:id="@+id/messages_label"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceSmall"
-        android:text="Messages"
-        android:layout_below="@+id/start_button" />
+        android:layout_below="@+id/psk_text"
+        android:text="Configure Device" />
 
-    <TextView
-        android:id="@+id/messages_text"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text=""
-        android:maxLines = "10"
-        android:scrollbars = "vertical"
-        android:layout_below="@+id/messages_label" />
 </RelativeLayout>
