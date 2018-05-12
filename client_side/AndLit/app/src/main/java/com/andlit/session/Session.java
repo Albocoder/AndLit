@@ -13,6 +13,7 @@ import android.preference.PreferenceManager;
 import android.speech.RecognizerIntent;
 import android.util.Log;
 
+import com.andlit.device.SSHInterface;
 import com.andlit.utils.RequestCodes;
 import com.andlit.camera.BitmapWrapper;
 import com.andlit.camera.CameraActivity;
@@ -33,6 +34,7 @@ import com.andlit.ui.settings.SettingsDefinedKeys;
 import com.andlit.utils.StorageHelper;
 import com.andlit.voice.VoiceGenerator;
 import com.andlit.voice.VoiceToCommandWrapper;
+import com.jcraft.jsch.JSchException;
 
 import org.bytedeco.javacpp.opencv_core;
 
@@ -62,6 +64,7 @@ public abstract class Session extends Activity {
     // FAILURE
     private static final String PICTURE_UNAVAILABLE = "Session has no picture available!";
     private static final String PICTURE_EXISTS = "Picture already exists. Please restart session!";
+    private static final String PICTURE_ERROR = "Error in taking picture.";
     private static final String NETWORK_ERROR = "No internet access, server is down.";
     private static final String PICTURE_LARGE = "Picture too large";
     private static final String TEXT_ERROR_RERUNNING = "Last text recognition job failed. Rerunning.";
@@ -112,6 +115,7 @@ public abstract class Session extends Activity {
     protected boolean saveOnExit;
     protected String randPictureName;
     protected boolean debugMode;
+    protected boolean useAndLitDevice;
 
     // initialized when session starts
     protected VoiceGenerator speaker;
@@ -143,12 +147,11 @@ public abstract class Session extends Activity {
         randPictureName = "capture_"+TAGSERIALNO+".png";
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
         saveOnExit = sharedPref.getBoolean(SettingsDefinedKeys.SAVE_UNLABELED_ON_EXIT,false);
+        useAndLitDevice = sharedPref.getBoolean(SettingsDefinedKeys.USE_ANDLIT_DEVICE,false);
         // start
         restartSession();
     }
 
-
-    // todo: add the adnlit device Input here
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode,resultCode,data);
@@ -176,6 +179,8 @@ public abstract class Session extends Activity {
                     audioFeedback(PICTURE_STORED_SUCCESS);
                 } catch (IOException ignored) {}
             }
+            else
+                audioFeedback(PICTURE_ERROR);
         }
         else if(requestCode == RequestCodes.SPEECH_INPUT_RC){
             try {
@@ -220,12 +225,17 @@ public abstract class Session extends Activity {
 
     // ***************************** ACTION FUNCTIONS *************************** //
 
+    // todo: test if this works with the device
     public final void takePicture() {
         if(vis != null) {
             audioFeedback(PICTURE_EXISTS);
             return;
         }
         audioFeedback(INFO_FUNCTION_1_1);
+        if(useAndLitDevice){
+            new TakePictureAsync(null).execute();
+            return;
+        }
         Intent i = new Intent(this, CameraActivity.class);
         startActivityForResult(i,RequestCodes.CAMERA_ACTIVITY_RC);
     }
@@ -657,6 +667,45 @@ public abstract class Session extends Activity {
 
             if(cb != null)
                 cb.run(ret);
+        }
+    }
+
+    @SuppressLint("StaticFieldLeak")
+    public class TakePictureAsync extends AsyncTask<Void,Void,Integer> {
+
+        private AsyncJobCallback cb;
+        private String location;
+
+        public TakePictureAsync(AsyncJobCallback cb){ this.cb = cb; }
+
+        @Override
+        protected Integer doInBackground(Void... voids) {
+            SSHInterface i;
+            try {
+                i = new SSHInterface();
+            } catch (JSchException e) {
+                return 1;
+            }
+            i.captureImage();
+            try {
+                Thread.sleep(6000);
+            } catch (InterruptedException e) {
+                return 2;
+            }
+            location = i.saveImageInFile(Session.this);
+            return 0;
+        }
+
+        @Override
+        protected void onPostExecute(Integer ret) {
+            if(ret != 0)
+                audioFeedback(PICTURE_ERROR);
+            else {
+                if (vis != null)
+                    vis.destroy();
+                vis = new VisionEndpoint(Session.this, new File(location));
+                audioFeedback(PICTURE_STORED_SUCCESS);
+            }
         }
     }
 
