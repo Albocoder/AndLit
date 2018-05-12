@@ -275,8 +275,11 @@ public class BluetoothConfigActivity extends Activity {
             startButton.setEnabled(true);
             if(s == null)
                 onError(errorMessage);
-            else
+            else {
+                Toast.makeText(BluetoothConfigActivity.this,"IP: "
+                +s,Toast.LENGTH_LONG).show();
                 new ConnectToDevice(s).execute();
+            }
         }
     }
 
