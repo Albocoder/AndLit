@@ -1,0 +1,2 @@
+This code was written by Gunduz, who also configured the device. I only helped him troubleshoot some issues with setting up the raspberry pi zero's camera.
+The code was sitting in `/home` directory and the username was `pi`. The folder inside is the whole `/home/pi` directory.
